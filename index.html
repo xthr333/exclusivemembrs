@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExclusiveMembrs</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #050505;
+      color: white;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 6%;
+      border-bottom: 1px solid #222;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .diamond {
+      margin-left: 6px;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+    }
+
+    nav a {
+      color: #aaa;
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 2px;
+      transition: .3s;
+    }
+
+    nav a:hover {
+      color: white;
+    }
+
+    .hero {
+      min-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .exm {
+      font-size: clamp(90px, 20vw, 230px);
+      font-weight: 900;
+      letter-spacing: -12px;
+      line-height: .8;
+    }
+
+    .hero h1 {
+      margin-top: 30px;
+      font-size: clamp(24px, 4vw, 52px);
+      letter-spacing: 7px;
+    }
+
+    .hero p {
+      color: #888;
+      letter-spacing: 5px;
+      font-size: 12px;
+      margin-top: 18px;
+    }
+
+    .star {
+      font-size: 42px;
+      margin: 25px 0 5px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 35px;
+    }
+
+    .btn {
+      padding: 14px 25px;
+      border: 1px solid white;
+      color: white;
+      text-decoration: none;
+      letter-spacing: 2px;
+      font-size: 11px;
+      transition: .25s;
+    }
+
+    .btn:hover {
+      background: white;
+      color: black;
+    }
+
+    .coming {
+      border-top: 1px solid #181818;
+      padding: 70px 6%;
+      text-align: center;
+    }
+
+    .coming p {
+      color: #666;
+      letter-spacing: 4px;
+      font-size: 11px;
+    }
+
+    @media(max-width: 700px) {
+      nav {
+        padding: 20px;
+      }
+
+      nav ul {
+        gap: 12px;
+      }
+
+      nav a {
+        font-size: 9px;
+      }
+
+      .brand {
+        font-size: 15px;
+      }
+
+      .exm {
+        letter-spacing: -7px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <div class="brand">EXCLUSIVEMEMBRS <span class="diamond">✦</span></div>
+
+  <ul>
+    <li><a href="#">ARTISTS</a></li>
+    <li><a href="#">SHOP</a></li>
+    <li><a href="#">EVENTS</a></li>
+    <li><a href="#">ABOUT</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+
+  <div class="exm">EXM</div>
+
+  <div class="star">✦</div>
+
+  <h1>EXCLUSIVEMEMBRS</h1>
+
+  <p>NOT A POPULARITY CONTEST.</p>
+
+  <div class="buttons">
+    <a class="btn" href="#">EXPLORE EXM</a>
+    <a class="btn" href="#">SHOP</a>
+  </div>
+
+</section>
+
+<section class="coming">
+  <p>MUSIC ✦ CULTURE ✦ COMMUNITY ✦ EXCLUSIVE BY NATURE</p>
+</section>
+
+</body>
+</html>
