@@ -14,10 +14,13 @@
 
     <link rel="stylesheet" href="style.css">
 
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
 
         /* =========================================
-           UPDATES PAGE
+           UPDATES HERO
         ========================================= */
 
         .updates-hero {
@@ -133,10 +136,12 @@
 
 
         /* =========================================
-           LOADING
+           LOADING / ERROR
         ========================================= */
 
-        .updates-loading {
+        .updates-loading,
+        .updates-error,
+        .updates-empty {
             margin-top: 45px;
             padding: 35px;
 
@@ -146,7 +151,23 @@
 
             font-size: 8px;
             font-weight: 900;
+            line-height: 1.8;
             letter-spacing: 2px;
+        }
+
+        .updates-error {
+            display: none;
+
+            border-style: solid;
+            border-color: #542128;
+
+            color: #c76a74;
+        }
+
+        .updates-empty {
+            display: none;
+
+            text-align: center;
         }
 
 
@@ -242,7 +263,37 @@
 
 
         /* =========================================
-           UPDATE FEED
+           BUTTON
+        ========================================= */
+
+        .update-main-link {
+            display: inline-block;
+
+            margin-top: 30px;
+            padding: 14px 17px;
+
+            border: 1px solid #fff;
+
+            background: #fff;
+            color: #000;
+
+            text-decoration: none;
+
+            font-size: 7px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+
+            transition: .2s ease;
+        }
+
+        .update-main-link:hover {
+            background: transparent;
+            color: #fff;
+        }
+
+
+        /* =========================================
+           FEED
         ========================================= */
 
         .updates-feed {
@@ -335,38 +386,6 @@
             border-color: #fff;
         }
 
-        .updates-empty {
-            display: none;
-
-            margin-top: 40px;
-            padding: 40px;
-
-            border: 1px dashed #282828;
-
-            color: #555;
-
-            text-align: center;
-
-            font-size: 8px;
-            font-weight: 900;
-            letter-spacing: 2px;
-        }
-
-        .updates-error {
-            display: none;
-
-            margin-top: 45px;
-            padding: 35px;
-
-            border: 1px solid #333;
-
-            color: #888;
-
-            font-size: 8px;
-            line-height: 1.8;
-            letter-spacing: 1.5px;
-        }
-
 
         /* =========================================
            MOBILE
@@ -386,10 +405,6 @@
 
             .updates-filter-section {
                 padding: 20px;
-            }
-
-            .update-filters {
-                gap: 6px;
             }
 
             .update-filter {
@@ -432,7 +447,7 @@
 
 
 <!-- =========================================
-     NAVIGATION
+     NAV
 ========================================== -->
 
 <nav class="navbar">
@@ -500,12 +515,11 @@
 
     </p>
 
-
     <div class="updates-live">
 
         <span class="updates-live-dot"></span>
 
-        EXM UPDATES ACTIVE
+        LIVE DATABASE CONNECTED
 
     </div>
 
@@ -520,45 +534,38 @@
 
     <div class="update-filters">
 
-        <button
-            class="update-filter active"
-            data-filter="all">
+        <button class="update-filter active"
+                data-filter="all">
             ALL
         </button>
 
-        <button
-            class="update-filter"
-            data-filter="songwars">
+        <button class="update-filter"
+                data-filter="songwars">
             SONGWARS
         </button>
 
-        <button
-            class="update-filter"
-            data-filter="roster">
+        <button class="update-filter"
+                data-filter="roster">
             ROSTER
         </button>
 
-        <button
-            class="update-filter"
-            data-filter="music">
+        <button class="update-filter"
+                data-filter="music">
             MUSIC
         </button>
 
-        <button
-            class="update-filter"
-            data-filter="merch">
+        <button class="update-filter"
+                data-filter="merch">
             MERCH
         </button>
 
-        <button
-            class="update-filter"
-            data-filter="events">
+        <button class="update-filter"
+                data-filter="events">
             EVENTS
         </button>
 
-        <button
-            class="update-filter"
-            data-filter="exm">
+        <button class="update-filter"
+                data-filter="exm">
             EXM
         </button>
 
@@ -568,7 +575,7 @@
 
 
 <!-- =========================================
-     LATEST UPDATE
+     FEATURED
 ========================================== -->
 
 <section class="section">
@@ -577,24 +584,21 @@
         LATEST TRANSMISSION
     </p>
 
-
     <div
-        class="updates-loading"
-        id="featuredLoading">
+        id="featuredLoading"
+        class="updates-loading">
 
-        LOADING EXM FEED...
+        CONNECTING TO EXM DATABASE...
 
     </div>
 
-
     <div id="featuredContainer"></div>
 
-
     <div
-        class="updates-error"
-        id="updatesError">
+        id="updatesError"
+        class="updates-error">
 
-        EXM FEED COULD NOT BE LOADED.
+        EXM DATABASE CONNECTION FAILED.
         REFRESH THE PAGE OR CHECK BACK SHORTLY.
 
     </div>
@@ -617,18 +621,17 @@
         FEED. ✦
     </h2>
 
-
     <div
-        class="updates-feed"
-        id="updatesFeed">
+        id="updatesFeed"
+        class="updates-feed">
     </div>
 
-
     <div
-        class="updates-empty"
-        id="updatesEmpty">
+        id="updatesEmpty"
+        class="updates-empty">
 
-        NO UPDATES IN THIS CATEGORY YET.
+        NO PUBLISHED UPDATES
+        IN THIS CATEGORY.
 
     </div>
 
@@ -636,7 +639,7 @@
 
 
 <!-- =========================================
-     CURRENT EXM
+     ACTIVE EXM
 ========================================== -->
 
 <section class="section">
@@ -654,9 +657,8 @@
     <div class="grid">
 
 
-        <a
-            href="events.html"
-            class="card clickable-card">
+        <a href="events.html"
+           class="card clickable-card">
 
             <p class="card-number">
                 LIVE
@@ -668,18 +670,16 @@
             </h3>
 
             <p>
-                DUO REGISTRATION,
-                OFFICIAL ROSTER,
-                JUDGES AND LIVE
-                EVENT INFORMATION.
+                OFFICIAL EVENT HUB,
+                DUOS, JUDGES AND
+                SONGWARS INFORMATION.
             </p>
 
         </a>
 
 
-        <a
-            href="shop.html"
-            class="card clickable-card">
+        <a href="shop.html"
+           class="card clickable-card">
 
             <p class="card-number">
                 001
@@ -692,16 +692,14 @@
 
             <p>
                 THE FIRST OFFICIAL
-                EXM PRODUCT WAVE
-                IS AVAILABLE NOW.
+                EXM PRODUCT WAVE.
             </p>
 
         </a>
 
 
-        <a
-            href="artists.html"
-            class="card clickable-card">
+        <a href="artists.html"
+           class="card clickable-card">
 
             <p class="card-number">
                 ROSTER
@@ -721,9 +719,8 @@
         </a>
 
 
-        <a
-            href="submit.html"
-            class="card clickable-card">
+        <a href="submit.html"
+           class="card clickable-card">
 
             <p class="card-number">
                 OPEN
@@ -738,123 +735,6 @@
                 MUSIC, VISUALS,
                 CONTENT AND
                 CREATIVE SUBMISSIONS.
-            </p>
-
-        </a>
-
-
-    </div>
-
-</section>
-
-
-<!-- =========================================
-     COMMUNITY
-========================================== -->
-
-<section class="section">
-
-    <p class="section-label">
-        COMMUNITY
-    </p>
-
-    <h2 class="section-title">
-        STAY<br>
-        TAPPED IN. ✦
-    </h2>
-
-
-    <div class="grid">
-
-
-        <a
-            href="https://discord.gg/WguA7bAV39"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="card clickable-card">
-
-            <p class="card-number">
-                01
-            </p>
-
-            <h3>
-                DISCORD
-            </h3>
-
-            <p>
-                COMMUNITY,
-                ANNOUNCEMENTS
-                AND EVENTS.
-            </p>
-
-        </a>
-
-
-        <a
-            href="https://www.instagram.com/exclusivemembrs"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="card clickable-card">
-
-            <p class="card-number">
-                02
-            </p>
-
-            <h3>
-                INSTAGRAM
-            </h3>
-
-            <p>
-                ROSTER,
-                SONGWARS,
-                DROPS AND
-                DAILY EXM CONTENT.
-            </p>
-
-        </a>
-
-
-        <a
-            href="https://www.tiktok.com/@exclusivemembrs"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="card clickable-card">
-
-            <p class="card-number">
-                03
-            </p>
-
-            <h3>
-                TIKTOK
-            </h3>
-
-            <p>
-                EXM CONTENT,
-                MOMENTS AND
-                COMMUNITY.
-            </p>
-
-        </a>
-
-
-        <a
-            href="https://youtube.com/@exclusivememb"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="card clickable-card">
-
-            <p class="card-number">
-                04
-            </p>
-
-            <h3>
-                YOUTUBE
-            </h3>
-
-            <p>
-                EVENTS,
-                RECAPS AND
-                EXM IN MOTION.
             </p>
 
         </a>
@@ -918,27 +798,18 @@
         NOT A POPULARITY CONTEST.
     </p>
 
-
     <div class="footer-links">
 
         <a href="index.html">HOME</a>
-
         <a href="artists.html">ARTISTS</a>
-
         <a href="shop.html">SHOP</a>
-
         <a href="events.html">SONGWARS</a>
-
         <a href="updates.html">UPDATES</a>
-
         <a href="submit.html">SUBMIT</a>
-
         <a href="about.html">ABOUT</a>
-
         <a href="contact.html">CONTACT</a>
 
     </div>
-
 
     <p class="copyright">
         © 2026 EXCLUSIVEMEMBRS®
@@ -948,81 +819,153 @@
 
 
 <!-- =========================================
-     DYNAMIC EXM UPDATE SYSTEM
+     SUPABASE LIVE UPDATE SYSTEM
 ========================================== -->
 
 <script>
+
+/* =========================================
+   PUBLIC SUPABASE CONFIG
+========================================= */
+
+const SUPABASE_URL =
+    "https://ldtmapwemttqoygcqlqu.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_fnnYUGRotjuA_56F1F3Yvg_l_1mYYY5";
+
+
+const { createClient } = supabase;
+
+const exmDB =
+    createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
 
 let exmUpdates = [];
 let activeFilter = "all";
 
 
 /* =========================================
-   SAFELY CREATE TEXT
+   TEXT HELPER
 ========================================= */
 
-function createTextElement(tag, className, text) {
+function createTextElement(
+    tag,
+    className,
+    text
+) {
 
     const element =
         document.createElement(tag);
 
     if (className) {
-        element.className = className;
+        element.className =
+            className;
     }
 
-    element.textContent = text;
+    element.textContent =
+        text || "";
 
     return element;
+
 }
 
 
 /* =========================================
-   DATE FORMATTING
+   DATE
 ========================================= */
 
-function formatFullDate(dateString) {
+function formatFullDate(
+    dateString
+) {
 
-    const date = new Date(dateString);
+    const date =
+        new Date(dateString);
 
-    return date.toLocaleDateString(
-        "en-US",
-        {
-            month: "long",
-            day: "numeric",
-            year: "numeric"
-        }
-    ).toUpperCase();
+    return date
+        .toLocaleDateString(
+            "en-US",
+            {
+                month: "long",
+                day: "numeric",
+                year: "numeric"
+            }
+        )
+        .toUpperCase();
 
 }
 
 
-function formatArchiveDate(dateString) {
+function formatArchiveDate(
+    dateString
+) {
 
-    const date = new Date(dateString);
-
-    const month =
-        date.toLocaleDateString(
-            "en-US",
-            { month: "short" }
-        ).toUpperCase();
-
-    const day =
-        String(date.getDate()).padStart(2, "0");
-
-    const year =
-        date.getFullYear();
+    const date =
+        new Date(dateString);
 
     return {
-        month,
-        day,
-        year
+
+        month:
+            date
+                .toLocaleDateString(
+                    "en-US",
+                    {
+                        month: "short"
+                    }
+                )
+                .toUpperCase(),
+
+        day:
+            String(
+                date.getDate()
+            ).padStart(
+                2,
+                "0"
+            ),
+
+        year:
+            date.getFullYear()
+
     };
 
 }
 
 
 /* =========================================
-   FEATURED UPDATE
+   LINK HELPER
+========================================= */
+
+function configureLink(
+    element,
+    url
+) {
+
+    element.href = url;
+
+    if (
+        url &&
+        (
+            url.startsWith("http://") ||
+            url.startsWith("https://")
+        )
+    ) {
+
+        element.target =
+            "_blank";
+
+        element.rel =
+            "noopener noreferrer";
+
+    }
+
+}
+
+
+/* =========================================
+   FEATURED
 ========================================= */
 
 function renderFeatured() {
@@ -1031,7 +974,6 @@ function renderFeatured() {
         document.getElementById(
             "featuredContainer"
         );
-
 
     container.innerHTML = "";
 
@@ -1042,36 +984,49 @@ function renderFeatured() {
             createTextElement(
                 "div",
                 "updates-empty",
-                "NO EXM UPDATES HAVE BEEN PUBLISHED YET."
+                "NO PUBLISHED EXM UPDATES YET."
             );
 
-        empty.style.display = "block";
+        empty.style.display =
+            "block";
 
-        container.appendChild(empty);
+        container.appendChild(
+            empty
+        );
 
         return;
+
     }
 
 
+    /*
+       If an update is explicitly featured,
+       use it.
+
+       Otherwise use the newest published
+       update automatically.
+    */
+
     const featured =
         exmUpdates.find(
-            update => update.featured === true
+            update =>
+                update.featured === true
         ) || exmUpdates[0];
 
 
     const article =
-        document.createElement("article");
+        document.createElement(
+            "article"
+        );
 
     article.className =
         "featured-update";
 
 
-    article.dataset.category =
-        featured.category;
-
-
     const meta =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     meta.className =
         "featured-update-meta";
@@ -1081,7 +1036,8 @@ function renderFeatured() {
         createTextElement(
             "span",
             "update-category",
-            featured.category.toUpperCase()
+            featured.category
+                .toUpperCase()
         );
 
 
@@ -1089,12 +1045,19 @@ function renderFeatured() {
         createTextElement(
             "span",
             "",
-            formatFullDate(featured.date)
+            formatFullDate(
+                featured.created_at
+            )
         );
 
 
-    meta.appendChild(category);
-    meta.appendChild(date);
+    meta.appendChild(
+        category
+    );
+
+    meta.appendChild(
+        date
+    );
 
 
     const heading =
@@ -1113,56 +1076,46 @@ function renderFeatured() {
         );
 
 
-    article.appendChild(meta);
-    article.appendChild(heading);
-    article.appendChild(description);
+    article.appendChild(
+        meta
+    );
+
+    article.appendChild(
+        heading
+    );
+
+    article.appendChild(
+        description
+    );
 
 
     if (
-        featured.link &&
-        featured.linkText
+        featured.link_url &&
+        featured.link_text
     ) {
-
-        const buttons =
-            document.createElement("div");
-
-        buttons.className =
-            "buttons";
-
 
         const link =
             createTextElement(
                 "a",
-                "btn",
-                featured.linkText
+                "update-main-link",
+                featured.link_text
             );
 
+        configureLink(
+            link,
+            featured.link_url
+        );
 
-        link.href =
-            featured.link;
-
-
-        if (
-            featured.link.startsWith("http")
-        ) {
-
-            link.target =
-                "_blank";
-
-            link.rel =
-                "noopener noreferrer";
-
-        }
-
-
-        buttons.appendChild(link);
-
-        article.appendChild(buttons);
+        article.appendChild(
+            link
+        );
 
     }
 
 
-    container.appendChild(article);
+    container.appendChild(
+        article
+    );
 
 }
 
@@ -1178,7 +1131,6 @@ function renderArchive() {
             "updatesFeed"
         );
 
-
     const empty =
         document.getElementById(
             "updatesEmpty"
@@ -1189,20 +1141,25 @@ function renderArchive() {
 
 
     const visibleUpdates =
-        exmUpdates.filter(update => {
+        exmUpdates.filter(
+            update => {
 
-            if (
-                activeFilter === "all"
-            ) {
-                return true;
+                if (
+                    activeFilter ===
+                    "all"
+                ) {
+
+                    return true;
+
+                }
+
+                return (
+                    update.category ===
+                    activeFilter
+                );
+
             }
-
-            return (
-                update.category ===
-                activeFilter
-            );
-
-        });
+        );
 
 
     if (!visibleUpdates.length) {
@@ -1219,125 +1176,132 @@ function renderArchive() {
         "none";
 
 
-    visibleUpdates.forEach(update => {
+    visibleUpdates.forEach(
+        update => {
 
-        const article =
-            document.createElement(
-                "article"
-            );
+            const article =
+                document.createElement(
+                    "article"
+                );
 
-        article.className =
-            "update-item";
-
-
-        const formattedDate =
-            formatArchiveDate(
-                update.date
-            );
+            article.className =
+                "update-item";
 
 
-        const date =
-            document.createElement(
-                "div"
-            );
-
-        date.className =
-            "update-date";
-
-
-        date.innerHTML =
-            formattedDate.month +
-            " " +
-            formattedDate.day +
-            "<br>" +
-            formattedDate.year;
-
-
-        const content =
-            document.createElement(
-                "div"
-            );
-
-        content.className =
-            "update-content";
-
-
-        const type =
-            createTextElement(
-                "span",
-                "update-type",
-                update.category.toUpperCase()
-            );
-
-
-        const heading =
-            createTextElement(
-                "h3",
-                "",
-                update.headline
-            );
-
-
-        const description =
-            createTextElement(
-                "p",
-                "",
-                update.description
-            );
-
-
-        content.appendChild(type);
-        content.appendChild(heading);
-        content.appendChild(description);
-
-
-        if (
-            update.link &&
-            update.linkText
-        ) {
-
-            const link =
-                createTextElement(
-                    "a",
-                    "update-link",
-                    update.linkText + " →"
+            const formatted =
+                formatArchiveDate(
+                    update.created_at
                 );
 
 
-            link.href =
-                update.link;
+            const date =
+                document.createElement(
+                    "div"
+                );
+
+            date.className =
+                "update-date";
+
+            date.innerHTML =
+                formatted.month +
+                " " +
+                formatted.day +
+                "<br>" +
+                formatted.year;
+
+
+            const content =
+                document.createElement(
+                    "div"
+                );
+
+            content.className =
+                "update-content";
+
+
+            const type =
+                createTextElement(
+                    "span",
+                    "update-type",
+                    update.category
+                        .toUpperCase()
+                );
+
+
+            const heading =
+                createTextElement(
+                    "h3",
+                    "",
+                    update.headline
+                );
+
+
+            const description =
+                createTextElement(
+                    "p",
+                    "",
+                    update.description
+                );
+
+
+            content.appendChild(
+                type
+            );
+
+            content.appendChild(
+                heading
+            );
+
+            content.appendChild(
+                description
+            );
 
 
             if (
-                update.link.startsWith("http")
+                update.link_url &&
+                update.link_text
             ) {
 
-                link.target =
-                    "_blank";
+                const link =
+                    createTextElement(
+                        "a",
+                        "update-link",
+                        update.link_text +
+                        " →"
+                    );
 
-                link.rel =
-                    "noopener noreferrer";
+                configureLink(
+                    link,
+                    update.link_url
+                );
+
+                content.appendChild(
+                    link
+                );
 
             }
 
 
-            content.appendChild(link);
+            article.appendChild(
+                date
+            );
+
+            article.appendChild(
+                content
+            );
+
+            feed.appendChild(
+                article
+            );
 
         }
-
-
-        article.appendChild(date);
-        article.appendChild(content);
-
-        feed.appendChild(article);
-
-    });
+    );
 
 }
 
 
 /* =========================================
-   FILTERS
+   FILTER BUTTONS
 ========================================= */
 
 const filterButtons =
@@ -1346,42 +1310,44 @@ const filterButtons =
     );
 
 
-filterButtons.forEach(button => {
+filterButtons.forEach(
+    button => {
 
-    button.addEventListener(
-        "click",
-        () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            activeFilter =
-                button.dataset.filter;
-
-
-            filterButtons.forEach(
-                filter => {
-
-                    filter.classList.remove(
-                        "active"
-                    );
-
-                }
-            );
+                activeFilter =
+                    button.dataset.filter;
 
 
-            button.classList.add(
-                "active"
-            );
+                filterButtons.forEach(
+                    item => {
+
+                        item.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
 
 
-            renderArchive();
+                button.classList.add(
+                    "active"
+                );
 
-        }
-    );
 
-});
+                renderArchive();
+
+            }
+        );
+
+    }
+);
 
 
 /* =========================================
-   LOAD updates.json
+   LOAD FROM SUPABASE
 ========================================= */
 
 async function loadUpdates() {
@@ -1391,8 +1357,7 @@ async function loadUpdates() {
             "featuredLoading"
         );
 
-
-    const error =
+    const errorBox =
         document.getElementById(
             "updatesError"
         );
@@ -1401,72 +1366,47 @@ async function loadUpdates() {
     try {
 
         /*
-         * Cache-busting query prevents
-         * browsers/GitHub Pages from
-         * showing an old update feed.
-         */
+           RLS also enforces published=true
+           for public users.
 
-        const response =
-            await fetch(
-                "updates.json?v=" +
-                Date.now()
-            );
+           We filter it here too so the
+           intention is explicit.
+        */
+
+        const {
+            data,
+            error
+        } =
+            await exmDB
+                .from("exm_updates")
+                .select(
+                    "id, created_at, category, headline, description, link_text, link_url, featured, published"
+                )
+                .eq(
+                    "published",
+                    true
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                );
 
 
-        if (!response.ok) {
-
-            throw new Error(
-                "Could not load updates.json"
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        if (
-            !data ||
-            !Array.isArray(data.updates)
-        ) {
-
-            throw new Error(
-                "Invalid EXM update data."
-            );
-
+        if (error) {
+            throw error;
         }
 
 
         exmUpdates =
-            data.updates
-                .filter(update => {
-
-                    return (
-                        update &&
-                        update.id &&
-                        update.date &&
-                        update.category &&
-                        update.headline &&
-                        update.description
-                    );
-
-                })
-                .sort((a, b) => {
-
-                    return (
-                        new Date(b.date) -
-                        new Date(a.date)
-                    );
-
-                });
+            data || [];
 
 
         loading.style.display =
             "none";
 
-
-        error.style.display =
+        errorBox.style.display =
             "none";
 
 
@@ -1475,19 +1415,18 @@ async function loadUpdates() {
 
     }
 
-    catch (err) {
+    catch (error) {
 
         console.error(
-            "EXM UPDATE ERROR:",
-            err
+            "EXM DATABASE ERROR:",
+            error
         );
 
 
         loading.style.display =
             "none";
 
-
-        error.style.display =
+        errorBox.style.display =
             "block";
 
     }
