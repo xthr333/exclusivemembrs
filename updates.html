@@ -17,7 +17,7 @@
     <style>
 
         /* =========================================
-           EXM UPDATES PAGE
+           UPDATES PAGE
         ========================================= */
 
         .updates-hero {
@@ -36,7 +36,6 @@
 
             font-size: clamp(60px, 11vw, 150px);
             line-height: .78;
-
             letter-spacing: -7px;
         }
 
@@ -65,7 +64,6 @@
             height: 7px;
 
             border-radius: 50%;
-
             background: #fff;
 
             animation: updatePulse 1.5s infinite;
@@ -95,11 +93,6 @@
             border-bottom: 1px solid #181818;
 
             background: #050505;
-
-            position: sticky;
-            top: 0;
-
-            z-index: 20;
         }
 
         .update-filters {
@@ -140,7 +133,25 @@
 
 
         /* =========================================
-           FEATURED UPDATE
+           LOADING
+        ========================================= */
+
+        .updates-loading {
+            margin-top: 45px;
+            padding: 35px;
+
+            border: 1px dashed #292929;
+
+            color: #666;
+
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+
+        /* =========================================
+           FEATURED
         ========================================= */
 
         .featured-update {
@@ -158,21 +169,20 @@
                 );
 
             position: relative;
-
             overflow: hidden;
         }
 
         .featured-update::after {
-            content: "001";
+            content: "EXM";
 
             position: absolute;
 
-            right: -15px;
+            right: -20px;
             bottom: -55px;
 
-            color: #0f0f0f;
+            color: #0e0e0e;
 
-            font-size: clamp(150px, 25vw, 330px);
+            font-size: clamp(130px, 23vw, 300px);
             font-weight: 900;
 
             letter-spacing: -20px;
@@ -188,7 +198,6 @@
         .featured-update-meta {
             display: flex;
             flex-wrap: wrap;
-
             align-items: center;
 
             gap: 15px;
@@ -233,7 +242,7 @@
 
 
         /* =========================================
-           FEED
+           UPDATE FEED
         ========================================= */
 
         .updates-feed {
@@ -343,40 +352,19 @@
             letter-spacing: 2px;
         }
 
+        .updates-error {
+            display: none;
 
-        /* =========================================
-           CURRENT EVENT
-        ========================================= */
-
-        .updates-event-box {
             margin-top: 45px;
-            padding: 40px;
+            padding: 35px;
 
-            border: 1px solid #282828;
+            border: 1px solid #333;
 
-            background: #080808;
-        }
+            color: #888;
 
-        .updates-event-number {
-            display: flex;
-            align-items: baseline;
-
-            gap: 8px;
-        }
-
-        .updates-event-number strong {
-            font-size: clamp(55px, 8vw, 95px);
-            line-height: .8;
-
-            letter-spacing: -5px;
-        }
-
-        .updates-event-number span {
-            color: #666;
-
-            font-size: 10px;
-            font-weight: 900;
-            letter-spacing: 2px;
+            font-size: 8px;
+            line-height: 1.8;
+            letter-spacing: 1.5px;
         }
 
 
@@ -388,20 +376,16 @@
 
             .updates-hero {
                 min-height: auto;
-
                 padding: 90px 20px 75px;
             }
 
             .updates-hero h1 {
                 font-size: clamp(55px, 20vw, 90px);
-
                 letter-spacing: -4px;
             }
 
             .updates-filter-section {
                 padding: 20px;
-
-                position: static;
             }
 
             .update-filters {
@@ -410,7 +394,6 @@
 
             .update-filter {
                 padding: 9px 10px;
-
                 font-size: 6px;
             }
 
@@ -438,10 +421,6 @@
                 padding-left: 0;
             }
 
-            .updates-event-box {
-                padding: 25px 20px;
-            }
-
         }
 
     </style>
@@ -464,39 +443,26 @@
 
     <ul class="nav-links">
 
-        <li>
-            <a href="index.html">HOME</a>
-        </li>
+        <li><a href="index.html">HOME</a></li>
+
+        <li><a href="artists.html">ARTISTS</a></li>
+
+        <li><a href="shop.html">SHOP</a></li>
+
+        <li><a href="events.html">SONGWARS</a></li>
 
         <li>
-            <a href="artists.html">ARTISTS</a>
-        </li>
-
-        <li>
-            <a href="shop.html">SHOP</a>
-        </li>
-
-        <li>
-            <a href="events.html">SONGWARS</a>
-        </li>
-
-        <li>
-            <a class="active" href="updates.html">
+            <a class="active"
+               href="updates.html">
                 UPDATES
             </a>
         </li>
 
-        <li>
-            <a href="submit.html">SUBMIT</a>
-        </li>
+        <li><a href="submit.html">SUBMIT</a></li>
 
-        <li>
-            <a href="about.html">ABOUT</a>
-        </li>
+        <li><a href="about.html">ABOUT</a></li>
 
-        <li>
-            <a href="contact.html">CONTACT</a>
-        </li>
+        <li><a href="contact.html">CONTACT</a></li>
 
     </ul>
 
@@ -557,63 +523,43 @@
         <button
             class="update-filter active"
             data-filter="all">
-
             ALL
-
         </button>
-
 
         <button
             class="update-filter"
             data-filter="songwars">
-
             SONGWARS
-
         </button>
-
 
         <button
             class="update-filter"
             data-filter="roster">
-
             ROSTER
-
         </button>
-
 
         <button
             class="update-filter"
             data-filter="music">
-
             MUSIC
-
         </button>
-
 
         <button
             class="update-filter"
             data-filter="merch">
-
             MERCH
-
         </button>
-
 
         <button
             class="update-filter"
             data-filter="events">
-
             EVENTS
-
         </button>
-
 
         <button
             class="update-filter"
             data-filter="exm">
-
             EXM
-
         </button>
 
     </div>
@@ -622,84 +568,42 @@
 
 
 <!-- =========================================
-     FEATURED UPDATE
+     LATEST UPDATE
 ========================================== -->
 
 <section class="section">
 
     <p class="section-label">
-        LATEST
+        LATEST TRANSMISSION
     </p>
 
 
-    <article
-        class="featured-update update-post"
-        data-category="merch">
+    <div
+        class="updates-loading"
+        id="featuredLoading">
 
-        <div class="featured-update-meta">
+        LOADING EXM FEED...
 
-            <span class="update-category">
-                MERCH
-            </span>
-
-            <span>
-                SEPTEMBER 18, 2026
-            </span>
-
-        </div>
+    </div>
 
 
-        <h2>
-            DROP 001:<br>
-            THE FIRST WAVE.
-        </h2>
+    <div id="featuredContainer"></div>
 
 
-        <p>
+    <div
+        class="updates-error"
+        id="updatesError">
 
-            THE FIRST OFFICIAL
-            EXCLUSIVEMEMBRS® PRODUCT
-            COLLECTION IS HERE.
+        EXM FEED COULD NOT BE LOADED.
+        REFRESH THE PAGE OR CHECK BACK SHORTLY.
 
-            <br><br>
-
-            DROP 001 INTRODUCES
-            THE ORIGINAL EXM LOGO WAVE
-            THROUGH APPAREL,
-            ACCESSORIES AND
-            CREATOR GOODS.
-
-        </p>
-
-
-        <div class="buttons">
-
-            <a href="shop.html"
-               class="btn">
-
-                EXPLORE DROP 001
-
-            </a>
-
-
-            <a href="https://exclusivemembrs.printify.me/"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="btn btn-dark">
-
-                SHOP NOW
-
-            </a>
-
-        </div>
-
-    </article>
+    </div>
 
 </section>
 
 
 <!-- =========================================
-     UPDATE ARCHIVE
+     ARCHIVE
 ========================================== -->
 
 <section class="section">
@@ -717,246 +621,6 @@
     <div
         class="updates-feed"
         id="updatesFeed">
-
-
-        <!-- DROP 001 -->
-
-        <article
-            class="update-item update-post"
-            data-category="merch">
-
-            <div class="update-date">
-
-                SEP 18<br>
-                2026
-
-            </div>
-
-
-            <div class="update-content">
-
-                <span class="update-type">
-                    MERCH
-                </span>
-
-                <h3>
-                    DROP 001 IS LIVE.
-                </h3>
-
-                <p>
-
-                    EXCLUSIVEMEMBRS®
-                    OFFICIALLY ENTERS
-                    PHYSICAL MERCH WITH
-                    DROP 001 —
-                    THE FIRST WAVE.
-
-                </p>
-
-
-                <a href="shop.html"
-                   class="update-link">
-
-                    VIEW DROP →
-
-                </a>
-
-            </div>
-
-        </article>
-
-
-        <!-- SONGWARS DUOS -->
-
-        <article
-            class="update-item update-post"
-            data-category="songwars">
-
-            <div class="update-date">
-
-                SEP 18<br>
-                2026
-
-            </div>
-
-
-            <div class="update-content">
-
-                <span class="update-type">
-                    SONGWARS
-                </span>
-
-                <h3>
-                    7 OF 12 DUOS APPROVED.
-                </h3>
-
-                <p>
-
-                    SONGWARS III CURRENTLY
-                    HAS SEVEN APPROVED DUOS.
-
-                    FIVE OPENING SPOTS
-                    REMAIN BEFORE THE
-                    REPLACEMENT WAITLIST
-                    BEGINS.
-
-                </p>
-
-
-                <a href="events.html"
-                   class="update-link">
-
-                    SONGWARS LIVE HUB →
-
-                </a>
-
-            </div>
-
-        </article>
-
-
-        <!-- SONGWARS JUDGES -->
-
-        <article
-            class="update-item update-post"
-            data-category="songwars">
-
-            <div class="update-date">
-
-                SEP 18<br>
-                2026
-
-            </div>
-
-
-            <div class="update-content">
-
-                <span class="update-type">
-                    SONGWARS
-                </span>
-
-                <h3>
-                    SONGWARS III JUDGES LOCKED.
-                </h3>
-
-                <p>
-
-                    THE CURRENT OFFICIAL
-                    JUDGE PANEL INCLUDES
-                    38BXBY, EJ, QWAN,
-                    JU / GOTTAITCH AND TP.
-
-                </p>
-
-
-                <a href="events.html"
-                   class="update-link">
-
-                    VIEW EVENT →
-
-                </a>
-
-            </div>
-
-        </article>
-
-
-        <!-- EXM SUBMISSIONS -->
-
-        <article
-            class="update-item update-post"
-            data-category="exm">
-
-            <div class="update-date">
-
-                SEP 18<br>
-                2026
-
-            </div>
-
-
-            <div class="update-content">
-
-                <span class="update-type">
-                    EXM
-                </span>
-
-                <h3>
-                    GET ON OUR RADAR.
-                </h3>
-
-                <p>
-
-                    GENERAL EXM SUBMISSIONS
-                    ARE OPEN.
-
-                    ARTISTS AND CREATORS
-                    CAN SEND MUSIC,
-                    VISUALS AND CONTENT
-                    DIRECTLY TO EXM.
-
-                </p>
-
-
-                <a href="submit.html"
-                   class="update-link">
-
-                    SUBMIT TO EXM →
-
-                </a>
-
-            </div>
-
-        </article>
-
-
-        <!-- ROSTER -->
-
-        <article
-            class="update-item update-post"
-            data-category="roster">
-
-            <div class="update-date">
-
-                SEP 18<br>
-                2026
-
-            </div>
-
-
-            <div class="update-content">
-
-                <span class="update-type">
-                    ROSTER
-                </span>
-
-                <h3>
-                    THE EXM ROSTER IS LIVE.
-                </h3>
-
-                <p>
-
-                    THE OFFICIAL EXM
-                    ROSTER HUB CONNECTS
-                    LISTENERS DIRECTLY
-                    TO ARTIST MUSIC
-                    AND SOCIAL PROFILES.
-
-                </p>
-
-
-                <a href="artists.html"
-                   class="update-link">
-
-                    VIEW ROSTER →
-
-                </a>
-
-            </div>
-
-        </article>
-
-
     </div>
 
 
@@ -972,98 +636,112 @@
 
 
 <!-- =========================================
-     CURRENT EVENT
+     CURRENT EXM
 ========================================== -->
 
 <section class="section">
 
     <p class="section-label">
-        CURRENT EVENT
+        CURRENTLY ACTIVE
     </p>
 
     <h2 class="section-title">
-        SONGWARS<br>
-        III. ✦
+        TAP<br>
+        IN. ✦
     </h2>
 
 
-    <p class="exm-description">
-
-        DUOS ARE FORMING.
-
-        <br><br>
-
-        24 ARTISTS.
-        12 DUOS.
-        LIVE JUDGING.
-        ONE EVENT.
-
-    </p>
+    <div class="grid">
 
 
-    <div class="updates-event-box">
+        <a
+            href="events.html"
+            class="card clickable-card">
 
-        <p class="section-label">
-            REGISTRATION STATUS
-        </p>
+            <p class="card-number">
+                LIVE
+            </p>
 
+            <h3>
+                SONGWARS<br>
+                III
+            </h3>
 
-        <div class="updates-event-number">
+            <p>
+                DUO REGISTRATION,
+                OFFICIAL ROSTER,
+                JUDGES AND LIVE
+                EVENT INFORMATION.
+            </p>
 
-            <strong>
-                07
-            </strong>
-
-            <span>
-                / 12 APPROVED
-            </span>
-
-        </div>
-
-
-        <div class="registration-bar">
-
-            <div
-                class="registration-progress"
-                style="width:58.33%;">
-            </div>
-
-        </div>
+        </a>
 
 
-        <div class="registration-bottom">
+        <a
+            href="shop.html"
+            class="card clickable-card">
 
-            <span>
-                7 APPROVED DUOS
-            </span>
+            <p class="card-number">
+                001
+            </p>
 
-            <span>
-                5 OPENING SPOTS REMAIN
-            </span>
+            <h3>
+                DROP<br>
+                001
+            </h3>
 
-        </div>
+            <p>
+                THE FIRST OFFICIAL
+                EXM PRODUCT WAVE
+                IS AVAILABLE NOW.
+            </p>
 
-
-        <div class="buttons">
-
-            <a href="events.html"
-               class="btn">
-
-                LIVE EVENT HUB
-
-            </a>
+        </a>
 
 
-            <a href="https://songwars-s3-registration.b26xkz4v97.chatgpt.site/"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="btn btn-dark">
+        <a
+            href="artists.html"
+            class="card clickable-card">
 
-                REGISTER FOR S3
+            <p class="card-number">
+                ROSTER
+            </p>
 
-            </a>
+            <h3>
+                EXM<br>
+                ARTISTS
+            </h3>
 
-        </div>
+            <p>
+                EXPLORE THE CURRENT
+                EXCLUSIVEMEMBRS®
+                ROSTER.
+            </p>
+
+        </a>
+
+
+        <a
+            href="submit.html"
+            class="card clickable-card">
+
+            <p class="card-number">
+                OPEN
+            </p>
+
+            <h3>
+                GET ON<br>
+                OUR RADAR
+            </h3>
+
+            <p>
+                MUSIC, VISUALS,
+                CONTENT AND
+                CREATIVE SUBMISSIONS.
+            </p>
+
+        </a>
+
 
     </div>
 
@@ -1071,13 +749,13 @@
 
 
 <!-- =========================================
-     STAY TAPPED IN
+     COMMUNITY
 ========================================== -->
 
 <section class="section">
 
     <p class="section-label">
-        EXM COMMUNITY
+        COMMUNITY
     </p>
 
     <h2 class="section-title">
@@ -1089,10 +767,11 @@
     <div class="grid">
 
 
-        <a href="https://discord.gg/WguA7bAV39"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="card clickable-card">
+        <a
+            href="https://discord.gg/WguA7bAV39"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="card clickable-card">
 
             <p class="card-number">
                 01
@@ -1111,10 +790,11 @@
         </a>
 
 
-        <a href="https://www.instagram.com/exclusivemembrs"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="card clickable-card">
+        <a
+            href="https://www.instagram.com/exclusivemembrs"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="card clickable-card">
 
             <p class="card-number">
                 02
@@ -1127,16 +807,18 @@
             <p>
                 ROSTER,
                 SONGWARS,
-                DROPS AND EXM CONTENT.
+                DROPS AND
+                DAILY EXM CONTENT.
             </p>
 
         </a>
 
 
-        <a href="https://www.tiktok.com/@exclusivemembrs"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="card clickable-card">
+        <a
+            href="https://www.tiktok.com/@exclusivemembrs"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="card clickable-card">
 
             <p class="card-number">
                 03
@@ -1148,16 +830,18 @@
 
             <p>
                 EXM CONTENT,
-                MOMENTS AND COMMUNITY.
+                MOMENTS AND
+                COMMUNITY.
             </p>
 
         </a>
 
 
-        <a href="https://youtube.com/@exclusivememb"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="card clickable-card">
+        <a
+            href="https://youtube.com/@exclusivememb"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="card clickable-card">
 
             <p class="card-number">
                 04
@@ -1237,37 +921,21 @@
 
     <div class="footer-links">
 
-        <a href="index.html">
-            HOME
-        </a>
+        <a href="index.html">HOME</a>
 
-        <a href="artists.html">
-            ARTISTS
-        </a>
+        <a href="artists.html">ARTISTS</a>
 
-        <a href="shop.html">
-            SHOP
-        </a>
+        <a href="shop.html">SHOP</a>
 
-        <a href="events.html">
-            SONGWARS
-        </a>
+        <a href="events.html">SONGWARS</a>
 
-        <a href="updates.html">
-            UPDATES
-        </a>
+        <a href="updates.html">UPDATES</a>
 
-        <a href="submit.html">
-            SUBMIT
-        </a>
+        <a href="submit.html">SUBMIT</a>
 
-        <a href="about.html">
-            ABOUT
-        </a>
+        <a href="about.html">ABOUT</a>
 
-        <a href="contact.html">
-            CONTACT
-        </a>
+        <a href="contact.html">CONTACT</a>
 
     </div>
 
@@ -1280,82 +948,558 @@
 
 
 <!-- =========================================
-     FILTER SYSTEM
+     DYNAMIC EXM UPDATE SYSTEM
 ========================================== -->
 
 <script>
 
-    const filterButtons =
-        document.querySelectorAll(".update-filter");
-
-    const updatePosts =
-        document.querySelectorAll(".update-post");
-
-    const emptyMessage =
-        document.getElementById("updatesEmpty");
+let exmUpdates = [];
+let activeFilter = "all";
 
 
-    filterButtons.forEach(button => {
+/* =========================================
+   SAFELY CREATE TEXT
+========================================= */
 
-        button.addEventListener("click", () => {
+function createTextElement(tag, className, text) {
 
-            const selected =
-                button.dataset.filter;
+    const element =
+        document.createElement(tag);
 
+    if (className) {
+        element.className = className;
+    }
 
-            filterButtons.forEach(btn => {
-                btn.classList.remove("active");
-            });
+    element.textContent = text;
 
-
-            button.classList.add("active");
-
-
-            let visiblePosts = 0;
-
-
-            updatePosts.forEach(post => {
-
-                const category =
-                    post.dataset.category;
+    return element;
+}
 
 
-                if (
-                    selected === "all" ||
-                    category === selected
-                ) {
+/* =========================================
+   DATE FORMATTING
+========================================= */
 
-                    post.style.display = "";
-                    visiblePosts++;
+function formatFullDate(dateString) {
 
-                }
+    const date = new Date(dateString);
 
-                else {
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        }
+    ).toUpperCase();
 
-                    post.style.display = "none";
-
-                }
-
-            });
+}
 
 
-            if (visiblePosts === 0) {
+function formatArchiveDate(dateString) {
 
-                emptyMessage.style.display =
-                    "block";
+    const date = new Date(dateString);
 
+    const month =
+        date.toLocaleDateString(
+            "en-US",
+            { month: "short" }
+        ).toUpperCase();
+
+    const day =
+        String(date.getDate()).padStart(2, "0");
+
+    const year =
+        date.getFullYear();
+
+    return {
+        month,
+        day,
+        year
+    };
+
+}
+
+
+/* =========================================
+   FEATURED UPDATE
+========================================= */
+
+function renderFeatured() {
+
+    const container =
+        document.getElementById(
+            "featuredContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (!exmUpdates.length) {
+
+        const empty =
+            createTextElement(
+                "div",
+                "updates-empty",
+                "NO EXM UPDATES HAVE BEEN PUBLISHED YET."
+            );
+
+        empty.style.display = "block";
+
+        container.appendChild(empty);
+
+        return;
+    }
+
+
+    const featured =
+        exmUpdates.find(
+            update => update.featured === true
+        ) || exmUpdates[0];
+
+
+    const article =
+        document.createElement("article");
+
+    article.className =
+        "featured-update";
+
+
+    article.dataset.category =
+        featured.category;
+
+
+    const meta =
+        document.createElement("div");
+
+    meta.className =
+        "featured-update-meta";
+
+
+    const category =
+        createTextElement(
+            "span",
+            "update-category",
+            featured.category.toUpperCase()
+        );
+
+
+    const date =
+        createTextElement(
+            "span",
+            "",
+            formatFullDate(featured.date)
+        );
+
+
+    meta.appendChild(category);
+    meta.appendChild(date);
+
+
+    const heading =
+        createTextElement(
+            "h2",
+            "",
+            featured.headline
+        );
+
+
+    const description =
+        createTextElement(
+            "p",
+            "",
+            featured.description
+        );
+
+
+    article.appendChild(meta);
+    article.appendChild(heading);
+    article.appendChild(description);
+
+
+    if (
+        featured.link &&
+        featured.linkText
+    ) {
+
+        const buttons =
+            document.createElement("div");
+
+        buttons.className =
+            "buttons";
+
+
+        const link =
+            createTextElement(
+                "a",
+                "btn",
+                featured.linkText
+            );
+
+
+        link.href =
+            featured.link;
+
+
+        if (
+            featured.link.startsWith("http")
+        ) {
+
+            link.target =
+                "_blank";
+
+            link.rel =
+                "noopener noreferrer";
+
+        }
+
+
+        buttons.appendChild(link);
+
+        article.appendChild(buttons);
+
+    }
+
+
+    container.appendChild(article);
+
+}
+
+
+/* =========================================
+   ARCHIVE
+========================================= */
+
+function renderArchive() {
+
+    const feed =
+        document.getElementById(
+            "updatesFeed"
+        );
+
+
+    const empty =
+        document.getElementById(
+            "updatesEmpty"
+        );
+
+
+    feed.innerHTML = "";
+
+
+    const visibleUpdates =
+        exmUpdates.filter(update => {
+
+            if (
+                activeFilter === "all"
+            ) {
+                return true;
             }
 
-            else {
-
-                emptyMessage.style.display =
-                    "none";
-
-            }
+            return (
+                update.category ===
+                activeFilter
+            );
 
         });
 
+
+    if (!visibleUpdates.length) {
+
+        empty.style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    empty.style.display =
+        "none";
+
+
+    visibleUpdates.forEach(update => {
+
+        const article =
+            document.createElement(
+                "article"
+            );
+
+        article.className =
+            "update-item";
+
+
+        const formattedDate =
+            formatArchiveDate(
+                update.date
+            );
+
+
+        const date =
+            document.createElement(
+                "div"
+            );
+
+        date.className =
+            "update-date";
+
+
+        date.innerHTML =
+            formattedDate.month +
+            " " +
+            formattedDate.day +
+            "<br>" +
+            formattedDate.year;
+
+
+        const content =
+            document.createElement(
+                "div"
+            );
+
+        content.className =
+            "update-content";
+
+
+        const type =
+            createTextElement(
+                "span",
+                "update-type",
+                update.category.toUpperCase()
+            );
+
+
+        const heading =
+            createTextElement(
+                "h3",
+                "",
+                update.headline
+            );
+
+
+        const description =
+            createTextElement(
+                "p",
+                "",
+                update.description
+            );
+
+
+        content.appendChild(type);
+        content.appendChild(heading);
+        content.appendChild(description);
+
+
+        if (
+            update.link &&
+            update.linkText
+        ) {
+
+            const link =
+                createTextElement(
+                    "a",
+                    "update-link",
+                    update.linkText + " →"
+                );
+
+
+            link.href =
+                update.link;
+
+
+            if (
+                update.link.startsWith("http")
+            ) {
+
+                link.target =
+                    "_blank";
+
+                link.rel =
+                    "noopener noreferrer";
+
+            }
+
+
+            content.appendChild(link);
+
+        }
+
+
+        article.appendChild(date);
+        article.appendChild(content);
+
+        feed.appendChild(article);
+
     });
+
+}
+
+
+/* =========================================
+   FILTERS
+========================================= */
+
+const filterButtons =
+    document.querySelectorAll(
+        ".update-filter"
+    );
+
+
+filterButtons.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            activeFilter =
+                button.dataset.filter;
+
+
+            filterButtons.forEach(
+                filter => {
+
+                    filter.classList.remove(
+                        "active"
+                    );
+
+                }
+            );
+
+
+            button.classList.add(
+                "active"
+            );
+
+
+            renderArchive();
+
+        }
+    );
+
+});
+
+
+/* =========================================
+   LOAD updates.json
+========================================= */
+
+async function loadUpdates() {
+
+    const loading =
+        document.getElementById(
+            "featuredLoading"
+        );
+
+
+    const error =
+        document.getElementById(
+            "updatesError"
+        );
+
+
+    try {
+
+        /*
+         * Cache-busting query prevents
+         * browsers/GitHub Pages from
+         * showing an old update feed.
+         */
+
+        const response =
+            await fetch(
+                "updates.json?v=" +
+                Date.now()
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Could not load updates.json"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !data ||
+            !Array.isArray(data.updates)
+        ) {
+
+            throw new Error(
+                "Invalid EXM update data."
+            );
+
+        }
+
+
+        exmUpdates =
+            data.updates
+                .filter(update => {
+
+                    return (
+                        update &&
+                        update.id &&
+                        update.date &&
+                        update.category &&
+                        update.headline &&
+                        update.description
+                    );
+
+                })
+                .sort((a, b) => {
+
+                    return (
+                        new Date(b.date) -
+                        new Date(a.date)
+                    );
+
+                });
+
+
+        loading.style.display =
+            "none";
+
+
+        error.style.display =
+            "none";
+
+
+        renderFeatured();
+        renderArchive();
+
+    }
+
+    catch (err) {
+
+        console.error(
+            "EXM UPDATE ERROR:",
+            err
+        );
+
+
+        loading.style.display =
+            "none";
+
+
+        error.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* =========================================
+   START
+========================================= */
+
+loadUpdates();
 
 </script>
 
