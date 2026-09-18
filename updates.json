@@ -1,3 +1,44 @@
 {
-  "updates": []
+  "updates": [
+    {
+      "id": "exm-001",
+      "date": "2026-09-18T13:00:00-04:00",
+      "category": "merch",
+      "headline": "DROP 001 — THE FIRST WAVE IS LIVE.",
+      "description": "The first official EXCLUSIVEMEMBRS® product wave is now available. DROP 001 introduces the original EXM identity through apparel, accessories and creator goods.",
+      "linkText": "EXPLORE DROP 001",
+      "link": "shop.html",
+      "featured": true
+    },
+    {
+      "id": "exm-002",
+      "date": "2026-09-18T12:00:00-04:00",
+      "category": "songwars",
+      "headline": "SONGWARS III — 7 OF 12 DUOS APPROVED.",
+      "description": "Seven duos are officially approved for SongWars III. Five opening spots remain before registration moves to the replacement waitlist.",
+      "linkText": "SONGWARS LIVE HUB",
+      "link": "events.html",
+      "featured": false
+    },
+    {
+      "id": "exm-003",
+      "date": "2026-09-18T11:00:00-04:00",
+      "category": "songwars",
+      "headline": "SONGWARS III JUDGE PANEL LOCKED.",
+      "description": "38BXBY, EJ, Qwan, Ju / Gottaitch and TP make up the five official judges for SongWars III.",
+      "linkText": "VIEW SONGWARS III",
+      "link": "events.html",
+      "featured": false
+    },
+    {
+      "id": "exm-004",
+      "date": "2026-09-18T10:00:00-04:00",
+      "category": "exm",
+      "headline": "GET ON OUR RADAR.",
+      "description": "EXM submissions are open. Artists and creators can submit music, visuals and content directly to EXCLUSIVEMEMBRS®.",
+      "linkText": "SUBMIT TO EXM",
+      "link": "submit.html",
+      "featured": false
+    }
+  ]
 }
