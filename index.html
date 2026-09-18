@@ -13,6 +13,9 @@
     <title>EXCLUSIVEMEMBRS® — ITS EXCLUSIVE.</title>
 
     <link rel="stylesheet" href="style.css">
+
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 
@@ -52,6 +55,12 @@
         <li>
             <a href="events.html">
                 SONGWARS
+            </a>
+        </li>
+
+        <li>
+            <a href="updates.html">
+                UPDATES
             </a>
         </li>
 
@@ -155,6 +164,7 @@
         EXCLUSIVEMEMBRS® ✦
         DROP 001 AVAILABLE NOW ✦
         SONGWARS III ✦
+        LIVE EXM UPDATES ✦
         ARTISTS ✦ PRODUCERS ✦ CREATORS ✦
         NOT A POPULARITY CONTEST. ✦
         ITS EXCLUSIVE. ✦
@@ -162,6 +172,7 @@
         EXCLUSIVEMEMBRS® ✦
         DROP 001 AVAILABLE NOW ✦
         SONGWARS III ✦
+        LIVE EXM UPDATES ✦
         ARTISTS ✦ PRODUCERS ✦ CREATORS ✦
         NOT A POPULARITY CONTEST. ✦
         ITS EXCLUSIVE. ✦
@@ -248,8 +259,6 @@
     <div class="grid">
 
 
-        <!-- ROSTER -->
-
         <a href="artists.html"
            class="card clickable-card">
 
@@ -270,8 +279,6 @@
 
         </a>
 
-
-        <!-- SONGWARS -->
 
         <a href="events.html"
            class="card clickable-card">
@@ -294,8 +301,6 @@
         </a>
 
 
-        <!-- DROP 001 -->
-
         <a href="shop.html"
            class="card clickable-card">
 
@@ -317,13 +322,32 @@
         </a>
 
 
-        <!-- SUBMIT -->
+        <a href="updates.html"
+           class="card clickable-card">
+
+            <p class="card-number">
+                04
+            </p>
+
+            <h3>
+                LIVE<br>
+                UPDATES
+            </h3>
+
+            <p>
+                ANNOUNCEMENTS,
+                ROSTER MOVES, DROPS
+                AND EXM NEWS.
+            </p>
+
+        </a>
+
 
         <a href="submit.html"
            class="card clickable-card">
 
             <p class="card-number">
-                04
+                05
             </p>
 
             <h3>
@@ -340,15 +364,13 @@
         </a>
 
 
-        <!-- DISCORD -->
-
         <a href="https://discord.gg/WguA7bAV39"
            target="_blank"
            rel="noopener noreferrer"
            class="card clickable-card">
 
             <p class="card-number">
-                05
+                06
             </p>
 
             <h3>
@@ -365,28 +387,73 @@
         </a>
 
 
-        <!-- CONTACT -->
+    </div>
 
-        <a href="contact.html"
-           class="card clickable-card">
+</section>
+
+
+<!-- =========================================
+     LIVE EXM TRANSMISSIONS
+========================================== -->
+
+<section class="section">
+
+    <p class="section-label">
+        EXM://LIVE TRANSMISSIONS
+    </p>
+
+    <h2 class="section-title">
+        LATEST<br>
+        FROM EXM. ✦
+    </h2>
+
+    <p class="exm-description">
+
+        SONGWARS. DROPS.
+        ROSTER MOVES. EVENTS.
+        MUSIC. EVERYTHING EXM.
+
+        <br><br>
+
+        PUBLISHED DIRECTLY FROM
+        EXM OWNER CONTROL.
+
+    </p>
+
+
+    <div id="homeUpdates"
+         class="grid"
+         style="margin-top:45px;">
+
+        <div class="card">
 
             <p class="card-number">
-                06
+                CONNECTING
             </p>
 
             <h3>
-                WORK WITH<br>
-                EXM
+                EXM<br>
+                DATABASE
             </h3>
 
             <p>
-                BUSINESS, PARTNERSHIPS,
-                COLLABORATIONS AND
-                GENERAL CONTACT.
+                LOADING THE LATEST
+                TRANSMISSIONS.
             </p>
 
-        </a>
+        </div>
 
+    </div>
+
+
+    <div class="buttons">
+
+        <a href="updates.html"
+           class="btn">
+
+            VIEW ALL UPDATES
+
+        </a>
 
     </div>
 
@@ -891,6 +958,10 @@
             SONGWARS
         </a>
 
+        <a href="updates.html">
+            UPDATES
+        </a>
+
         <a href="submit.html">
             SUBMIT
         </a>
@@ -919,5 +990,324 @@
 </footer>
 
 
+<!-- =========================================
+     EXM LIVE DATABASE
+========================================== -->
+
+<script>
+
+const SUPABASE_URL =
+    "https://ldtmapwemttqoygcqlqu.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_fnnYUGRotjuA_56F1F3Yvg_l_1mYYY5";
+
+
+const { createClient } = supabase;
+
+
+const exmDB =
+    createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
+
+async function loadHomeUpdates() {
+
+    const container =
+        document.getElementById(
+            "homeUpdates"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await exmDB
+            .from("exm_updates")
+            .select(
+                "id, created_at, category, headline, description, link_text, link_url, featured"
+            )
+            .eq(
+                "published",
+                true
+            )
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            )
+            .limit(3);
+
+
+    if (error) {
+
+        console.error(
+            "EXM UPDATE ERROR:",
+            error
+        );
+
+
+        container.innerHTML = "";
+
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+        card.className =
+            "card";
+
+
+        const status =
+            document.createElement(
+                "p"
+            );
+
+        status.className =
+            "card-number";
+
+        status.textContent =
+            "OFFLINE";
+
+
+        const heading =
+            document.createElement(
+                "h3"
+            );
+
+        heading.textContent =
+            "FEED UNAVAILABLE";
+
+
+        const body =
+            document.createElement(
+                "p"
+            );
+
+        body.textContent =
+            "CHECK BACK FOR THE LATEST EXM TRANSMISSIONS.";
+
+
+        card.appendChild(status);
+        card.appendChild(heading);
+        card.appendChild(body);
+
+        container.appendChild(card);
+
+        return;
+
+    }
+
+
+    if (!data || data.length === 0) {
+
+        container.innerHTML = "";
+
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+        card.className =
+            "card";
+
+
+        const status =
+            document.createElement(
+                "p"
+            );
+
+        status.className =
+            "card-number";
+
+        status.textContent =
+            "EXM";
+
+
+        const heading =
+            document.createElement(
+                "h3"
+            );
+
+        heading.textContent =
+            "NO NEW TRANSMISSIONS";
+
+
+        const body =
+            document.createElement(
+                "p"
+            );
+
+        body.textContent =
+            "NEW EXM UPDATES WILL APPEAR HERE.";
+
+
+        card.appendChild(status);
+        card.appendChild(heading);
+        card.appendChild(body);
+
+        container.appendChild(card);
+
+        return;
+
+    }
+
+
+    container.innerHTML = "";
+
+
+    data.forEach(
+        update => {
+
+            const card =
+                document.createElement(
+                    update.link_url
+                        ? "a"
+                        : "div"
+                );
+
+
+            card.className =
+                "card clickable-card";
+
+
+            if (update.link_url) {
+
+                card.href =
+                    update.link_url;
+
+
+                if (
+                    update.link_url.startsWith(
+                        "http://"
+                    ) ||
+                    update.link_url.startsWith(
+                        "https://"
+                    )
+                ) {
+
+                    card.target =
+                        "_blank";
+
+                    card.rel =
+                        "noopener noreferrer";
+
+                }
+
+            }
+
+
+            const meta =
+                document.createElement(
+                    "p"
+                );
+
+            meta.className =
+                "card-number";
+
+
+            let metaText =
+                String(
+                    update.category || "EXM"
+                ).toUpperCase();
+
+
+            if (update.featured) {
+
+                metaText +=
+                    " // FEATURED";
+
+            }
+
+
+            meta.textContent =
+                metaText;
+
+
+            const heading =
+                document.createElement(
+                    "h3"
+                );
+
+            heading.textContent =
+                update.headline ||
+                "EXM UPDATE";
+
+
+            const body =
+                document.createElement(
+                    "p"
+                );
+
+            body.textContent =
+                update.description || "";
+
+
+            card.appendChild(meta);
+            card.appendChild(heading);
+            card.appendChild(body);
+
+
+            if (
+                update.link_url &&
+                update.link_text
+            ) {
+
+                const action =
+                    document.createElement(
+                        "p"
+                    );
+
+                action.style.marginTop =
+                    "20px";
+
+                action.style.color =
+                    "#fff";
+
+                action.style.fontWeight =
+                    "900";
+
+                action.style.letterSpacing =
+                    "1.5px";
+
+                action.textContent =
+                    update.link_text +
+                    " →";
+
+
+                card.appendChild(
+                    action
+                );
+
+            }
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+loadHomeUpdates();
+
+</script>
+
+
 </body>
+
 </html>
