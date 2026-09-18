@@ -1,184 +1,400 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ExclusiveMembrs</title>
+    <meta charset="UTF-8">
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-    body {
-      background: #050505;
-      color: white;
-      font-family: Arial, Helvetica, sans-serif;
-    }
+    <meta name="description"
+          content="ExclusiveMembrs — Music, culture, community and clothing. Not a popularity contest.">
 
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 25px 6%;
-      border-bottom: 1px solid #222;
-    }
+    <title>ExclusiveMembrs ✦</title>
 
-    .brand {
-      font-size: 22px;
-      font-weight: bold;
-      letter-spacing: 2px;
-    }
-
-    .diamond {
-      margin-left: 6px;
-    }
-
-    nav ul {
-      display: flex;
-      list-style: none;
-      gap: 30px;
-    }
-
-    nav a {
-      color: #aaa;
-      text-decoration: none;
-      font-size: 13px;
-      letter-spacing: 2px;
-      transition: .3s;
-    }
-
-    nav a:hover {
-      color: white;
-    }
-
-    .hero {
-      min-height: 82vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 40px 20px;
-    }
-
-    .exm {
-      font-size: clamp(90px, 20vw, 230px);
-      font-weight: 900;
-      letter-spacing: -12px;
-      line-height: .8;
-    }
-
-    .hero h1 {
-      margin-top: 30px;
-      font-size: clamp(24px, 4vw, 52px);
-      letter-spacing: 7px;
-    }
-
-    .hero p {
-      color: #888;
-      letter-spacing: 5px;
-      font-size: 12px;
-      margin-top: 18px;
-    }
-
-    .star {
-      font-size: 42px;
-      margin: 25px 0 5px;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 15px;
-      margin-top: 35px;
-    }
-
-    .btn {
-      padding: 14px 25px;
-      border: 1px solid white;
-      color: white;
-      text-decoration: none;
-      letter-spacing: 2px;
-      font-size: 11px;
-      transition: .25s;
-    }
-
-    .btn:hover {
-      background: white;
-      color: black;
-    }
-
-    .coming {
-      border-top: 1px solid #181818;
-      padding: 70px 6%;
-      text-align: center;
-    }
-
-    .coming p {
-      color: #666;
-      letter-spacing: 4px;
-      font-size: 11px;
-    }
-
-    @media(max-width: 700px) {
-      nav {
-        padding: 20px;
-      }
-
-      nav ul {
-        gap: 12px;
-      }
-
-      nav a {
-        font-size: 9px;
-      }
-
-      .brand {
-        font-size: 15px;
-      }
-
-      .exm {
-        letter-spacing: -7px;
-      }
-    }
-  </style>
+    <!-- EXM MAIN STYLESHEET -->
+    <link rel="stylesheet" href="style.css">
 </head>
+
 
 <body>
 
-<nav>
-  <div class="brand">EXCLUSIVEMEMBRS <span class="diamond">✦</span></div>
+    <!-- =========================
+         NAVIGATION
+    ========================== -->
 
-  <ul>
-    <li><a href="#">ARTISTS</a></li>
-    <li><a href="#">SHOP</a></li>
-    <li><a href="#">EVENTS</a></li>
-    <li><a href="#">ABOUT</a></li>
-  </ul>
-</nav>
+    <nav>
 
-<section class="hero">
+        <a href="index.html"
+           class="brand"
+           style="color:white; text-decoration:none;">
 
-  <div class="exm">EXM</div>
+            EXCLUSIVEMEMBRS
+            <span class="diamond">✦</span>
 
-  <div class="star">✦</div>
+        </a>
 
-  <h1>EXCLUSIVEMEMBRS</h1>
 
-  <p>NOT A POPULARITY CONTEST.</p>
+        <ul>
 
-  <div class="buttons">
-    <a class="btn" href="#">EXPLORE EXM</a>
-    <a class="btn" href="#">SHOP</a>
-  </div>
+            <li>
+                <a href="index.html">HOME</a>
+            </li>
 
-</section>
+            <li>
+                <a href="artists.html">ARTISTS</a>
+            </li>
 
-<section class="coming">
-  <p>MUSIC ✦ CULTURE ✦ COMMUNITY ✦ EXCLUSIVE BY NATURE</p>
-</section>
+            <li>
+                <a href="shop.html">SHOP</a>
+            </li>
+
+            <li>
+                <a href="events.html">EVENTS</a>
+            </li>
+
+            <li>
+                <a href="about.html">ABOUT</a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+
+
+    <!-- =========================
+         HERO
+    ========================== -->
+
+    <main>
+
+        <section class="hero">
+
+            <!--
+                TEMPORARY EXM LOGO
+
+                We're replacing this with the
+                Alternate / Global EXM logo
+                once the permanent logo is finished.
+            -->
+
+            <div class="exm">
+                EXM
+            </div>
+
+
+            <div class="star">
+                ✦
+            </div>
+
+
+            <h1>
+                EXCLUSIVEMEMBRS
+            </h1>
+
+
+            <p>
+                NOT A POPULARITY CONTEST.
+            </p>
+
+
+            <div class="buttons">
+
+                <a class="btn"
+                   href="artists.html">
+
+                    EXPLORE EXM
+
+                </a>
+
+
+                <a class="btn"
+                   href="shop.html">
+
+                    SHOP
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             MOVING EXM STRIP
+        ========================== -->
+
+        <div class="ticker">
+
+            <div class="ticker-track">
+
+                EXCLUSIVEMEMBRS ✦
+                MUSIC ✦
+                CULTURE ✦
+                COMMUNITY ✦
+                ITS EXCLUSIVE ✦
+
+                EXCLUSIVEMEMBRS ✦
+                MUSIC ✦
+                CULTURE ✦
+                COMMUNITY ✦
+                ITS EXCLUSIVE ✦
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             ARTISTS PREVIEW
+        ========================== -->
+
+        <section class="section">
+
+            <p class="section-label">
+                THE COLLECTIVE
+            </p>
+
+
+            <h2 class="section-title">
+                SELECTED<br>
+                ARTISTS ✦
+            </h2>
+
+
+            <div class="grid">
+
+                <a href="artists.html"
+                   class="card"
+                   style="text-decoration:none; color:white;">
+
+                    <h3>
+                        EXM ARTISTS
+                    </h3>
+
+                    <p>
+                        MEET THE COLLECTIVE →
+                    </p>
+
+                </a>
+
+
+                <a href="events.html"
+                   class="card"
+                   style="text-decoration:none; color:white;">
+
+                    <h3>
+                        SONGWARS
+                    </h3>
+
+                    <p>
+                        EXM EVENTS →
+                    </p>
+
+                </a>
+
+
+                <a href="shop.html"
+                   class="card"
+                   style="text-decoration:none; color:white;">
+
+                    <h3>
+                        DROP 001
+                    </h3>
+
+                    <p>
+                        IN DEVELOPMENT →
+                    </p>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             DROP 001
+        ========================== -->
+
+        <section class="section">
+
+            <p class="section-label">
+                EXCLUSIVEMEMBRS CLOTHING
+            </p>
+
+
+            <h2 class="section-title">
+                DROP 001 ✦
+            </h2>
+
+
+            <div class="grid">
+
+                <div class="card">
+
+                    <h3>
+                        EXM TEE
+                    </h3>
+
+                    <p>
+                        COMING SOON
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>
+                        EXM HOODIE
+                    </h3>
+
+                    <p>
+                        COMING SOON
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3>
+                        EXM SWEATS
+                    </h3>
+
+                    <p>
+                        COMING SOON
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="buttons">
+
+                <a class="btn"
+                   href="shop.html">
+
+                    VIEW DROP 001
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             EVENTS
+        ========================== -->
+
+        <section class="section">
+
+            <p class="section-label">
+                EXM EVENTS
+            </p>
+
+
+            <h2 class="section-title">
+                SONGWARS ✦
+            </h2>
+
+
+            <div class="card">
+
+                <h3>
+                    SEASON 3 — DUOS
+                </h3>
+
+                <p>
+                    NOVEMBER 21, 2026
+                </p>
+
+            </div>
+
+
+            <div class="buttons">
+
+                <a class="btn"
+                   href="events.html">
+
+                    VIEW EVENTS
+
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer>
+
+        <div class="footer-logo">
+
+            EXCLUSIVEMEMBRS ✦
+
+        </div>
+
+
+        <p class="footer-tagline">
+
+            NOT A POPULARITY CONTEST.
+
+        </p>
+
+
+        <div class="footer-links">
+
+            <a href="artists.html">
+                ARTISTS
+            </a>
+
+            <a href="shop.html">
+                SHOP
+            </a>
+
+            <a href="events.html">
+                EVENTS
+            </a>
+
+            <a href="about.html">
+                ABOUT
+            </a>
+
+            <a href="https://www.instagram.com/exclusivemembrs/"
+               target="_blank"
+               rel="noopener noreferrer">
+
+                INSTAGRAM
+
+            </a>
+
+        </div>
+
+
+        <p class="copyright">
+
+            © 2026 EXCLUSIVEMEMBRS
+
+        </p>
+
+    </footer>
+
 
 </body>
+
 </html>
