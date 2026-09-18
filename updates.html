@@ -8,11 +8,444 @@
           content="width=device-width, initial-scale=1.0">
 
     <meta name="description"
-          content="Official EXCLUSIVEMEMBRS® updates — SongWars, roster news, releases, merch, events and announcements.">
+          content="Official EXCLUSIVEMEMBRS® updates — SongWars, roster news, music, merch, events and announcements.">
 
     <title>Updates — EXCLUSIVEMEMBRS®</title>
 
     <link rel="stylesheet" href="style.css">
+
+    <style>
+
+        /* =========================================
+           EXM UPDATES PAGE
+        ========================================= */
+
+        .updates-hero {
+            min-height: 70vh;
+            padding: 110px 7% 90px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            border-bottom: 1px solid #181818;
+        }
+
+        .updates-hero h1 {
+            margin-top: 18px;
+
+            font-size: clamp(60px, 11vw, 150px);
+            line-height: .78;
+
+            letter-spacing: -7px;
+        }
+
+        .updates-live {
+            display: inline-flex;
+            align-items: center;
+
+            width: fit-content;
+
+            gap: 9px;
+
+            margin-top: 35px;
+            padding: 10px 13px;
+
+            border: 1px solid #333;
+
+            color: #aaa;
+
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .updates-live-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #fff;
+
+            animation: updatePulse 1.5s infinite;
+        }
+
+        @keyframes updatePulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .2;
+            }
+
+        }
+
+
+        /* =========================================
+           FILTERS
+        ========================================= */
+
+        .updates-filter-section {
+            padding: 30px 7%;
+
+            border-bottom: 1px solid #181818;
+
+            background: #050505;
+
+            position: sticky;
+            top: 0;
+
+            z-index: 20;
+        }
+
+        .update-filters {
+            display: flex;
+            flex-wrap: wrap;
+
+            gap: 8px;
+        }
+
+        .update-filter {
+            padding: 11px 14px;
+
+            border: 1px solid #292929;
+
+            background: transparent;
+            color: #666;
+
+            font-size: 7px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+
+            cursor: pointer;
+
+            transition: .2s ease;
+        }
+
+        .update-filter:hover {
+            border-color: #777;
+            color: #fff;
+        }
+
+        .update-filter.active {
+            border-color: #fff;
+
+            background: #fff;
+            color: #000;
+        }
+
+
+        /* =========================================
+           FEATURED UPDATE
+        ========================================= */
+
+        .featured-update {
+            margin-top: 45px;
+            padding: 55px;
+
+            border: 1px solid #333;
+
+            background:
+                radial-gradient(
+                    circle at top right,
+                    #171717,
+                    #080808 48%,
+                    #050505 80%
+                );
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .featured-update::after {
+            content: "001";
+
+            position: absolute;
+
+            right: -15px;
+            bottom: -55px;
+
+            color: #0f0f0f;
+
+            font-size: clamp(150px, 25vw, 330px);
+            font-weight: 900;
+
+            letter-spacing: -20px;
+
+            z-index: 0;
+        }
+
+        .featured-update > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .featured-update-meta {
+            display: flex;
+            flex-wrap: wrap;
+
+            align-items: center;
+
+            gap: 15px;
+
+            color: #555;
+
+            font-size: 7px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .update-category {
+            padding: 8px 10px;
+
+            border: 1px solid #444;
+
+            color: #fff;
+        }
+
+        .featured-update h2 {
+            max-width: 950px;
+
+            margin-top: 35px;
+
+            font-size: clamp(45px, 8vw, 110px);
+            line-height: .82;
+
+            letter-spacing: -5px;
+        }
+
+        .featured-update > p {
+            max-width: 650px;
+
+            margin-top: 35px;
+
+            color: #888;
+
+            font-size: 9px;
+            line-height: 1.9;
+            letter-spacing: 1.5px;
+        }
+
+
+        /* =========================================
+           FEED
+        ========================================= */
+
+        .updates-feed {
+            width: 100%;
+            max-width: 1100px;
+
+            margin-top: 50px;
+
+            border-top: 1px solid #282828;
+        }
+
+        .update-item {
+            display: grid;
+
+            grid-template-columns: 110px 1fr;
+
+            gap: 40px;
+
+            padding: 40px 0;
+
+            border-bottom: 1px solid #282828;
+
+            transition: .2s ease;
+        }
+
+        .update-item:hover {
+            padding-left: 10px;
+        }
+
+        .update-date {
+            color: #555;
+
+            font-size: 8px;
+            font-weight: 900;
+            line-height: 1.7;
+            letter-spacing: 2px;
+        }
+
+        .update-type {
+            display: inline-block;
+
+            color: #777;
+
+            font-size: 7px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .update-content h3 {
+            margin-top: 12px;
+
+            font-size: clamp(24px, 4vw, 45px);
+            line-height: .95;
+
+            letter-spacing: -1px;
+        }
+
+        .update-content p {
+            max-width: 650px;
+
+            margin-top: 18px;
+
+            color: #777;
+
+            font-size: 8px;
+            line-height: 1.9;
+            letter-spacing: 1.3px;
+        }
+
+        .update-link {
+            display: inline-block;
+
+            margin-top: 22px;
+            padding-bottom: 5px;
+
+            border-bottom: 1px solid #555;
+
+            color: #fff;
+
+            text-decoration: none;
+
+            font-size: 7px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+
+            transition: .2s ease;
+        }
+
+        .update-link:hover {
+            border-color: #fff;
+        }
+
+        .updates-empty {
+            display: none;
+
+            margin-top: 40px;
+            padding: 40px;
+
+            border: 1px dashed #282828;
+
+            color: #555;
+
+            text-align: center;
+
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+
+        /* =========================================
+           CURRENT EVENT
+        ========================================= */
+
+        .updates-event-box {
+            margin-top: 45px;
+            padding: 40px;
+
+            border: 1px solid #282828;
+
+            background: #080808;
+        }
+
+        .updates-event-number {
+            display: flex;
+            align-items: baseline;
+
+            gap: 8px;
+        }
+
+        .updates-event-number strong {
+            font-size: clamp(55px, 8vw, 95px);
+            line-height: .8;
+
+            letter-spacing: -5px;
+        }
+
+        .updates-event-number span {
+            color: #666;
+
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 620px) {
+
+            .updates-hero {
+                min-height: auto;
+
+                padding: 90px 20px 75px;
+            }
+
+            .updates-hero h1 {
+                font-size: clamp(55px, 20vw, 90px);
+
+                letter-spacing: -4px;
+            }
+
+            .updates-filter-section {
+                padding: 20px;
+
+                position: static;
+            }
+
+            .update-filters {
+                gap: 6px;
+            }
+
+            .update-filter {
+                padding: 9px 10px;
+
+                font-size: 6px;
+            }
+
+            .featured-update {
+                padding: 30px 22px;
+            }
+
+            .featured-update h2 {
+                letter-spacing: -3px;
+            }
+
+            .featured-update::after {
+                display: none;
+            }
+
+            .update-item {
+                grid-template-columns: 1fr;
+
+                gap: 12px;
+
+                padding: 30px 0;
+            }
+
+            .update-item:hover {
+                padding-left: 0;
+            }
+
+            .updates-event-box {
+                padding: 25px 20px;
+            }
+
+        }
+
+    </style>
+
 </head>
 
 
@@ -32,27 +465,19 @@
     <ul class="nav-links">
 
         <li>
-            <a href="index.html">
-                HOME
-            </a>
+            <a href="index.html">HOME</a>
         </li>
 
         <li>
-            <a href="artists.html">
-                ARTISTS
-            </a>
+            <a href="artists.html">ARTISTS</a>
         </li>
 
         <li>
-            <a href="shop.html">
-                SHOP
-            </a>
+            <a href="shop.html">SHOP</a>
         </li>
 
         <li>
-            <a href="events.html">
-                SONGWARS
-            </a>
+            <a href="events.html">SONGWARS</a>
         </li>
 
         <li>
@@ -62,21 +487,15 @@
         </li>
 
         <li>
-            <a href="submit.html">
-                SUBMIT
-            </a>
+            <a href="submit.html">SUBMIT</a>
         </li>
 
         <li>
-            <a href="about.html">
-                ABOUT
-            </a>
+            <a href="about.html">ABOUT</a>
         </li>
 
         <li>
-            <a href="contact.html">
-                CONTACT
-            </a>
+            <a href="contact.html">CONTACT</a>
         </li>
 
     </ul>
@@ -88,16 +507,16 @@
 
 
 <!-- =========================================
-     UPDATES HERO
+     HERO
 ========================================== -->
 
-<section class="page-hero">
+<section class="updates-hero">
 
     <p class="section-label">
         EXM LIVE
     </p>
 
-    <h1 class="section-title">
+    <h1>
         WHAT'S<br>
         HAPPENING. ✦
     </h1>
@@ -116,9 +535,9 @@
     </p>
 
 
-    <div class="live-badge">
+    <div class="updates-live">
 
-        <span class="live-dot"></span>
+        <span class="updates-live-dot"></span>
 
         EXM UPDATES ACTIVE
 
@@ -128,15 +547,10 @@
 
 
 <!-- =========================================
-     UPDATE CATEGORIES
+     FILTERS
 ========================================== -->
 
-<section class="section updates-category-section">
-
-    <p class="section-label">
-        FILTER THE FEED
-    </p>
-
+<section class="updates-filter-section">
 
     <div class="update-filters">
 
@@ -208,7 +622,7 @@
 
 
 <!-- =========================================
-     LATEST / FEATURED UPDATE
+     FEATURED UPDATE
 ========================================== -->
 
 <section class="section">
@@ -221,7 +635,6 @@
     <article
         class="featured-update update-post"
         data-category="merch">
-
 
         <div class="featured-update-meta">
 
@@ -250,8 +663,8 @@
 
             <br><br>
 
-            DROP 001 INTRODUCES THE
-            ORIGINAL EXM LOGO WAVE
+            DROP 001 INTRODUCES
+            THE ORIGINAL EXM LOGO WAVE
             THROUGH APPAREL,
             ACCESSORIES AND
             CREATOR GOODS.
@@ -261,20 +674,18 @@
 
         <div class="buttons">
 
-            <a
-                href="shop.html"
-                class="btn">
+            <a href="shop.html"
+               class="btn">
 
                 EXPLORE DROP 001
 
             </a>
 
 
-            <a
-                href="https://exclusivemembrs.printify.me/"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn btn-dark">
+            <a href="https://exclusivemembrs.printify.me/"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="btn btn-dark">
 
                 SHOP NOW
 
@@ -288,7 +699,7 @@
 
 
 <!-- =========================================
-     UPDATE FEED
+     UPDATE ARCHIVE
 ========================================== -->
 
 <section class="section">
@@ -308,9 +719,7 @@
         id="updatesFeed">
 
 
-        <!-- =================================
-             DROP 001
-        ================================== -->
+        <!-- DROP 001 -->
 
         <article
             class="update-item update-post"
@@ -337,15 +746,16 @@
                 <p>
 
                     EXCLUSIVEMEMBRS®
-                    OFFICIALLY ENTERS MERCH
-                    WITH DROP 001 —
+                    OFFICIALLY ENTERS
+                    PHYSICAL MERCH WITH
+                    DROP 001 —
                     THE FIRST WAVE.
 
                 </p>
 
-                <a
-                    href="shop.html"
-                    class="update-link">
+
+                <a href="shop.html"
+                   class="update-link">
 
                     VIEW DROP →
 
@@ -356,9 +766,7 @@
         </article>
 
 
-        <!-- =================================
-             SONGWARS REGISTRATION
-        ================================== -->
+        <!-- SONGWARS DUOS -->
 
         <article
             class="update-item update-post"
@@ -394,9 +802,9 @@
 
                 </p>
 
-                <a
-                    href="events.html"
-                    class="update-link">
+
+                <a href="events.html"
+                   class="update-link">
 
                     SONGWARS LIVE HUB →
 
@@ -407,9 +815,7 @@
         </article>
 
 
-        <!-- =================================
-             SONGWARS STAFF
-        ================================== -->
+        <!-- SONGWARS JUDGES -->
 
         <article
             class="update-item update-post"
@@ -430,7 +836,7 @@
                 </span>
 
                 <h3>
-                    SONGWARS III JUDGE PANEL.
+                    SONGWARS III JUDGES LOCKED.
                 </h3>
 
                 <p>
@@ -442,9 +848,9 @@
 
                 </p>
 
-                <a
-                    href="events.html"
-                    class="update-link">
+
+                <a href="events.html"
+                   class="update-link">
 
                     VIEW EVENT →
 
@@ -455,9 +861,7 @@
         </article>
 
 
-        <!-- =================================
-             SUBMISSIONS
-        ================================== -->
+        <!-- EXM SUBMISSIONS -->
 
         <article
             class="update-item update-post"
@@ -493,9 +897,9 @@
 
                 </p>
 
-                <a
-                    href="submit.html"
-                    class="update-link">
+
+                <a href="submit.html"
+                   class="update-link">
 
                     SUBMIT TO EXM →
 
@@ -506,9 +910,7 @@
         </article>
 
 
-        <!-- =================================
-             ROSTER
-        ================================== -->
+        <!-- ROSTER -->
 
         <article
             class="update-item update-post"
@@ -535,16 +937,16 @@
                 <p>
 
                     THE OFFICIAL EXM
-                    ROSTER HUB NOW CONNECTS
+                    ROSTER HUB CONNECTS
                     LISTENERS DIRECTLY
                     TO ARTIST MUSIC
                     AND SOCIAL PROFILES.
 
                 </p>
 
-                <a
-                    href="artists.html"
-                    class="update-link">
+
+                <a href="artists.html"
+                   class="update-link">
 
                     VIEW ROSTER →
 
@@ -558,10 +960,6 @@
     </div>
 
 
-    <!-- =====================================
-         EMPTY FILTER MESSAGE
-    ====================================== -->
-
     <div
         class="updates-empty"
         id="updatesEmpty">
@@ -574,7 +972,7 @@
 
 
 <!-- =========================================
-     SONGWARS FEATURE
+     CURRENT EVENT
 ========================================== -->
 
 <section class="section">
@@ -595,34 +993,29 @@
 
         <br><br>
 
-        THE NEXT SONGWARS BRINGS
-        24 ARTISTS TOGETHER
-        ACROSS 12 DUOS FOR
-        EXM'S NEXT LIVE
-        COMPETITION.
+        24 ARTISTS.
+        12 DUOS.
+        LIVE JUDGING.
+        ONE EVENT.
 
     </p>
 
 
-    <div class="registration-status">
+    <div class="updates-event-box">
 
-        <div class="registration-top">
-
-            <div>
-
-                <span class="registration-number">
-                    07
-                </span>
-
-                <span class="registration-total">
-                    / 12
-                </span>
-
-            </div>
+        <p class="section-label">
+            REGISTRATION STATUS
+        </p>
 
 
-            <span class="registration-open">
-                REGISTRATION OPEN
+        <div class="updates-event-number">
+
+            <strong>
+                07
+            </strong>
+
+            <span>
+                / 12 APPROVED
             </span>
 
         </div>
@@ -645,34 +1038,32 @@
             </span>
 
             <span>
-                5 SPOTS REMAIN
+                5 OPENING SPOTS REMAIN
             </span>
 
         </div>
 
-    </div>
+
+        <div class="buttons">
+
+            <a href="events.html"
+               class="btn">
+
+                LIVE EVENT HUB
+
+            </a>
 
 
-    <div class="buttons">
+            <a href="https://songwars-s3-registration.b26xkz4v97.chatgpt.site/"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="btn btn-dark">
 
-        <a
-            href="events.html"
-            class="btn">
+                REGISTER FOR S3
 
-            LIVE EVENT HUB
+            </a>
 
-        </a>
-
-
-        <a
-            href="https://songwars-s3-registration.b26xkz4v97.chatgpt.site/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-dark">
-
-            REGISTER
-
-        </a>
+        </div>
 
     </div>
 
@@ -680,13 +1071,13 @@
 
 
 <!-- =========================================
-     STAY CONNECTED
+     STAY TAPPED IN
 ========================================== -->
 
 <section class="section">
 
     <p class="section-label">
-        DON'T MISS THE NEXT ONE
+        EXM COMMUNITY
     </p>
 
     <h2 class="section-title">
@@ -698,14 +1089,13 @@
     <div class="grid">
 
 
-        <a
-            href="https://discord.gg/WguA7bAV39"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="card clickable-card">
+        <a href="https://discord.gg/WguA7bAV39"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="card clickable-card">
 
             <p class="card-number">
-                LIVE
+                01
             </p>
 
             <h3>
@@ -715,20 +1105,19 @@
             <p>
                 COMMUNITY,
                 ANNOUNCEMENTS
-                AND EXM EVENTS.
+                AND EVENTS.
             </p>
 
         </a>
 
 
-        <a
-            href="https://www.instagram.com/exclusivemembrs"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="card clickable-card">
+        <a href="https://www.instagram.com/exclusivemembrs"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="card clickable-card">
 
             <p class="card-number">
-                SOCIAL
+                02
             </p>
 
             <h3>
@@ -738,21 +1127,19 @@
             <p>
                 ROSTER,
                 SONGWARS,
-                DROPS AND
-                DAILY EXM CONTENT.
+                DROPS AND EXM CONTENT.
             </p>
 
         </a>
 
 
-        <a
-            href="https://www.tiktok.com/@exclusivemembrs"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="card clickable-card">
+        <a href="https://www.tiktok.com/@exclusivemembrs"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="card clickable-card">
 
             <p class="card-number">
-                CONTENT
+                03
             </p>
 
             <h3>
@@ -760,22 +1147,20 @@
             </h3>
 
             <p>
-                EXM MOMENTS,
-                CONTENT AND
-                COMMUNITY.
+                EXM CONTENT,
+                MOMENTS AND COMMUNITY.
             </p>
 
         </a>
 
 
-        <a
-            href="https://youtube.com/@exclusivememb"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="card clickable-card">
+        <a href="https://youtube.com/@exclusivememb"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="card clickable-card">
 
             <p class="card-number">
-                VIDEO
+                04
             </p>
 
             <h3>
@@ -817,8 +1202,11 @@
 
     <p>
 
-        THE WORLD GETS BIGGER
-        FROM HERE.
+        SONGWARS.
+        MUSIC.
+        DROPS.
+        EVENTS.
+        EXM.
 
         <br><br>
 
@@ -892,82 +1280,82 @@
 
 
 <!-- =========================================
-     UPDATE FILTER SYSTEM
+     FILTER SYSTEM
 ========================================== -->
 
 <script>
 
-const filterButtons =
-    document.querySelectorAll(".update-filter");
+    const filterButtons =
+        document.querySelectorAll(".update-filter");
 
-const updatePosts =
-    document.querySelectorAll(".update-post");
+    const updatePosts =
+        document.querySelectorAll(".update-post");
 
-const emptyMessage =
-    document.getElementById("updatesEmpty");
-
-
-filterButtons.forEach(button => {
-
-    button.addEventListener("click", () => {
-
-        const selected =
-            button.dataset.filter;
+    const emptyMessage =
+        document.getElementById("updatesEmpty");
 
 
-        filterButtons.forEach(btn => {
-            btn.classList.remove("active");
-        });
+    filterButtons.forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const selected =
+                button.dataset.filter;
 
 
-        button.classList.add("active");
+            filterButtons.forEach(btn => {
+                btn.classList.remove("active");
+            });
 
 
-        let visiblePosts = 0;
+            button.classList.add("active");
 
 
-        updatePosts.forEach(post => {
-
-            const category =
-                post.dataset.category;
+            let visiblePosts = 0;
 
 
-            if (
-                selected === "all" ||
-                category === selected
-            ) {
+            updatePosts.forEach(post => {
 
-                post.style.display = "";
-                visiblePosts++;
+                const category =
+                    post.dataset.category;
+
+
+                if (
+                    selected === "all" ||
+                    category === selected
+                ) {
+
+                    post.style.display = "";
+                    visiblePosts++;
+
+                }
+
+                else {
+
+                    post.style.display = "none";
+
+                }
+
+            });
+
+
+            if (visiblePosts === 0) {
+
+                emptyMessage.style.display =
+                    "block";
 
             }
 
             else {
 
-                post.style.display = "none";
+                emptyMessage.style.display =
+                    "none";
 
             }
 
         });
 
-
-        if (visiblePosts === 0) {
-
-            emptyMessage.style.display =
-                "block";
-
-        }
-
-        else {
-
-            emptyMessage.style.display =
-                "none";
-
-        }
-
     });
-
-});
 
 </script>
 
