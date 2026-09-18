@@ -36,9 +36,7 @@ a {
 .navbar {
     width: 100%;
     min-height: 76px;
-
     padding: 20px 5%;
-
     border-bottom: 1px solid #222;
 
     display: flex;
@@ -51,7 +49,6 @@ a {
 
 .brand {
     color: #fff;
-
     text-decoration: none;
 
     font-size: 14px;
@@ -74,7 +71,6 @@ a {
 
 .nav-links a {
     color: #777;
-
     text-decoration: none;
 
     font-size: 9px;
@@ -96,7 +92,6 @@ a {
 
 .hero {
     min-height: 88vh;
-
     padding: 90px 7%;
 
     display: flex;
@@ -109,23 +104,19 @@ a {
 
 .hero-logo-wrap {
     width: min(580px, 90%);
-
     margin-bottom: 30px;
 }
 
 .hero-logo {
     display: block;
-
     width: 100%;
     height: auto;
-
     object-fit: contain;
 }
 
 .hero-symbol,
 .final-symbol {
     margin: 15px 0;
-
     font-size: 26px;
 }
 
@@ -173,7 +164,6 @@ a {
 
 .page-hero {
     padding: 120px 7% 90px;
-
     border-bottom: 1px solid #181818;
 }
 
@@ -184,7 +174,6 @@ a {
 
 .section {
     padding: 110px 7%;
-
     border-bottom: 1px solid #181818;
 }
 
@@ -201,7 +190,6 @@ a {
 
 .exm-description {
     max-width: 700px;
-
     margin-top: 35px;
 
     color: #aaa;
@@ -268,7 +256,6 @@ a {
 
 .ticker {
     width: 100%;
-
     overflow: hidden;
 
     border-top: 1px solid #222;
@@ -279,7 +266,6 @@ a {
 
 .ticker-track {
     width: max-content;
-
     padding: 18px 0;
 
     font-size: 9px;
@@ -319,13 +305,11 @@ a {
 
 .card {
     min-height: 210px;
-
     padding: 28px;
 
     border: 1px solid #282828;
 
     background: #080808;
-
     color: #fff;
 
     text-decoration: none;
@@ -354,13 +338,11 @@ a {
 
 .clickable-card:hover {
     border-color: #fff;
-
     transform: translateY(-4px);
 }
 
 .card-number {
     color: #555;
-
     font-size: 9px;
 }
 
@@ -388,7 +370,6 @@ a {
     border: 1px solid #333;
 
     color: #aaa;
-
     text-decoration: none;
 
     font-size: 8px;
@@ -400,7 +381,6 @@ a {
 
 .artist-links a:hover {
     border-color: #fff;
-
     color: #fff;
 }
 
@@ -408,7 +388,6 @@ a {
     display: inline-block;
 
     margin-top: 20px;
-
     padding: 8px 10px;
 
     border: 1px solid #222;
@@ -429,7 +408,6 @@ a {
     max-width: 850px;
 
     margin-top: 50px;
-
     padding: 40px;
 
     border: 1px solid #282828;
@@ -486,7 +464,6 @@ a {
 
 .form-group textarea {
     min-height: 150px;
-
     resize: vertical;
 }
 
@@ -524,6 +501,377 @@ a {
 
     font-size: 8px;
     letter-spacing: 1.3px;
+}
+
+
+/* =========================================
+   SHOP — DROP 001 HERO
+========================================= */
+
+.shop-hero {
+    min-height: 92vh;
+
+    padding: 110px 7%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    border-bottom: 1px solid #181818;
+}
+
+.drop-number {
+    margin-top: 25px;
+
+    color: #fff;
+
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 7px;
+}
+
+.shop-hero h1 {
+    margin-top: 20px;
+
+    font-size: clamp(65px, 12vw, 165px);
+    line-height: .78;
+
+    letter-spacing: -7px;
+}
+
+.shop-hero-copy {
+    max-width: 680px;
+
+    margin-top: 40px;
+
+    color: #999;
+
+    font-size: 11px;
+    line-height: 1.9;
+    letter-spacing: 2px;
+}
+
+.drop-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    gap: 14px;
+
+    margin-top: 35px;
+
+    color: #555;
+
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.shop-hero-buttons {
+    justify-content: center;
+}
+
+
+/* =========================================
+   SHOP FEATURED PRODUCT
+========================================= */
+
+.featured-product {
+    position: relative;
+}
+
+.product-index,
+.shop-product-number {
+    color: #444;
+
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.featured-product-layout {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(350px, .8fr);
+
+    gap: 70px;
+
+    align-items: center;
+
+    margin-top: 40px;
+}
+
+.featured-product-info h2 {
+    margin-top: 15px;
+
+    font-size: clamp(50px, 8vw, 110px);
+    line-height: .83;
+
+    letter-spacing: -5px;
+}
+
+.product-price {
+    margin-top: 30px !important;
+
+    color: #fff !important;
+
+    font-size: 19px !important;
+    font-weight: 900;
+    letter-spacing: 1px !important;
+}
+
+.product-description {
+    max-width: 580px;
+
+    margin-top: 30px;
+
+    color: #888;
+
+    font-size: 10px;
+    line-height: 1.9;
+    letter-spacing: 1.4px;
+}
+
+.product-details {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-top: 30px;
+}
+
+.product-details span {
+    padding: 9px 11px;
+
+    border: 1px solid #282828;
+
+    color: #777;
+
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: 1.3px;
+}
+
+
+/* =========================================
+   PRODUCT VISUALS
+========================================= */
+
+.product-visual {
+    min-height: 330px;
+
+    border: 1px solid #222;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #181818 0%,
+            #090909 45%,
+            #050505 75%
+        );
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 18px;
+
+    overflow: hidden;
+
+    position: relative;
+}
+
+.product-visual::before {
+    content: "";
+
+    position: absolute;
+
+    width: 70%;
+    height: 1px;
+
+    background: #222;
+
+    transform: rotate(-35deg);
+}
+
+.product-visual::after {
+    content: "";
+
+    position: absolute;
+
+    width: 70%;
+    height: 1px;
+
+    background: #222;
+
+    transform: rotate(35deg);
+}
+
+.product-visual-hero {
+    min-height: 560px;
+}
+
+.product-symbol {
+    position: relative;
+    z-index: 2;
+
+    color: #e6e6e6;
+
+    font-size: clamp(80px, 12vw, 160px);
+    font-weight: 900;
+
+    letter-spacing: -12px;
+
+    text-shadow:
+        0 1px 0 #fff,
+        0 2px 0 #777,
+        0 4px 15px #000;
+}
+
+.product-symbol-small {
+    font-size: clamp(60px, 9vw, 110px);
+}
+
+.product-symbol-wide {
+    transform: skewX(-8deg);
+}
+
+.product-visual p,
+.product-visual span {
+    position: relative;
+    z-index: 2;
+
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 3px;
+}
+
+.product-visual span {
+    color: #555;
+}
+
+
+/* =========================================
+   SHOP PRODUCT GRID
+========================================= */
+
+.shop-product-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
+
+    margin-top: 50px;
+}
+
+.shop-product-card {
+    border: 1px solid #282828;
+
+    background: #080808;
+
+    padding: 16px;
+
+    transition: .25s ease;
+}
+
+.shop-product-card:hover {
+    border-color: #555;
+    transform: translateY(-3px);
+}
+
+.shop-product-number {
+    padding: 10px 8px 20px;
+}
+
+.shop-product-content {
+    padding: 30px 18px 25px;
+}
+
+.shop-product-content h3 {
+    margin-top: 15px;
+
+    font-size: clamp(28px, 4vw, 50px);
+    line-height: .9;
+
+    letter-spacing: -2px;
+}
+
+.shop-product-content > p:not(.section-label):not(.product-price) {
+    max-width: 450px;
+
+    margin-top: 22px;
+
+    color: #777;
+
+    font-size: 8px;
+    line-height: 1.8;
+    letter-spacing: 1.3px;
+}
+
+.product-link {
+    display: inline-block;
+
+    margin-top: 30px;
+    padding-bottom: 5px;
+
+    border-bottom: 1px solid #555;
+
+    color: #fff;
+
+    text-decoration: none;
+
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+
+    transition: .2s ease;
+}
+
+.product-link:hover {
+    border-color: #fff;
+}
+
+
+/* =========================================
+   DROP MANIFESTO
+========================================= */
+
+.drop-manifesto {
+    padding: 140px 7%;
+
+    border-bottom: 1px solid #181818;
+
+    text-align: center;
+}
+
+.drop-manifesto h2 {
+    margin-top: 20px;
+
+    font-size: clamp(55px, 10vw, 135px);
+    line-height: .78;
+
+    letter-spacing: -6px;
+}
+
+.drop-manifesto > p:not(.section-label) {
+    max-width: 650px;
+
+    margin: 45px auto 0;
+
+    color: #777;
+
+    font-size: 10px;
+    line-height: 2;
+    letter-spacing: 1.8px;
 }
 
 
@@ -577,7 +925,6 @@ a {
     gap: 8px;
 
     margin-top: 25px;
-
     padding: 9px 13px;
 
     border: 1px solid #333;
@@ -622,7 +969,6 @@ a {
     width: min(900px, 100%);
 
     margin-top: 55px;
-
     padding: 35px;
 
     border-top: 1px solid #333;
@@ -717,7 +1063,6 @@ a {
     max-width: 950px;
 
     margin-top: 50px;
-
     padding: 35px;
 
     border: 1px solid #282828;
@@ -895,7 +1240,6 @@ a {
 
 .duo-x {
     color: #444;
-
     font-size: 20px;
 }
 
@@ -927,7 +1271,6 @@ a {
 
 .locked-badge {
     margin-bottom: 10px;
-
     padding: 15px 18px;
 
     border: 1px solid #fff;
@@ -960,7 +1303,6 @@ a {
 
 .staff-number {
     color: #444;
-
     font-size: 8px;
 }
 
@@ -1090,7 +1432,6 @@ footer {
 
 .footer-logo {
     font-weight: 900;
-
     letter-spacing: 2px;
 }
 
@@ -1164,6 +1505,11 @@ footer {
             repeat(3, minmax(0, 1fr));
     }
 
+    .featured-product-layout {
+        grid-template-columns: 1fr;
+        gap: 45px;
+    }
+
 }
 
 
@@ -1173,7 +1519,8 @@ footer {
 
 @media (max-width: 800px) {
 
-    .songwars-hero h1 {
+    .songwars-hero h1,
+    .shop-hero h1 {
         letter-spacing: -4px;
     }
 
@@ -1185,7 +1532,8 @@ footer {
         min-width: 80px;
     }
 
-    .duo-grid {
+    .duo-grid,
+    .shop-product-grid {
         grid-template-columns: 1fr;
     }
 
@@ -1222,7 +1570,6 @@ footer {
 
     .hero {
         min-height: 78vh;
-
         padding: 70px 20px;
     }
 
@@ -1257,7 +1604,6 @@ footer {
 
     .btn {
         width: 100%;
-
         text-align: center;
     }
 
@@ -1267,23 +1613,62 @@ footer {
     }
 
 
+    /* SHOP MOBILE */
+
+    .shop-hero {
+        min-height: auto;
+        padding: 90px 20px;
+    }
+
+    .shop-hero h1 {
+        font-size: clamp(55px, 20vw, 90px);
+        letter-spacing: -4px;
+    }
+
+    .shop-hero-copy {
+        font-size: 9px;
+    }
+
+    .drop-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .featured-product-info h2 {
+        letter-spacing: -3px;
+    }
+
+    .product-visual-hero {
+        min-height: 390px;
+    }
+
+    .product-symbol {
+        letter-spacing: -7px;
+    }
+
+    .drop-manifesto {
+        padding: 100px 20px;
+    }
+
+    .drop-manifesto h2 {
+        letter-spacing: -3px;
+    }
+
+
     /* SONGWARS MOBILE */
 
     .songwars-hero {
         min-height: auto;
-
         padding: 80px 20px;
     }
 
     .songwars-hero h1 {
         font-size: clamp(55px, 21vw, 90px);
-
         letter-spacing: -4px;
     }
 
     .countdown-wrap {
         margin-top: 45px;
-
         padding: 28px 5px;
     }
 
@@ -1297,7 +1682,6 @@ footer {
 
     .countdown-unit span {
         font-size: 37px;
-
         letter-spacing: -2px;
     }
 
@@ -1321,20 +1705,17 @@ footer {
 
     .registration-bottom {
         flex-direction: column;
-
         gap: 8px;
     }
 
 
     .duo-card {
         min-height: auto;
-
         padding: 24px 20px;
     }
 
     .duo-members {
         grid-template-columns: 1fr;
-
         gap: 15px;
     }
 
@@ -1361,7 +1742,6 @@ footer {
 
     .update-item {
         grid-template-columns: 1fr;
-
         gap: 12px;
     }
 
