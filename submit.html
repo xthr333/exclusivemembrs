@@ -2,17 +2,21 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
     <meta name="description"
-          content="Submit your music, content, work or talent to ExclusiveMembrs. Let the work talk.">
+          content="Submit your music, content, work or talent to ExclusiveMembrs.">
 
-    <title>Submit — EXCLUSIVEMEMBRS ✦</title>
+    <title>
+        Submit — EXCLUSIVEMEMBRS ✦
+    </title>
 
     <link rel="stylesheet" href="style.css">
+
 </head>
 
 
@@ -26,19 +30,13 @@
     </a>
 
     <ul class="nav-links">
-
         <li><a href="index.html">HOME</a></li>
-
         <li><a href="artists.html">ARTISTS</a></li>
-
         <li><a href="shop.html">SHOP</a></li>
-
         <li><a href="events.html">SONGWARS</a></li>
-
-        <li><a href="submit.html">SUBMIT</a></li>
-
+        <li><a class="active" href="submit.html">SUBMIT</a></li>
         <li><a href="about.html">ABOUT</a></li>
-
+        <li><a href="contact.html">CONTACT</a></li>
     </ul>
 
 </nav>
@@ -47,17 +45,14 @@
 <main>
 
 
-<!-- HERO -->
-
-<section class="section submit-hero">
+<section class="page-hero">
 
     <p class="section-label">
         EXM SUBMISSIONS
     </p>
 
     <h1 class="section-title">
-        LET THE<br>
-        WORK TALK. ✦
+        LET THE<br>WORK TALK. ✦
     </h1>
 
     <p class="exm-description">
@@ -81,30 +76,17 @@
 </section>
 
 
-<!-- TICKER -->
-
 <div class="ticker">
 
     <div class="ticker-track">
 
-        GET ON OUR RADAR ✦
-        SUBMIT YOUR WORK ✦
-        LET THE WORK TALK ✦
-        EXCLUSIVEMEMBRS ✦
-        NOT A POPULARITY CONTEST ✦
-
-        GET ON OUR RADAR ✦
-        SUBMIT YOUR WORK ✦
-        LET THE WORK TALK ✦
-        EXCLUSIVEMEMBRS ✦
-        NOT A POPULARITY CONTEST ✦
+        GET ON OUR RADAR ✦ SUBMIT YOUR WORK ✦ LET THE WORK TALK ✦ EXCLUSIVEMEMBRS ✦
+        GET ON OUR RADAR ✦ SUBMIT YOUR WORK ✦ LET THE WORK TALK ✦ EXCLUSIVEMEMBRS ✦
 
     </div>
 
 </div>
 
-
-<!-- EXPLANATION -->
 
 <section class="section">
 
@@ -113,14 +95,12 @@
     </p>
 
     <h2 class="section-title">
-        SHOW US<br>
-        WHAT YOU DO. ✦
+        SHOW US<br>WHAT YOU DO. ✦
     </h2>
 
     <p class="exm-description">
 
-        THIS ISN'T JUST AN
-        "APPLICATION."
+        THIS ISN'T JUST AN APPLICATION.
 
         <br><br>
 
@@ -139,8 +119,6 @@
 </section>
 
 
-<!-- FORM -->
-
 <section class="section">
 
     <p class="section-label">
@@ -148,28 +126,21 @@
     </p>
 
     <h2 class="section-title">
-        YOUR<br>
-        MOVE. ✦
+        YOUR<br>MOVE. ✦
     </h2>
 
 
     <form
         action="https://formspree.io/f/xaennara"
         method="POST"
-        class="exm-form"
-    >
+        class="exm-form">
 
-
-        <!-- SUBJECT -->
 
         <input
             type="hidden"
             name="_subject"
-            value="New EXM Submission"
-        >
+            value="New EXM Submission">
 
-
-        <!-- NAME -->
 
         <div class="form-group">
 
@@ -178,17 +149,14 @@
             </label>
 
             <input
-                type="text"
                 id="name"
+                type="text"
                 name="Name"
                 placeholder="YOUR NAME"
-                required
-            >
+                required>
 
         </div>
 
-
-        <!-- EMAIL -->
 
         <div class="form-group">
 
@@ -197,17 +165,14 @@
             </label>
 
             <input
-                type="email"
                 id="email"
+                type="email"
                 name="email"
                 placeholder="YOUR EMAIL"
-                required
-            >
+                required>
 
         </div>
 
-
-        <!-- PHONE -->
 
         <div class="form-group">
 
@@ -216,16 +181,13 @@
             </label>
 
             <input
-                type="tel"
                 id="phone"
+                type="tel"
                 name="Phone"
-                placeholder="OPTIONAL"
-            >
+                placeholder="OPTIONAL">
 
         </div>
 
-
-        <!-- CATEGORY -->
 
         <div class="form-group">
 
@@ -236,51 +198,25 @@
             <select
                 id="category"
                 name="Category"
-                required
-            >
+                required>
 
                 <option value="">
                     SELECT ONE
                 </option>
 
-                <option value="Artist">
-                    ARTIST
-                </option>
-
-                <option value="Producer">
-                    PRODUCER
-                </option>
-
-                <option value="Content Creator">
-                    CONTENT CREATOR
-                </option>
-
-                <option value="Photographer">
-                    PHOTOGRAPHER
-                </option>
-
-                <option value="Videographer">
-                    VIDEOGRAPHER
-                </option>
-
-                <option value="Designer">
-                    DESIGNER
-                </option>
-
-                <option value="Athlete">
-                    ATHLETE
-                </option>
-
-                <option value="Other">
-                    OTHER
-                </option>
+                <option>ARTIST</option>
+                <option>PRODUCER</option>
+                <option>CONTENT CREATOR</option>
+                <option>PHOTOGRAPHER</option>
+                <option>VIDEOGRAPHER</option>
+                <option>DESIGNER</option>
+                <option>ATHLETE</option>
+                <option>OTHER</option>
 
             </select>
 
         </div>
 
-
-        <!-- INSTAGRAM -->
 
         <div class="form-group">
 
@@ -289,17 +225,14 @@
             </label>
 
             <input
-                type="text"
                 id="instagram"
+                type="text"
                 name="Instagram"
                 placeholder="@USERNAME OR PROFILE LINK"
-                required
-            >
+                required>
 
         </div>
 
-
-        <!-- DISCORD -->
 
         <div class="form-group">
 
@@ -308,16 +241,13 @@
             </label>
 
             <input
-                type="text"
                 id="discord"
+                type="text"
                 name="Discord"
-                placeholder="USERNAME — OPTIONAL"
-            >
+                placeholder="OPTIONAL">
 
         </div>
 
-
-        <!-- WORK LINK -->
 
         <div class="form-group">
 
@@ -326,17 +256,14 @@
             </label>
 
             <input
-                type="url"
                 id="work"
+                type="url"
                 name="Work Link"
                 placeholder="SPOTIFY / YOUTUBE / PORTFOLIO / DRIVE / SOCIAL LINK"
-                required
-            >
+                required>
 
         </div>
 
-
-        <!-- INTEREST -->
 
         <div class="form-group">
 
@@ -346,22 +273,21 @@
 
             <select
                 id="interest"
-                name="EXM Interest"
-            >
+                name="EXM Interest">
 
                 <option value="Letting the work talk">
                     JUST LETTING THE WORK TALK
                 </option>
 
-                <option value="Interested in joining EXM">
-                    INTERESTED IN JOINING EXM
+                <option value="Interested in EXM">
+                    INTERESTED IN EXM
                 </option>
 
                 <option value="Collaboration">
                     COLLABORATION
                 </option>
 
-                <option value="Opportunities">
+                <option value="Future opportunities">
                     FUTURE OPPORTUNITIES
                 </option>
 
@@ -374,8 +300,6 @@
         </div>
 
 
-        <!-- MESSAGE -->
-
         <div class="form-group">
 
             <label for="message">
@@ -385,42 +309,33 @@
             <textarea
                 id="message"
                 name="Message"
-                rows="6"
-                placeholder="TELL US ABOUT YOURSELF, YOUR WORK, OR WHY EXM SHOULD KNOW YOUR NAME."
-            ></textarea>
+                placeholder="TELL US ABOUT YOURSELF, YOUR WORK, OR WHY EXM SHOULD KNOW YOUR NAME."></textarea>
 
         </div>
 
 
-        <!-- CONSENT -->
-
         <div class="form-check">
 
             <input
+                id="submission-permission"
                 type="checkbox"
-                id="contactPermission"
                 name="Contact Permission"
                 value="Yes"
-                required
-            >
+                required>
 
-            <label for="contactPermission">
+            <label for="submission-permission">
 
                 I AGREE THAT EXCLUSIVEMEMBRS
-                MAY CONTACT ME ABOUT THIS
-                SUBMISSION.
+                MAY CONTACT ME ABOUT THIS SUBMISSION.
 
             </label>
 
         </div>
 
 
-        <!-- SUBMIT -->
-
         <button
             type="submit"
-            class="btn form-submit"
-        >
+            class="btn form-submit">
 
             SEND TO EXM ✦
 
@@ -440,59 +355,16 @@
 </section>
 
 
-<!-- COMMUNITY -->
-
-<section class="section">
-
-    <p class="section-label">
-        WHILE YOU'RE HERE
-    </p>
-
-    <h2 class="section-title">
-        ENTER THE<br>
-        COMMUNITY. ✦
-    </h2>
-
-    <div class="buttons">
-
-        <a
-            href="https://discord.gg/WguA7bAV39"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn"
-        >
-            JOIN DISCORD
-        </a>
-
-        <a
-            href="https://www.instagram.com/exclusivemembrs/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-dark"
-        >
-            FOLLOW EXM
-        </a>
-
-    </div>
-
-</section>
-
-
-<!-- END -->
-
 <section class="final-section">
 
-    <div class="final-symbol">
-        ✦
-    </div>
+    <div class="final-symbol">✦</div>
 
     <p class="section-label">
         EXCLUSIVEMEMBRS
     </p>
 
     <h2>
-        GET ON<br>
-        OUR RADAR.
+        GET ON<br>OUR RADAR.
     </h2>
 
     <p>
@@ -500,7 +372,6 @@
     </p>
 
 </section>
-
 
 </main>
 
@@ -516,47 +387,13 @@
     </p>
 
     <div class="footer-links">
-
         <a href="index.html">HOME</a>
-
         <a href="artists.html">ARTISTS</a>
-
         <a href="shop.html">SHOP</a>
-
         <a href="events.html">SONGWARS</a>
-
         <a href="submit.html">SUBMIT</a>
-
         <a href="about.html">ABOUT</a>
-
-        <a
-            href="https://www.instagram.com/exclusivemembrs/"
-            target="_blank"
-        >
-            INSTAGRAM
-        </a>
-
-        <a
-            href="https://discord.gg/WguA7bAV39"
-            target="_blank"
-        >
-            DISCORD
-        </a>
-
-        <a
-            href="https://www.tiktok.com/@exclusivemembrs"
-            target="_blank"
-        >
-            TIKTOK
-        </a>
-
-        <a
-            href="https://youtube.com/@exclusivememb"
-            target="_blank"
-        >
-            YOUTUBE
-        </a>
-
+        <a href="contact.html">CONTACT</a>
     </div>
 
     <p class="copyright">
@@ -564,7 +401,6 @@
     </p>
 
 </footer>
-
 
 </body>
 </html>
