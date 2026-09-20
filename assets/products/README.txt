@@ -1,1 +1,0 @@
-Official Drop 001 product images are staged from the user-provided redesign package. Do not substitute unverified imagery.
