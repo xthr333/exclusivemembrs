@@ -1,132 +1,21 @@
 (() => {
-  const cfg = window.EXM_CONFIG || {};
-  const $ = (s, p=document) => p.querySelector(s);
-  const $$ = (s, p=document) => [...p.querySelectorAll(s)];
+  const cfg=window.EXM_CONFIG||{},$=(s,p=document)=>p.querySelector(s),$$=(s,p=document)=>[...p.querySelectorAll(s)];
+  const reducedMotion=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const boot=$("#exmBoot"),skip=$("#bootSkip"),sound=$("#soundToggle");
+  if(boot){let released=false,ctx=null,soundOn=false;const release=()=>{if(released)return;released=true;boot.classList.add("boot-release");setTimeout(()=>{boot.remove();try{localStorage.setItem("exmBootComplete","1");}catch(e){}},reducedMotion?120:420);};let seen=false;try{seen=localStorage.getItem("exmBootComplete")==="1";}catch(e){}if(seen){boot.remove();}else{setTimeout(()=>skip?.classList.add("visible"),1000);const normal=setTimeout(release,reducedMotion?500:2800),emergency=setTimeout(release,3200);skip?.addEventListener("click",()=>{clearTimeout(normal);clearTimeout(emergency);release();});sound?.addEventListener("click",()=>{soundOn=!soundOn;sound.setAttribute("aria-pressed",String(soundOn));sound.textContent=`SOUND: ${soundOn?"ON":"OFF"}`;if(soundOn){try{ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=92;g.gain.setValueAtTime(.025,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.09);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.1);}catch(e){}}});}}
+  const toggle=$(".nav-toggle"),links=$(".nav-links"),more=$(".nav-more"),moreToggle=$(".nav-more-toggle");const closeMore=()=>{more?.classList.remove("open");moreToggle?.setAttribute("aria-expanded","false");},closeNav=()=>{links?.classList.remove("open");toggle?.setAttribute("aria-expanded","false");closeMore();};if(toggle&&links){toggle.addEventListener("click",e=>{e.stopPropagation();const open=links.classList.toggle("open");toggle.setAttribute("aria-expanded",String(open));if(!open)closeMore();});links.addEventListener("click",e=>{if(e.target.closest("a"))closeNav();});}if(more&&moreToggle)moreToggle.addEventListener("click",e=>{e.stopPropagation();const open=more.classList.toggle("open");moreToggle.setAttribute("aria-expanded",String(open));});document.addEventListener("click",e=>{if(links&&!links.contains(e.target)&&e.target!==toggle)closeNav();});document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeNav();toggle?.focus();}});
+  const page=(location.pathname.split("/").pop()||"index.html").toLowerCase();$$(".nav-links a[data-page]").forEach(a=>{if(a.dataset.page===page){a.classList.add("active");a.setAttribute("aria-current","page");if(a.closest(".nav-more"))moreToggle?.classList.add("active");}});
+  const reveal=reducedMotion?null:new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("is-visible");reveal.unobserve(e.target);}}),{threshold:.08});$$(".reveal").forEach(el=>reducedMotion?el.classList.add("is-visible"):reveal.observe(el));
+  window.getEXMClient=()=>{if(!window.supabase||!cfg.SUPABASE_URL||!cfg.SUPABASE_PUBLISHABLE_KEY)return null;if(!window.__EXM_DB__)window.__EXM_DB__=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY);return window.__EXM_DB__;};
+  const safeUrl=url=>{if(!url)return"";const v=String(url).trim();return/^(https?:\/\/|mailto:|#|[a-z0-9_-]+\.html(?:[?#].*)?$)/i.test(v)?v:"";};
+  const normalizeUpdate=u=>({id:String(u.id||u.created_at||u.date||"update"),created_at:u.created_at||u.date||"",category:u.category||"EXM",headline:u.headline||"EXM UPDATE",description:u.description||"",link_text:u.link_text||u.linkText||"OPEN",link_url:u.link_url||u.link||"",featured:Boolean(u.featured)});
+  const updateCard=raw=>{const u=normalizeUpdate(raw),article=document.createElement("article");article.className="transmission-card reveal";if(u.featured)article.classList.add("featured");const meta=document.createElement("div");meta.className="transmission-meta";meta.textContent=`${String(u.category).toUpperCase()} // ${u.featured?"FEATURED":"TRANSMISSION"}`;const h=document.createElement("h3");h.textContent=u.headline;const p=document.createElement("p");p.textContent=u.description;article.append(meta,h,p);const href=safeUrl(u.link_url);if(href){const a=document.createElement("a");a.className="text-link";a.href=href;a.textContent=`${u.link_text} ↗`;if(/^https?:\/\//i.test(href)){a.target="_blank";a.rel="noopener noreferrer";}article.appendChild(a);}return article;};
+  const renderUpdates=(target,data,label="")=>{target.innerHTML="";if(label){const note=document.createElement("div");note.className="system-message sync-label";note.textContent=label;target.appendChild(note);}if(!data.length){const empty=document.createElement("div");empty.className="system-message";empty.textContent="NO PUBLISHED TRANSMISSIONS YET.";target.appendChild(empty);return;}data.forEach(u=>target.appendChild(updateCard(u)));$$(".reveal",target).forEach(el=>reducedMotion?el.classList.add("is-visible"):reveal.observe(el));};
+  const loadFallback=async limit=>{try{const r=await fetch("updates.json",{cache:"no-store"});if(!r.ok)throw new Error(`HTTP ${r.status}`);const j=await r.json(),list=Array.isArray(j)?j:(j.updates||[]);return(limit?list.slice(0,limit):list).map(normalizeUpdate);}catch(e){console.warn("EXM synced fallback unavailable",e);return[];}};
+  window.loadEXMUpdates=async(targetId,limit=0)=>{const target=document.getElementById(targetId);if(!target)return;target.innerHTML='<div class="system-message">CONNECTING…</div>';const db=window.getEXMClient();try{if(!db)throw new Error("Public database client unavailable");let q=db.from("exm_updates").select("id,created_at,category,headline,description,link_text,link_url,featured,published").eq("published",true).order("featured",{ascending:false}).order("created_at",{ascending:false});if(limit)q=q.limit(limit);const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error("Public updates request timed out")),3500));const result=await Promise.race([q,timeout]);if(result.error)throw result.error;renderUpdates(target,(result.data||[]).map(normalizeUpdate));}catch(e){console.warn("EXM live transmissions unavailable; using last synced copy",e);renderUpdates(target,await loadFallback(limit),"LAST SYNCED TRANSMISSIONS");}};
 
-  // Shared mobile nav
-  const toggle = $(".nav-toggle");
-  const links = $(".nav-links");
-  if (toggle && links) {
-    toggle.addEventListener("click", () => {
-      const open = links.classList.toggle("open");
-      toggle.setAttribute("aria-expanded", String(open));
-    });
-  }
-
-  // Active nav item
-  const page = (location.pathname.split("/").pop() || "index.html").toLowerCase();
-  $$(".nav-links a[data-page]").forEach(a => {
-    if (a.dataset.page === page) a.classList.add("active");
-  });
-
-  // Reveal animation
-  const reveal = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add("is-visible");
-        reveal.unobserve(e.target);
-      }
-    });
-  }, { threshold: .08 });
-  $$(".reveal").forEach(el => reveal.observe(el));
-
-  // Supabase public client
-  window.getEXMClient = () => {
-    if (!window.supabase || !cfg.SUPABASE_URL || !cfg.SUPABASE_PUBLISHABLE_KEY) return null;
-    if (!window.__EXM_DB__) {
-      window.__EXM_DB__ = window.supabase.createClient(
-        cfg.SUPABASE_URL,
-        cfg.SUPABASE_PUBLISHABLE_KEY
-      );
-    }
-    return window.__EXM_DB__;
-  };
-
-  const safeUrl = (url) => {
-    if (!url) return "";
-    const v = String(url).trim();
-    if (/^(https?:\/\/|mailto:|#|[a-z0-9_-]+\.html(?:[?#].*)?$)/i.test(v)) return v;
-    return "";
-  };
-
-  const updateCard = (u) => {
-    const article = document.createElement("article");
-    article.className = "transmission-card reveal";
-    if (u.featured) article.classList.add("featured");
-
-    const meta = document.createElement("div");
-    meta.className = "transmission-meta";
-    meta.textContent = `${String(u.category || "EXM").toUpperCase()} // ${u.featured ? "FEATURED" : "TRANSMISSION"}`;
-
-    const h = document.createElement("h3");
-    h.textContent = u.headline || "EXM UPDATE";
-
-    const p = document.createElement("p");
-    p.textContent = u.description || "";
-
-    article.append(meta, h, p);
-
-    const href = safeUrl(u.link_url);
-    if (href) {
-      const a = document.createElement("a");
-      a.className = "text-link";
-      a.href = href;
-      a.textContent = `${u.link_text || "OPEN"} ↗`;
-      if (/^https?:\/\//i.test(href)) {
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-      }
-      article.appendChild(a);
-    }
-    return article;
-  };
-
-  window.loadEXMUpdates = async (targetId, limit=0) => {
-    const target = document.getElementById(targetId);
-    if (!target) return;
-    const db = window.getEXMClient();
-    if (!db) {
-      target.innerHTML = '<div class="system-message">EXM://DATABASE OFFLINE</div>';
-      return;
-    }
-
-    let q = db.from("exm_updates")
-      .select("id,created_at,category,headline,description,link_text,link_url,featured,published")
-      .eq("published", true)
-      .order("featured", { ascending: false })
-      .order("created_at", { ascending: false });
-
-    if (limit) q = q.limit(limit);
-    const { data, error } = await q;
-
-    target.innerHTML = "";
-    if (error) {
-      console.error(error);
-      target.innerHTML = '<div class="system-message">EXM://TRANSMISSION ERROR</div>';
-      return;
-    }
-    if (!data?.length) {
-      target.innerHTML = '<div class="system-message">NO ACTIVE TRANSMISSIONS.</div>';
-      return;
-    }
-    data.forEach(u => target.appendChild(updateCard(u)));
-    $$(".reveal", target).forEach(el => reveal.observe(el));
-  };
-
-  // SongWars countdown: Nov 21, 2026 8:00 PM ET (UTC-5 in November)
-  const countdown = $("#songwarsCountdown");
-  if (countdown) {
-    const target = new Date("2026-11-21T20:00:00-05:00").getTime();
-    const tick = () => {
-      let d = Math.max(0, target - Date.now());
-      const days = Math.floor(d / 86400000); d %= 86400000;
-      const hrs = Math.floor(d / 3600000); d %= 3600000;
-      const mins = Math.floor(d / 60000); d %= 60000;
-      const secs = Math.floor(d / 1000);
-      const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = String(v).padStart(2,"0"); };
-      set("cdDays", days); set("cdHours", hrs); set("cdMinutes", mins); set("cdSeconds", secs);
-      if (target <= Date.now()) countdown.classList.add("live-now");
-    };
-    tick(); setInterval(tick, 1000);
-  }
+  const showLatestNotice=u=>{u=normalizeUpdate(u);if(!u.id||!u.headline)return;const key=`exmDismissedUpdate:${u.id}`;try{if(localStorage.getItem(key)==="1")return;}catch(e){}const n=document.createElement("aside");n.className="update-notice";n.setAttribute("role","status");n.setAttribute("aria-label","Latest EXM update");const copy=document.createElement("div");copy.className="update-notice-copy";const meta=document.createElement("span");meta.className="update-notice-meta";meta.textContent=`LATEST // ${String(u.category).toUpperCase()}`;const h=document.createElement("strong");h.textContent=u.headline;const p=document.createElement("p");p.textContent=u.description;copy.append(meta,h,p);const href=safeUrl(u.link_url);if(href){const a=document.createElement("a");a.href=href;a.textContent=`${u.link_text} ↗`;if(/^https?:\/\//i.test(href)){a.target="_blank";a.rel="noopener noreferrer";}copy.appendChild(a);}const x=document.createElement("button");x.type="button";x.className="update-notice-close";x.setAttribute("aria-label","Dismiss this update");x.textContent="×";n.append(copy,x);document.body.appendChild(n);requestAnimationFrame(()=>n.classList.add("show"));const dismiss=()=>{try{localStorage.setItem(key,"1");}catch(e){}n.classList.remove("show");setTimeout(()=>n.remove(),250);};x.addEventListener("click",dismiss);let startX=null,startY=null;n.addEventListener("touchstart",e=>{const t=e.touches[0];startX=t.clientX;startY=t.clientY;},{passive:true});n.addEventListener("touchend",e=>{if(startX===null)return;const t=e.changedTouches[0],dx=t.clientX-startX,dy=t.clientY-startY;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy))dismiss();startX=startY=null;},{passive:true});};
+  window.loadLatestEXMNotice=async()=>{const db=window.getEXMClient();try{if(!db)throw new Error("Public database client unavailable");const q=db.from("exm_updates").select("id,created_at,category,headline,description,link_text,link_url,featured,published").eq("published",true).order("created_at",{ascending:false}).limit(1);const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error("Latest update request timed out")),3500));const result=await Promise.race([q,timeout]);if(result.error)throw result.error;if(result.data?.[0])showLatestNotice(result.data[0]);}catch(e){const fallback=await loadFallback(1);if(fallback[0])showLatestNotice(fallback[0]);}};
+  window.addEventListener("DOMContentLoaded",()=>window.loadLatestEXMNotice());
+  const countdown=$("#songwarsCountdown");if(countdown){const target=new Date("2026-11-21T20:00:00-05:00").getTime();const tick=()=>{let d=Math.max(0,target-Date.now());const days=Math.floor(d/86400000);d%=86400000;const hrs=Math.floor(d/3600000);d%=3600000;const mins=Math.floor(d/60000);d%=60000;const secs=Math.floor(d/1000);const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=String(v).padStart(2,"0");};set("cdDays",days);set("cdHours",hrs);set("cdMinutes",mins);set("cdSeconds",secs);if(target<=Date.now())countdown.classList.add("live-now");};tick();setInterval(tick,1000);}
 })();
