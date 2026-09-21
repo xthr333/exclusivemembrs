@@ -5,79 +5,15 @@
 <a class="brand" href="index.html">EXCLUSIVEMEMBRS ✦</a>
 <button class="nav-toggle" aria-expanded="false" aria-label="Toggle navigation">MENU //</button>
 <ul class="nav-links">
-<li><a data-page="index.html" href="index.html">HOME</a></li>
-<li><a data-page="artists.html" href="artists.html">ARTISTS</a></li>
-<li><a data-page="shop.html" href="shop.html">SHOP</a></li>
-<li><a data-page="events.html" href="events.html">SONGWARS</a></li>
-<li><a data-page="updates.html" href="updates.html">UPDATES</a></li>
-<li><a data-page="submit.html" href="submit.html">SUBMIT</a></li>
-<li><a data-page="about.html" href="about.html">ABOUT</a></li>
-<li><a data-page="contact.html" href="contact.html">CONTACT</a></li>
+<li><a data-page="index.html" href="index.html">HOME</a></li><li><a data-page="artists.html" href="artists.html">ARTISTS</a></li><li><a data-page="shop.html" href="shop.html">SHOP</a></li><li><a data-page="events.html" href="events.html">SONGWARS</a></li><li><a data-page="updates.html" href="updates.html">UPDATES</a></li><li><a data-page="submit.html" href="submit.html">SUBMIT</a></li><li><a data-page="about.html" href="about.html">ABOUT</a></li><li><a data-page="contact.html" href="contact.html">CONTACT</a></li>
 </ul></nav><main class="admin-shell">
 <section class="page-hero" style="padding-left:0;padding-right:0"><p class="eyebrow">PRIVATE CONTROL NODE</p><h1>OWNER<br>CONTROL.</h1></section>
-
-<section id="loginPanel" class="admin-panel">
-<p class="section-label">OWNER LOGIN</p>
-<form id="loginForm" class="form-shell">
-<div class="field"><label>EMAIL</label><input id="loginEmail" type="email" autocomplete="username" required></div>
-<div class="field"><label>PASSWORD</label><input id="loginPassword" type="password" autocomplete="current-password" required></div>
-<button class="btn" type="submit">LOGIN</button>
-<p id="loginMessage" class="section-copy"></p>
-</form></section>
-
-<section id="controlPanel" class="hidden">
-<div class="admin-panel"><p class="section-label">SYSTEM STATUS</p><h2 style="margin-top:12px">LIVE UPDATES // NEW TRANSMISSION</h2>
-<form id="updateForm" class="form-shell">
-<input id="editId" type="hidden">
-<div class="field"><label>CATEGORY</label><input id="category" maxlength="60" required placeholder="MERCH / SONGWARS / ROSTER"></div>
-<div class="field"><label>HEADLINE</label><input id="headline" maxlength="140" required></div>
-<div class="field"><label>DESCRIPTION</label><textarea id="description" maxlength="1500" required></textarea></div>
-<div class="field"><label>BUTTON TEXT</label><input id="linkText" maxlength="80"></div>
-<div class="field"><label>BUTTON LINK</label><input id="linkUrl" maxlength="500" placeholder="shop.html or https://..."></div>
-<div class="field"><label><input id="featured" type="checkbox"> FEATURED</label></div>
-<div class="field"><label><input id="published" type="checkbox" checked> PUBLISHED</label></div>
-<div class="buttons"><button class="btn" type="submit">SAVE TRANSMISSION</button><button id="cancelEdit" class="btn btn-dark" type="button">CLEAR</button></div>
-<p id="adminMessage" class="section-copy"></p>
-</form></div>
-<div class="admin-panel"><div class="buttons" style="justify-content:space-between"><p class="section-label">PUBLISHED / DRAFT TRANSMISSIONS</p><button id="logoutBtn" class="mini-btn" type="button">LOG OUT</button></div><div id="adminList" class="admin-list"></div></div>
-</section></main>
-<script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="script.js"></script>
-<script>
-const db = getEXMClient();
-const loginPanel=document.getElementById("loginPanel"), controlPanel=document.getElementById("controlPanel");
-const msg=document.getElementById("adminMessage"), loginMsg=document.getElementById("loginMessage");
-const form=document.getElementById("updateForm");
-
-function setLoggedIn(on){loginPanel.classList.toggle("hidden",on);controlPanel.classList.toggle("hidden",!on);if(on) loadAdmin();}
-async function refreshSession(){const {data}=await db.auth.getSession();setLoggedIn(!!data.session);}
-document.getElementById("loginForm").addEventListener("submit",async e=>{e.preventDefault();loginMsg.textContent="AUTHENTICATING...";
-const {error}=await db.auth.signInWithPassword({email:document.getElementById("loginEmail").value.trim(),password:document.getElementById("loginPassword").value});
-if(error) loginMsg.textContent=error.message; else {loginMsg.textContent="";setLoggedIn(true);}});
-document.getElementById("logoutBtn").onclick=async()=>{await db.auth.signOut();setLoggedIn(false);};
-function clearForm(){form.reset();document.getElementById("editId").value="";document.getElementById("published").checked=true;msg.textContent="";}
-document.getElementById("cancelEdit").onclick=clearForm;
-
-form.addEventListener("submit",async e=>{e.preventDefault();msg.textContent="SAVING...";
-const id=document.getElementById("editId").value;
-const payload={category:document.getElementById("category").value.trim(),headline:document.getElementById("headline").value.trim(),description:document.getElementById("description").value.trim(),link_text:document.getElementById("linkText").value.trim()||null,link_url:document.getElementById("linkUrl").value.trim()||null,featured:document.getElementById("featured").checked,published:document.getElementById("published").checked};
-let result=id?await db.from("exm_updates").update(payload).eq("id",id):await db.from("exm_updates").insert(payload);
-if(result.error) msg.textContent=result.error.message; else {msg.textContent="TRANSMISSION SAVED.";clearForm();await loadAdmin();}});
-
-async function loadAdmin(){const list=document.getElementById("adminList");list.innerHTML='<div class="system-message">LOADING...</div>';
-const {data,error}=await db.from("exm_updates").select("*").order("created_at",{ascending:false});
-if(error){list.innerHTML='<div class="system-message">'+error.message+'</div>';return;}
-list.innerHTML="";(data||[]).forEach(u=>{const row=document.createElement("div");row.className="admin-row";
-const h=document.createElement("h3");h.textContent=u.headline||"UNTITLED";
-const p=document.createElement("p");p.className="section-copy";p.textContent=(u.category||"EXM")+" // "+(u.published?"PUBLISHED":"DRAFT")+(u.featured?" // FEATURED":"");
-const actions=document.createElement("div");actions.className="admin-actions";
-const edit=document.createElement("button");edit.className="mini-btn";edit.textContent="EDIT";edit.onclick=()=>editUpdate(u);
-const pub=document.createElement("button");pub.className="mini-btn";pub.textContent=u.published?"UNPUBLISH":"PUBLISH";pub.onclick=()=>toggleField(u.id,"published",!u.published);
-const feat=document.createElement("button");feat.className="mini-btn";feat.textContent=u.featured?"UNFEATURE":"FEATURE";feat.onclick=()=>toggleField(u.id,"featured",!u.featured);
-const del=document.createElement("button");del.className="mini-btn danger";del.textContent="DELETE";del.onclick=()=>deleteUpdate(u.id);
-actions.append(edit,pub,feat,del);row.append(h,p,actions);list.append(row);});
-if(!data?.length) list.innerHTML='<div class="system-message">NO TRANSMISSIONS.</div>';}
-function editUpdate(u){document.getElementById("editId").value=u.id;document.getElementById("category").value=u.category||"";document.getElementById("headline").value=u.headline||"";document.getElementById("description").value=u.description||"";document.getElementById("linkText").value=u.link_text||"";document.getElementById("linkUrl").value=u.link_url||"";document.getElementById("featured").checked=!!u.featured;document.getElementById("published").checked=!!u.published;scrollTo({top:0,behavior:"smooth"});}
-async function toggleField(id,field,value){const payload={};payload[field]=value;const {error}=await db.from("exm_updates").update(payload).eq("id",id);if(error) alert(error.message);else loadAdmin();}
-async function deleteUpdate(id){if(!confirm("Delete this transmission?"))return;const {error}=await db.from("exm_updates").delete().eq("id",id);if(error)alert(error.message);else loadAdmin();}
-refreshSession();
+<section id="loginPanel" class="admin-panel"><p class="section-label">OWNER LOGIN</p><form id="loginForm" class="form-shell"><div class="field"><label>EMAIL</label><input id="loginEmail" type="email" autocomplete="username" required></div><div class="field"><label>PASSWORD</label><input id="loginPassword" type="password" autocomplete="current-password" required></div><button class="btn" type="submit">LOGIN</button><p id="loginMessage" class="section-copy"></p></form></section>
+<section id="controlPanel" class="hidden"><div class="admin-panel"><p class="section-label">SYSTEM STATUS</p><h2 style="margin-top:12px">LIVE UPDATES // NEW TRANSMISSION</h2><form id="updateForm" class="form-shell"><input id="editId" type="hidden"><div class="field"><label>CATEGORY</label><select id="category" required><option value="">SELECT CATEGORY</option><option value="EXM">EXM</option><option value="SONGWARS">SONGWARS</option><option value="ROSTER">ROSTER</option></select></div><div class="field"><label>HEADLINE</label><input id="headline" maxlength="140" required></div><div class="field"><label>DESCRIPTION</label><textarea id="description" maxlength="1500" required></textarea></div><div class="field"><label>BUTTON TEXT</label><input id="linkText" maxlength="80"></div><div class="field"><label>BUTTON LINK</label><input id="linkUrl" maxlength="500" placeholder="shop.html or https://..."></div><div class="field"><label><input id="featured" type="checkbox"> FEATURED</label></div><div class="field"><label><input id="published" type="checkbox" checked> PUBLISHED</label></div><div class="buttons"><button class="btn" type="submit">SAVE TRANSMISSION</button><button id="cancelEdit" class="btn btn-dark" type="button">CLEAR</button></div><p id="adminMessage" class="section-copy"></p></form></div><div class="admin-panel"><div class="buttons" style="justify-content:space-between"><p class="section-label">PUBLISHED / DRAFT TRANSMISSIONS</p><button id="logoutBtn" class="mini-btn" type="button">LOG OUT</button></div><div id="adminList" class="admin-list"></div></div></section></main>
+<script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="script.js"></script><script>
+const db=getEXMClient();const loginPanel=document.getElementById('loginPanel'),controlPanel=document.getElementById('controlPanel'),msg=document.getElementById('adminMessage'),loginMsg=document.getElementById('loginMessage'),form=document.getElementById('updateForm');
+function setLoggedIn(on){loginPanel.classList.toggle('hidden',on);controlPanel.classList.toggle('hidden',!on);if(on)loadAdmin();}async function refreshSession(){const{data}=await db.auth.getSession();setLoggedIn(!!data.session);}document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();loginMsg.textContent='AUTHENTICATING...';const{error}=await db.auth.signInWithPassword({email:document.getElementById('loginEmail').value.trim(),password:document.getElementById('loginPassword').value});if(error)loginMsg.textContent=error.message;else{loginMsg.textContent='';setLoggedIn(true);}});document.getElementById('logoutBtn').onclick=async()=>{await db.auth.signOut();setLoggedIn(false);};function clearForm(){form.reset();document.getElementById('editId').value='';document.getElementById('published').checked=true;msg.textContent='';}document.getElementById('cancelEdit').onclick=clearForm;
+form.addEventListener('submit',async e=>{e.preventDefault();msg.textContent='SAVING...';const id=document.getElementById('editId').value;const payload={category:document.getElementById('category').value,headline:document.getElementById('headline').value.trim(),description:document.getElementById('description').value.trim(),link_text:document.getElementById('linkText').value.trim()||null,link_url:document.getElementById('linkUrl').value.trim()||null,featured:document.getElementById('featured').checked,published:document.getElementById('published').checked};let result=id?await db.from('exm_updates').update(payload).eq('id',id):await db.from('exm_updates').insert(payload);if(result.error)msg.textContent=result.error.message;else{clearForm();msg.textContent='TRANSMISSION SAVED.';await loadAdmin();}});
+async function loadAdmin(){const list=document.getElementById('adminList');list.innerHTML='<div class="system-message">LOADING...</div>';const{data,error}=await db.from('exm_updates').select('*').order('created_at',{ascending:false});if(error){list.innerHTML='<div class="system-message">'+error.message+'</div>';return;}list.innerHTML='';(data||[]).forEach(u=>{const row=document.createElement('div');row.className='admin-row';const h=document.createElement('h3');h.textContent=u.headline||'UNTITLED';const p=document.createElement('p');p.className='section-copy';p.textContent=(u.category||'EXM')+' // '+(u.published?'PUBLISHED':'DRAFT')+(u.featured?' // FEATURED':'');const actions=document.createElement('div');actions.className='admin-actions';const edit=document.createElement('button');edit.className='mini-btn';edit.textContent='EDIT';edit.onclick=()=>editUpdate(u);const pub=document.createElement('button');pub.className='mini-btn';pub.textContent=u.published?'UNPUBLISH':'PUBLISH';pub.onclick=()=>toggleField(u.id,'published',!u.published);const feat=document.createElement('button');feat.className='mini-btn';feat.textContent=u.featured?'UNFEATURE':'FEATURE';feat.onclick=()=>toggleField(u.id,'featured',!u.featured);const del=document.createElement('button');del.className='mini-btn danger';del.textContent='DELETE';del.onclick=()=>deleteUpdate(u.id);actions.append(edit,pub,feat,del);row.append(h,p,actions);list.append(row);});if(!data?.length)list.innerHTML='<div class="system-message">NO TRANSMISSIONS.</div>';}
+function editUpdate(u){document.getElementById('editId').value=u.id;const category=document.getElementById('category');category.value=['EXM','SONGWARS','ROSTER'].includes(u.category)?u.category:'EXM';document.getElementById('headline').value=u.headline||'';document.getElementById('description').value=u.description||'';document.getElementById('linkText').value=u.link_text||'';document.getElementById('linkUrl').value=u.link_url||'';document.getElementById('featured').checked=!!u.featured;document.getElementById('published').checked=!!u.published;scrollTo({top:0,behavior:'smooth'});}async function toggleField(id,field,value){const payload={};payload[field]=value;const{error}=await db.from('exm_updates').update(payload).eq('id',id);if(error)alert(error.message);else loadAdmin();}async function deleteUpdate(id){if(!confirm('Delete this transmission?'))return;const{error}=await db.from('exm_updates').delete().eq('id',id);if(error)alert(error.message);else loadAdmin();}refreshSession();
 </script></body></html>
