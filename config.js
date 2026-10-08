@@ -44,18 +44,6 @@ window.EXM_SONGWARS = {
       if (bottom[1]) bottom[1].textContent = '3 OPEN POSITIONS';
     }
 
-    // Replace the first open field slot (09) with the newly approved duo.
-    var field = document.querySelector('.field-board');
-    if (field) {
-      var openSlots = field.querySelectorAll('.duo-slot.open');
-      if (openSlots.length === 4) {
-        var slot9 = openSlots[0];
-        var approved = document.createElement('div');
-        approved.className = 'duo-slot reveal visible';
-        approved.innerHTML = '<span class="card-index">FIELD SLOT // 09</span><h3>Splash bros. 🌹</h3><p>APPROVED DUO // ROSTER LOCKED</p>';
-        slot9.replaceWith(approved);
-      }
-    }
   }
 
   if (document.readyState === 'loading') {
