@@ -4,7 +4,7 @@ window.EXM_CONFIG = {
   SUPABASE_URL: "https://ldtmapwemttqoygcqlqu.supabase.co",
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_fnnYUGRotjuA_56F1F3Yvg_l_1mYYY5",
   STORE_URL: "https://exclusivemembrs.printify.me/",
-  DISCORD_URL: "https://discord.gg/WguA7bAV39",
+  DISCORD_URL: "https://discord.gg/NdZkx9gvb",
   INSTAGRAM_URL: "https://www.instagram.com/exclusivemembrs",
   TIKTOK_URL: "https://www.tiktok.com/@exclusivemembrs",
   YOUTUBE_URL: "https://youtube.com/@exclusivememb"
@@ -13,10 +13,12 @@ window.EXM_CONFIG = {
 // Current public SongWars III field status. Keep this small block as the
 // fallback source of truth for static GitHub Pages content.
 window.EXM_SONGWARS = {
-  approvedDuos: 9,
+  approvedDuos: 12,
   maxDuos: 12,
-  openSpots: 3,
-  progress: 75
+  openSpots: 0,
+  waitlistOpen: true,
+  waitlistedDuos: 4,
+  progress: 100
 };
 
 (function syncSongWarsPublicStatus() {
@@ -24,11 +26,11 @@ window.EXM_SONGWARS = {
     // Homepage status heading.
     document.querySelectorAll('.section-title').forEach(function (el) {
       var text = el.textContent.replace(/\s+/g, ' ').trim().toUpperCase();
-      if (/^(7|8) LOCKED\.\s*(4|5) OPEN\.$/.test(text)) {
-        el.innerHTML = '9 LOCKED.<br>3 OPEN.';
+      if (/^(7|8|9) LOCKED\.\s*(3|4|5) OPEN\.$/.test(text)) {
+        el.innerHTML = '12 LOCKED.<br>WAITLIST OPEN.';
       }
-      if (/^(7|8) DUOS\.\s*LOCKED IN\.$/.test(text)) {
-        el.innerHTML = '9 DUOS.<br>LOCKED IN.';
+      if (/^(7|8|9) DUOS\.\s*LOCKED IN\.$/.test(text)) {
+        el.innerHTML = '12 DUOS.<br>LOCKED IN.';
       }
     });
 
@@ -38,10 +40,10 @@ window.EXM_SONGWARS = {
       var number = reg.querySelector('.registration-number');
       var bar = reg.querySelector('.progress span');
       var bottom = reg.querySelectorAll('.registration-bottom span');
-      if (number) number.textContent = '09';
-      if (bar) bar.style.width = '75%';
-      if (bottom[0]) bottom[0].textContent = '9 APPROVED DUOS';
-      if (bottom[1]) bottom[1].textContent = '3 OPEN POSITIONS';
+      if (number) number.textContent = '12';
+      if (bar) bar.style.width = '100%';
+      if (bottom[0]) bottom[0].textContent = '12 APPROVED DUOS';
+      if (bottom[1]) bottom[1].textContent = 'REPLACEMENT WAITLIST OPEN';
     }
 
   }
@@ -52,3 +54,4 @@ window.EXM_SONGWARS = {
     apply();
   }
 })();
+

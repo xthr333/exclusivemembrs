@@ -1,33 +1,43 @@
 {
   "updates": [
     {
-      "id": "exm-001",
-      "date": "2026-09-18T13:00:00-04:00",
-      "category": "merch",
-      "headline": "DROP 001 — THE FIRST WAVE IS LIVE.",
-      "description": "The first official EXCLUSIVEMEMBRS® product wave is now available. DROP 001 introduces the original EXM identity through apparel, accessories and creator goods.",
-      "linkText": "EXPLORE DROP 001",
-      "link": "shop.html",
+      "id": "exm-2026-10-25-field",
+      "date": "2026-10-25T10:00:00-04:00",
+      "category": "songwars",
+      "headline": "SONGWARS III — MAIN FIELD LOCKED.",
+      "description": "All 12 championship duos and 24 approved artists are confirmed. Replacement registration remains open through the ordered waitlist.",
+      "linkText": "VIEW FIELD & MATCHUPS",
+      "link": "events.html",
       "featured": true
     },
     {
-      "id": "exm-002",
-      "date": "2026-09-18T12:00:00-04:00",
+      "id": "exm-2026-10-24-deadline",
+      "date": "2026-10-24T18:00:00-04:00",
       "category": "songwars",
-      "headline": "SONGWARS III — 7 OF 12 DUOS APPROVED.",
-      "description": "Seven duos are officially approved for SongWars III. Five opening spots remain before registration moves to the replacement waitlist.",
-      "linkText": "SONGWARS LIVE HUB",
+      "headline": "APPROVED DUOS — MUSIC DUE NOVEMBER 14.",
+      "description": "All four unreleased songs are due through the approved-duo music portal by November 14 at 11:59 PM ET.",
+      "linkText": "VIEW SONGWARS III",
       "link": "events.html",
       "featured": false
     },
     {
-      "id": "exm-003",
-      "date": "2026-09-18T11:00:00-04:00",
+      "id": "exm-2026-10-22-panel",
+      "date": "2026-10-22T18:00:00-04:00",
       "category": "songwars",
-      "headline": "SONGWARS III JUDGE PANEL LOCKED.",
-      "description": "38BXBY, EJ, Qwan, Ju / Gottaitch and TP make up the five official judges for SongWars III.",
-      "linkText": "VIEW SONGWARS III",
+      "headline": "OFFICIAL JUDGE PANEL CONFIRMED.",
+      "description": "Qwan, Ju / Gottaitch, ej, 8onnet & Blou as one shared judging seat, and Tiva form the official panel. Peak Unc joins as head judge and special guest.",
+      "linkText": "MEET THE PANEL",
       "link": "events.html",
+      "featured": false
+    },
+    {
+      "id": "exm-001",
+      "date": "2026-09-18T13:00:00-04:00",
+      "category": "merch",
+      "headline": "DROP 001 — THE FIRST WAVE IS LIVE.",
+      "description": "The first official EXCLUSIVEMEMBRS® product wave is available now through the official store.",
+      "linkText": "EXPLORE DROP 001",
+      "link": "shop.html",
       "featured": false
     },
     {
@@ -42,3 +52,4 @@
     }
   ]
 }
+
