@@ -1,0 +1,241 @@
+{
+  "verifiedDate": "2026-11-07",
+  "note": "Official Printify product mockups; original artwork is unchanged. Options may differ by variant. Primary images sourced at 2048px and optimized to a maximum of 1200px; additional views use the supplier’s 400px thumbnails. All images are saved locally as WebP, with original artwork unchanged.",
+  "products": [
+    {
+      "id": "32122606",
+      "name": "Oversized Boxy Tee",
+      "storeUrl": "https://exclusivemembrs.printify.me/product/32122606",
+      "photos": [
+        {
+          "label": "back",
+          "file": "assets/products/32122606-back.webp",
+          "source": "https://images-api.printify.com/mockup/6aad9ffed9657b9daf0b82be/103520/100286/exclusivemembrs-drop-001-oversized-boxy-tees.jpg?camera_label=back&revision=1789777736223&s=2048"
+        },
+        {
+          "label": "front collar closeup",
+          "file": "assets/products/32122606-front-collar-closeup.webp",
+          "source": "https://images-api.printify.com/mockup/6aad9ffed9657b9daf0b82be/103520/138545/exclusivemembrs-drop-001-oversized-boxy-tees.jpg?camera_label=front-collar-closeup&revision=1789777736223&s=400"
+        },
+        {
+          "label": "front",
+          "file": "assets/products/32122606-front.webp",
+          "source": "https://images-api.printify.com/mockup/6aad9ffed9657b9daf0b82be/103520/100285/exclusivemembrs-drop-001-oversized-boxy-tees.jpg?camera_label=front&revision=1789777736223&s=400"
+        },
+        {
+          "label": "person 1 front",
+          "file": "assets/products/32122606-person-1-front.webp",
+          "source": "https://images-api.printify.com/mockup/6aad9ffed9657b9daf0b82be/103520/100476/exclusivemembrs-drop-001-oversized-boxy-tees.jpg?camera_label=person-1-front&revision=1789777736223&s=400"
+        }
+      ]
+    },
+    {
+      "id": "32129312",
+      "name": "EXM Crop Tee",
+      "storeUrl": "https://exclusivemembrs.printify.me/product/32129312",
+      "photos": [
+        {
+          "label": "front",
+          "file": "assets/products/32129312-front.webp",
+          "source": "https://images-api.printify.com/mockup/6aadd49cd3d83bf6d504b91d/121053/112821/exclusivemembrs-crop-tee-drop-001.jpg?camera_label=front&revision=1789950119870&s=2048"
+        },
+        {
+          "label": "back",
+          "file": "assets/products/32129312-back.webp",
+          "source": "https://images-api.printify.com/mockup/6aadd49cd3d83bf6d504b91d/121053/112822/exclusivemembrs-crop-tee-drop-001.jpg?camera_label=back&revision=1789950119870&s=400"
+        },
+        {
+          "label": "size chart",
+          "file": "assets/products/32129312-size-chart.webp",
+          "source": "https://images-api.printify.com/mockup/6aadd49cd3d83bf6d504b91d/121053/112824/exclusivemembrs-crop-tee-drop-001.jpg?camera_label=size-chart&revision=1789950119870&s=400"
+        }
+      ]
+    },
+    {
+      "id": "32203437",
+      "name": "EXM Cuffed Beanie",
+      "storeUrl": "https://exclusivemembrs.printify.me/product/32203437",
+      "photos": [
+        {
+          "label": "front",
+          "file": "assets/products/32203437-front.webp",
+          "source": "https://images-api.printify.com/mockup/6ab077d620af73c095083a9c/116417/109382/exclusivemembrs-drop-001-embroidered-cuffed-beanie.jpg?camera_label=front&revision=1789949998699&s=2048"
+        },
+        {
+          "label": "back",
+          "file": "assets/products/32203437-back.webp",
+          "source": "https://images-api.printify.com/mockup/6ab077d620af73c095083a9c/116417/109401/exclusivemembrs-drop-001-embroidered-cuffed-beanie.jpg?camera_label=back&revision=1789949998699&s=400"
+        }
+      ]
+    },
+    {
+      "id": "32202053",
+      "name": "Roster Tough Magnetic Case",
+      "storeUrl": "https://exclusivemembrs.printify.me/product/32202053",
+      "photos": [
+        {
+          "label": "front",
+          "file": "assets/products/32202053-front.webp",
+          "source": "https://images-api.printify.com/mockup/6ab06b00eb4e70b1760c8b61/109328/107253/exm-drop-001-roster-tough-magnetic-case.jpg?camera_label=front&revision=1789947124851&s=2048"
+        },
+        {
+          "label": "close up",
+          "file": "assets/products/32202053-close-up.webp",
+          "source": "https://images-api.printify.com/mockup/6ab06b00eb4e70b1760c8b61/109328/107277/exm-drop-001-roster-tough-magnetic-case.jpg?camera_label=close-up&revision=1789947124851&s=400"
+        },
+        {
+          "label": "layers",
+          "file": "assets/products/32202053-layers.webp",
+          "source": "https://images-api.printify.com/mockup/6ab06b00eb4e70b1760c8b61/109328/107301/exm-drop-001-roster-tough-magnetic-case.jpg?camera_label=layers&revision=1789947124851&s=400"
+        }
+      ]
+    },
+    {
+      "id": "32202109",
+      "name": "Roster Tough Phone Case",
+      "storeUrl": "https://exclusivemembrs.printify.me/product/32202109",
+      "photos": [
+        {
+          "label": "front and side",
+          "file": "assets/products/32202109-front-and-side.webp",
+          "source": "https://images-api.printify.com/mockup/6ab06c0f60474e564e01566f/62582/97458/exm-drop-001-roster-tough-phone-case.jpg?camera_label=front-and-side&revision=1789947269389&s=2048"
+        },
+        {
+          "label": "front",
+          "file": "assets/products/32202109-front.webp",
+          "source": "https://images-api.printify.com/mockup/6ab06c0f60474e564e01566f/62582/97508/exm-drop-001-roster-tough-phone-case.jpg?camera_label=front&revision=1789947269389&s=400"
+        },
+        {
+          "label": "side",
+          "file": "assets/products/32202109-side.webp",
+          "source": "https://images-api.printify.com/mockup/6ab06c0f60474e564e01566f/62582/97891/exm-drop-001-roster-tough-phone-case.jpg?camera_label=side&revision=1789947269389&s=400"
+        },
+        {
+          "label": "close up",
+          "file": "assets/products/32202109-close-up.webp",
+          "source": "https://images-api.printify.com/mockup/6ab06c0f60474e564e01566f/62582/97543/exm-drop-001-roster-tough-phone-case.jpg?camera_label=close-up&revision=1789947269389&s=400"
+        }
+      ]
+    },
+    {
+      "id": "32230915",
+      "name": "Debut Roster Journal",
+      "storeUrl": "https://exclusivemembrs.printify.me/product/32230915",
+      "photos": [
+        {
+          "label": "front",
+          "file": "assets/products/32230915-front.webp",
+          "source": "https://images-api.printify.com/mockup/6ab1716d5795dc08e705c4a2/65223/7338/exclusivemembrs-drop-001-debut-roster-journal.jpg?camera_label=front&revision=1790014994059&s=2048"
+        },
+        {
+          "label": "back",
+          "file": "assets/products/32230915-back.webp",
+          "source": "https://images-api.printify.com/mockup/6ab1716d5795dc08e705c4a2/65223/7339/exclusivemembrs-drop-001-debut-roster-journal.jpg?camera_label=back&revision=1790014994059&s=400"
+        },
+        {
+          "label": "opened",
+          "file": "assets/products/32230915-opened.webp",
+          "source": "https://images-api.printify.com/mockup/6ab1716d5795dc08e705c4a2/65223/7340/exclusivemembrs-drop-001-debut-roster-journal.jpg?camera_label=opened&revision=1790014994059&s=400"
+        },
+        {
+          "label": "inside",
+          "file": "assets/products/32230915-inside.webp",
+          "source": "https://images-api.printify.com/mockup/6ab1716d5795dc08e705c4a2/65223/7341/exclusivemembrs-drop-001-debut-roster-journal.jpg?camera_label=inside&revision=1790014994059&s=400"
+        }
+      ]
+    },
+    {
+      "id": "32123676",
+      "name": "EXM Core Desk Mat",
+      "storeUrl": "https://exclusivemembrs.printify.me/product/32123676",
+      "photos": [
+        {
+          "label": "front",
+          "file": "assets/products/32123676-front.webp",
+          "source": "https://images-api.printify.com/mockup/6aadad34f66d6772a6076c60/103807/100925/exclusivemembrs-desk-mat-exm-core.jpg?camera_label=front&revision=1789767144684&s=2048"
+        },
+        {
+          "label": "back",
+          "file": "assets/products/32123676-back.webp",
+          "source": "https://images-api.printify.com/mockup/6aadad34f66d6772a6076c60/103807/100928/exclusivemembrs-desk-mat-exm-core.jpg?camera_label=back&revision=1789767144684&s=400"
+        },
+        {
+          "label": "context 1",
+          "file": "assets/products/32123676-context-1.webp",
+          "source": "https://images-api.printify.com/mockup/6aadad34f66d6772a6076c60/103807/100956/exclusivemembrs-desk-mat-exm-core.jpg?camera_label=context-1&revision=1789767144684&s=400"
+        },
+        {
+          "label": "context 2",
+          "file": "assets/products/32123676-context-2.webp",
+          "source": "https://images-api.printify.com/mockup/6aadad34f66d6772a6076c60/103807/100947/exclusivemembrs-desk-mat-exm-core.jpg?camera_label=context-2&revision=1789767144684&s=400"
+        }
+      ]
+    },
+    {
+      "id": "32123533",
+      "name": "EXM Logo Sticker",
+      "storeUrl": "https://exclusivemembrs.printify.me/product/32123533",
+      "photos": [
+        {
+          "label": "front",
+          "file": "assets/products/32123533-front.webp",
+          "source": "https://images-api.printify.com/mockup/6aada99c4f189b1bfd0b3b41/45754/16655/exclusivemembrs-logo-sticker-drop-001.jpg?camera_label=front&revision=1789766831975&s=2048"
+        },
+        {
+          "label": "context 1",
+          "file": "assets/products/32123533-context-1.webp",
+          "source": "https://images-api.printify.com/mockup/6aada99c4f189b1bfd0b3b41/45754/2178/exclusivemembrs-logo-sticker-drop-001.jpg?camera_label=context-1&revision=1789766831975&s=400"
+        },
+        {
+          "label": "context 2",
+          "file": "assets/products/32123533-context-2.webp",
+          "source": "https://images-api.printify.com/mockup/6aada99c4f189b1bfd0b3b41/45754/20548/exclusivemembrs-logo-sticker-drop-001.jpg?camera_label=context-2&revision=1789766831975&s=400"
+        }
+      ]
+    },
+    {
+      "id": "32200341",
+      "name": "Clip-On Bandana",
+      "storeUrl": "https://exclusivemembrs.printify.me/product/32200341",
+      "photos": [
+        {
+          "label": "front",
+          "file": "assets/products/32200341-front.webp",
+          "source": "https://images-api.printify.com/mockup/6ab060442690521c670f3af5/115223/119814/exm-pet-division-clip-on-bandana.jpg?camera_label=front&revision=1789948532070&s=2048"
+        }
+      ]
+    },
+    {
+      "id": "32200610",
+      "name": "Official Member Tag",
+      "storeUrl": "https://exclusivemembrs.printify.me/product/32200610",
+      "photos": [
+        {
+          "label": "front",
+          "file": "assets/products/32200610-front.webp",
+          "source": "https://images-api.printify.com/mockup/6ab062c994b87c6305006628/70870/11730/exm-pet-division-official-member-tag.jpg?camera_label=front&revision=1789947770475&s=2048"
+        },
+        {
+          "label": "back",
+          "file": "assets/products/32200610-back.webp",
+          "source": "https://images-api.printify.com/mockup/6ab062c994b87c6305006628/70870/11731/exm-pet-division-official-member-tag.jpg?camera_label=back&revision=1789947770475&s=400"
+        },
+        {
+          "label": "front and back",
+          "file": "assets/products/32200610-front-and-back.webp",
+          "source": "https://images-api.printify.com/mockup/6ab062c994b87c6305006628/70870/11734/exm-pet-division-official-member-tag.jpg?camera_label=front-and-back&revision=1789947770475&s=400"
+        },
+        {
+          "label": "lifestyle dog",
+          "file": "assets/products/32200610-lifestyle-dog.webp",
+          "source": "https://images-api.printify.com/mockup/6ab062c994b87c6305006628/70870/11732/exm-pet-division-official-member-tag.jpg?camera_label=lifestyle-dog&revision=1789947770475&s=400"
+        },
+        {
+          "label": "lifestyle cat",
+          "file": "assets/products/32200610-lifestyle-cat.webp",
+          "source": "https://images-api.printify.com/mockup/6ab062c994b87c6305006628/70870/11788/exm-pet-division-official-member-tag.jpg?camera_label=lifestyle-cat&revision=1789947770475&s=400"
+        }
+      ]
+    }
+  ]
+}
