@@ -1,0 +1,151 @@
+{
+  "syncedAt": "2026-11-07T17:44:43.127Z",
+  "source": "SongWars III registration database",
+  "approved": [
+    {
+      "duo": "BallHogs",
+      "artists": [
+        "LR",
+        "Mayo"
+      ],
+      "handles": [
+        "Riskianoo",
+        "Mayoshere"
+      ]
+    },
+    {
+      "duo": "KTK",
+      "artists": [
+        "r3",
+        "ktk.tobi"
+      ],
+      "handles": [
+        "r3hz.p",
+        "ktk.tobi"
+      ]
+    },
+    {
+      "duo": "JaexJ",
+      "artists": [
+        "bootupkee",
+        "1chrxllo"
+      ],
+      "handles": [
+        "@jaexkee",
+        "@1chrxllo"
+      ]
+    },
+    {
+      "duo": "##00",
+      "artists": [
+        "PG23",
+        "Jai"
+      ],
+      "handles": [
+        "@sshortterm",
+        "dontfeelliketalking00"
+      ]
+    },
+    {
+      "duo": "Yopz",
+      "artists": [
+        "Bitchyounotayop",
+        "Wasi"
+      ],
+      "handles": [
+        "@swampygooler",
+        "@yabxtchfavoritedreadhead"
+      ]
+    },
+    {
+      "duo": "1twoggx1mxhara",
+      "artists": [
+        "1twogg",
+        "mxhara"
+      ],
+      "handles": [
+        "1twogg",
+        "1mxhara"
+      ]
+    },
+    {
+      "duo": "Station 614",
+      "artists": [
+        "JiggyB",
+        "Seanoiid"
+      ],
+      "handles": [
+        "jiggybxndzz",
+        "N/A"
+      ]
+    },
+    {
+      "duo": "Forever Young",
+      "artists": [
+        "callmeLD",
+        "yung asy"
+      ],
+      "handles": [
+        "callmeld_",
+        "yungasy"
+      ]
+    },
+    {
+      "duo": "the melt vs da world",
+      "artists": [
+        "fukitdrako!",
+        "konrax!"
+      ],
+      "handles": [
+        "innaclubwiddadub",
+        "k0nrax"
+      ]
+    },
+    {
+      "duo": "Oneinfinite",
+      "artists": [
+        "Phxntum",
+        "Warisovr"
+      ],
+      "handles": [
+        "@phxntum_",
+        "@warisovr"
+      ]
+    },
+    {
+      "duo": "WeSoso$lime",
+      "artists": [
+        "$$vbii",
+        "Ayco"
+      ],
+      "handles": [
+        "Praisemxrrr",
+        "1.ayco"
+      ]
+    },
+    {
+      "duo": "As5",
+      "artists": [
+        "Jaykurtt",
+        "Bbyhero6"
+      ],
+      "handles": [
+        "Jaykurtt5",
+        "Jaahero1"
+      ]
+    }
+  ],
+  "waitlist": [
+    {
+      "duo": "STAYUP!&WIN",
+      "artists": [
+        "projectsyth",
+        "akumasblood"
+      ],
+      "handles": [
+        "@projectsyth",
+        "@akumasblood"
+      ]
+    }
+  ]
+}

@@ -11,13 +11,13 @@ window.EXM_CONFIG = {
 };
 
 // Current public SongWars III field status. Keep this small block as the
-// fallback source of truth for static GitHub Pages content.
+// dated public snapshot only. Live registrations remain the source of truth.
 window.EXM_SONGWARS = {
   approvedDuos: 12,
   maxDuos: 12,
   openSpots: 0,
   waitlistOpen: true,
-  waitlistedDuos: 2,
+  waitlistedDuos: 1,
   progress: 100
 };
 

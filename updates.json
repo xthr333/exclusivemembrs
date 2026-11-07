@@ -1,12 +1,22 @@
 {
   "updates": [
     {
-      "id": "exm-2026-10-25-field",
-      "date": "2026-10-25T10:00:00-04:00",
+      "id": "exm-2026-11-07-domain",
+      "date": "2026-11-07T12:30:00-05:00",
+      "category": "exm",
+      "headline": "ONE ADDRESS. THE EXM WORLD.",
+      "description": "The collective, collection, SongWars, Residency and W3 Studios now have a connected home at exclusivemembrs.com.",
+      "linkText": "EXPLORE EXM",
+      "link": "index.html",
+      "featured": true
+    },
+    {
+      "id": "exm-2026-11-07-field",
+      "date": "2026-11-07T12:00:00-05:00",
       "category": "songwars",
-      "headline": "SONGWARS III — MAIN FIELD LOCKED.",
-      "description": "All 12 championship duos and 24 approved artists are confirmed. Replacement registration remains open through the ordered waitlist.",
-      "linkText": "VIEW FIELD & MATCHUPS",
+      "headline": "DOUBLE IMPACT — NOVEMBER 21.",
+      "description": "The November 7 registration snapshot lists 12 approved duos, including As5, with replacement registration still open. Approval and attendance confirmation are separate. Four songs are due November 14 at 11:59 PM ET.",
+      "linkText": "FIELD, MATCHUPS & ARTIST PORTAL",
       "link": "events.html",
       "featured": true
     },
@@ -17,16 +27,6 @@
       "headline": "APPROVED DUOS — MUSIC DUE NOVEMBER 14.",
       "description": "All four unreleased songs are due through the approved-duo music portal by November 14 at 11:59 PM ET.",
       "linkText": "VIEW SONGWARS III",
-      "link": "events.html",
-      "featured": false
-    },
-    {
-      "id": "exm-2026-10-22-panel",
-      "date": "2026-10-22T18:00:00-04:00",
-      "category": "songwars",
-      "headline": "OFFICIAL JUDGE PANEL CONFIRMED.",
-      "description": "Qwan, Ju / Gottaitch, ej, 8onnet & Blou as one shared judging seat, and Tiva form the official panel. Peak Unc joins as head judge and special guest.",
-      "linkText": "MEET THE PANEL",
       "link": "events.html",
       "featured": false
     },

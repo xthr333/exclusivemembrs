@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /v2-preview/
+Sitemap: https://exclusivemembrs.com/sitemap.xml
