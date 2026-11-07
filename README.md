@@ -1,3 +1,9 @@
+# EXCLUSIVEMEMBRS — Official domain rollout
+
+Live hub: https://exclusivemembrs.com/
+
+See [ROLLOUT.md](ROLLOUT.md) for current build/deploy workflow and [TESTING.md](TESTING.md) for verified checks and boundaries. Cloudflare Worker: **exm**.
+
 # EXCLUSIVEMEMBRS® connected master build
 
 Upload every file in this folder to the root of the GitHub Pages repository.
