@@ -19,65 +19,32 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Check JavaScript syntax
         run: |
           node --check config.js
           node --check script.js
           node --check songwars.js
+          node --check rollout.js
+          node --check tools/build.mjs
+          node --check tools/check.mjs
+
+      - name: Test link validator regressions
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
       - name: Validate site files and links
+        run: python3 tools/validate-site.py
+
+      - name: Validate page structure and public snapshot
+        run: npm run check
+
+      - name: Build and check deploy output
         run: |
-          python3 - <<'PY'
-          import json
-          import re
-          from html.parser import HTMLParser
-          from pathlib import Path
-          from urllib.parse import unquote
-
-          root = Path(".")
-          required = [
-              "index.html", "artists.html", "shop.html", "events.html",
-              "updates.html", "submit.html", "about.html", "contact.html",
-              "style.css", "script.js", "config.js", "updates.json"
-          ]
-          missing = [name for name in required if not (root / name).is_file()]
-          if missing:
-              raise SystemExit("Missing required files: " + ", ".join(missing))
-
-          json.loads((root / "updates.json").read_text(encoding="utf-8"))
-
-          class References(HTMLParser):
-              def __init__(self):
-                  super().__init__()
-                  self.refs = []
-              def handle_starttag(self, tag, attrs):
-                  values = dict(attrs)
-                  for key in ("href", "src"):
-                      if key in values:
-                          self.refs.append(values[key])
-
-          broken = []
-          for page in root.glob("*.html"):
-              parser = References()
-              parser.feed(page.read_text(encoding="utf-8"))
-              for ref in parser.refs:
-                  if ref.startswith(("http://", "https://", "mailto:", "tel:", "#", "data:", "javascript:")):
-                      continue
-                  target = unquote(ref.split("#", 1)[0].split("?", 1)[0])
-                  if target and not (root / target).exists():
-                      broken.append(f"{page}: {ref}")
-
-          if broken:
-              raise SystemExit("Broken local references:\n" + "\n".join(broken))
-
-          combined = "\n".join(p.read_text(encoding="utf-8") for p in root.glob("*.html"))
-          stale = [r"7 OF 12", r"7 LOCKED", r"8 APPROVED DUOS", r"9 LOCKED", r"3 OPEN", r"38BXBY"]
-          hits = [pattern for pattern in stale if re.search(pattern, combined, re.I)]
-          if hits:
-              raise SystemExit("Stale public SongWars copy found: " + ", ".join(hits))
-
-          print("EXM site checks passed.")
-          PY
+          npm run build
+          test -s dist/index.html
+          test -s dist/404.html
+          test -s dist/robots.txt
+          test -s dist/sitemap.xml
+          test -s dist/_headers
 
