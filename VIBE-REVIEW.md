@@ -26,6 +26,6 @@
 
 - This does not change prices, products, Printify checkout, database approvals, access policies, payment configuration, or the separate application sites.
 - Payment transaction not performed. Printify checkout handoff was verified in the earlier rollout without entering personal/payment data or ordering.
-- Contact inbox delivery still requires the owner to confirm receipt of a real inquiry; validation and error-safe frontend behavior do not prove delivery.
+- Contact inbox delivery: Wayne reported that it works on November 8, 2026. Owner-confirmed receipt closes the earlier inbox-verification item; this is separate from automated frontend validation.
 - Roster and staff are dated public snapshots, not a new realtime registration integration. Owner update feed remains the existing published-update connection.
 - An existing Cloudflare build override must target Worker `exm`. Correct settings: build `npm run build`; deploy `npx wrangler deploy --name exm`; root `/`. Source publication is not proof that the production domain deployed it; verify the live page separately.

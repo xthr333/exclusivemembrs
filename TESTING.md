@@ -1,5 +1,14 @@
 # Rollout checks — November 7, 2026
 
+## November 8 buyer-help follow-up
+
+- Wayne confirmed the contact form works, closing the prior inbox-delivery question.
+- Added shipping, returns and order help linked from the shop, contact page and all public footers.
+- Policy references: official Printify Pop-Up Store overview, shipping setup and refund/reprint documentation; shipping methods and charges remain checkout-dependent.
+- No test message, purchase, payment, refund or third-party account change was performed in this follow-up.
+
+## Earlier rollout checks
+
 - `node tools/check.mjs`: PASS. 12 pages; 317 local links/assets; 7 inline/external script syntax checks; unique IDs and single main/h1 per page.
 - `node tools/build.mjs`: PASS. Buildless static output, no paid dependencies.
 - `wrangler@4.158.0 deploy --dry-run`: PASS. Assets-only Worker configuration accepted. This does not deploy or prove live delivery.

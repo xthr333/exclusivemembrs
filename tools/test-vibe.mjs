@@ -72,3 +72,16 @@ const home=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert.ok(!home.includes('world-panel residency-panel'));
 assert.ok(home.includes('quiet-residency'));
 console.log('PASS: 10 shareable artist hubs; five-stage no-bye bracket; 8 real W3 portfolio photos with provenance; Merlin portfolio destination; low-key Residency.');
+const orderHelp=fs.readFileSync(path.join(root,'order-help.html'),'utf8');
+assert.ok(orderHelp.includes('30 calendar days of delivery'));
+assert.ok(orderHelp.includes('wrong size or color'));
+assert.ok(orderHelp.includes('contact.html#contact-form'));
+assert.ok(orderHelp.includes('https://printify.com/contacts/'));
+assert.ok(orderHelp.includes('delivery estimates are not guarantees'));
+assert.ok(!orderHelp.includes('support@'));
+assert.equal((orderHelp.match(/<details /g)||[]).length,3);
+for(const f of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
+ const content=fs.readFileSync(path.join(root,f),'utf8');
+ if(content.includes('<footer>'))assert.ok(content.split('<footer>')[1].includes('order-help.html'),`${f}: visible order help`);
+}
+console.log('PASS: buyer help, verified policy/support links, accessible FAQs, and sitewide footer access.');
