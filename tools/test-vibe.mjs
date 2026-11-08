@@ -43,3 +43,32 @@ for(const f of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
 const luminance=hex=>{const c=hex.match(/[\da-f]{2}/gi).map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
 for(const [fg,bg] of [['c2c7d8','1a1d29'],['c1c6d8','08090d'],['c0c9e3','11131b'],['12151f','d4d9e6']]){assert.ok((luminance(fg)+.05)/(luminance(bg)+.05)>=4.5||(luminance(bg)+.05)/(luminance(fg)+.05)>=4.5);}
 console.log('PASS: safe update links; retired notice filtering and deduplication; 10 real product galleries / 33 local images; no unauthorized Philadelphia positioning; core copy contrast >= 4.5:1.');
+const profiles=['ybdd','1ilriskk','luciifrmla','mayo','youngcj2x','03wayne','ydm-ski','bitchyounotayop','1chrxllo','vantiva'];
+const directory=fs.readFileSync(path.join(root,'artists.html'),'utf8');
+assert.equal((directory.match(/class="membr-row /g)||[]).length,10);
+for(const slug of profiles){
+ const profile=fs.readFileSync(path.join(root,`${slug}.html`),'utf8');
+ assert.ok(directory.includes(`href="${slug}.html"`));
+ assert.ok(profile.includes(`https://exclusivemembrs.com/${slug}`));
+ assert.ok(profile.includes('data-copy-profile'));
+ assert.ok(profile.includes('class="profile-link"'));
+ assert.ok(!profile.includes('stkn=')&&!profile.includes('?si='));
+}
+const eventPage=fs.readFileSync(path.join(root,'events.html'),'utf8');
+for(const round of ['opening','wildcards','quarters','semis','final']) assert.ok(eventPage.includes(`id="round-${round}"`));
+assert.equal((eventPage.match(/class="round-slot"/g)||[]).length,6);
+assert.ok(eventPage.includes('Quarterfinal pairings have not been announced'));
+const w3=fs.readFileSync(path.join(root,'studios.html'),'utf8');
+assert.ok(w3.includes('https://photogw3.merlin.site/'));
+assert.ok(!w3.includes('w3-studios.square.site'));
+const photoSources=JSON.parse(fs.readFileSync(path.join(root,'assets/w3/sources.json'),'utf8'));
+assert.equal(photoSources.photos.length,8);
+for(const photo of photoSources.photos){
+ assert.ok(w3.includes(photo.file));
+ assert.ok(photo.source.startsWith('https://d2kt395i2p6b75.cloudfront.net/01M1F1D4A908PXNV9QJ99KTWMC/'));
+ assert.ok(fs.statSync(path.join(root,photo.file)).size>1000);
+}
+const home=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert.ok(!home.includes('world-panel residency-panel'));
+assert.ok(home.includes('quiet-residency'));
+console.log('PASS: 10 shareable artist hubs; five-stage no-bye bracket; 8 real W3 portfolio photos with provenance; Merlin portfolio destination; low-key Residency.');
