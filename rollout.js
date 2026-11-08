@@ -76,7 +76,7 @@
       img.dataset.fallbackApplied = 'true';
       const message = document.createElement('span');
       message.className = 'product-unavailable';
-      message.textContent = img.alt ? `${img.alt} — image unavailable. View the official store for product photos.` : 'Image unavailable.';
+      message.textContent = img.alt ? `${img.alt} — image unavailable. ${img.closest('.product-gallery,.selected-product,.rotation-item') ? 'View the official store for product photos.' : 'Please reload or follow the page’s portfolio link.'}` : 'Image unavailable. Please reload.';
       img.replaceWith(message);
     };
     img.addEventListener('error', fallback, {once:true});

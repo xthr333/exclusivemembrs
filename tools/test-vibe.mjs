@@ -85,3 +85,16 @@ for(const f of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
  if(content.includes('<footer>'))assert.ok(content.split('<footer>')[1].includes('order-help.html'),`${f}: visible order help`);
 }
 console.log('PASS: buyer help, verified policy/support links, accessible FAQs, and sitewide footer access.');
+const updatesPage=fs.readFileSync(path.join(root,'updates.html'),'utf8');
+assert.ok(updatesPage.includes('quiet-residency'));
+assert.ok(!updatesPage.includes('CREATE<br>TOGETHER.'));
+assert.ok(updatesPage.includes('<noscript>'));
+for(const f of ['index.html','studios.html']){
+ const html=fs.readFileSync(path.join(root,f),'utf8');
+ for(const tag of html.matchAll(/<img\b[^>]*src="assets\/w3\/[^\"]+"[^>]*>/g)){
+  assert.ok(tag[0].includes('width="400"'));
+  assert.ok(/height="(?:500|600)"/.test(tag[0]));
+ }
+}
+assert.ok(fs.readFileSync(path.join(root,'rollout.js'),'utf8').includes("img.closest('.product-gallery,.selected-product,.rotation-item')"));
+console.log('PASS: quiet Residency updates placement, no-JS update navigation and truthful W3 image dimensions.');

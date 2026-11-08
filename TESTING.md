@@ -2,6 +2,15 @@
 
 ## November 8 buyer-help follow-up
 
+### Full-site review, November 8
+
+- Checked 23 root pages at 320px and 1280px browser-frame widths: no document overflow, missing image alt attributes, blank unlabeled buttons or missing h1s. This is responsive Chrome testing, not physical-device certification.
+- Checked 36 live URLs: main/www domains, public page routes, all 10 product destinations, SongWars portal, Residency information/interest destinations and the supplied W3 portfolio returned HTTP 200. Social platforms and payment transactions were not exhaustively tested.
+- Exercised mobile navigation/More menu, all five shop filters, product-photo switching and bracket round navigation. Confirmed six empty required contact fields remain invalid without submitting a message.
+- Re-read live SongWars registrations and staff: approved roster and public panel still match. Refreshed only the sanitized snapshot timestamp; no private contacts, attendance timestamps or staff application text published.
+- Reduced the remaining oversized Residency spotlight on Updates, corrected W3 photo dimensions, added no-JS update navigation, and made image-error guidance context-aware.
+- Contact delivery remains owner-confirmed; no purchase, message, login or approval mutation was performed in this review.
+
 - Wayne confirmed the contact form works, closing the prior inbox-delivery question.
 - Added shipping, returns and order help linked from the shop, contact page and all public footers.
 - Policy references: official Printify Pop-Up Store overview, shipping setup and refund/reprint documentation; shipping methods and charges remain checkout-dependent.
