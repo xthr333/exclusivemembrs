@@ -1,5 +1,14 @@
 # Rollout checks — November 7, 2026
 
+## November 8 cross-browser style pass
+
+- Added WebKit text/gradient/mask/backdrop prefixes, safe-area spacing, dynamic viewport fallbacks, readable native form controls and reduced-motion/forced-color fallbacks without restricting pinch zoom.
+- Self-hosted the existing Barlow Condensed and IBM Plex Mono Latin WOFF2 fonts, preserving their original files and SIL Open Font Licenses. No new imagery or brand copy was added.
+- Checked 23 pages at 320px and 1280px widths, plus eight main pages at 390px and 768px: 62 Chrome browser-frame layout checks with no horizontal document overflow. Main-page checks also found no broken loaded images.
+- Exercised the short landscape menu at 844×390. Fixed inherited flex wrapping that put menu links into hidden columns; the Contact link remains reachable after opening More.
+- Added automated coverage for every page's stylesheet order, viewport accessibility, font files, no-IntersectionObserver visibility and contact success/failure fallbacks with and without AbortController. Contact tests use stubbed fetch; no email was sent.
+- Native iOS/macOS Safari, Firefox and Edge are not available in this environment. Browser-targeted code fallbacks are implemented, but these checks are not native-browser or physical-device certification.
+
 ## November 8 buyer-help follow-up
 
 ### Full-site review, November 8

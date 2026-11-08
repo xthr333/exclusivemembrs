@@ -126,14 +126,16 @@
       button.disabled = true;
       button.textContent = 'SENDING…';
       status.textContent = 'Sending your message…';
+      const controller = typeof AbortController === 'function' ? new AbortController() : null;
+      const timer = controller ? setTimeout(() => controller.abort(),15000) : null;
       try {
-        const response = await fetch(form.action, {method:'POST', body:new FormData(form), headers:{Accept:'application/json'}, signal:AbortSignal.timeout(15000)});
+        const response = await fetch(form.action, {method:'POST', body:new FormData(form), headers:{Accept:'application/json'}, ...(controller ? {signal:controller.signal} : {})});
         if (!response.ok) throw new Error('Submission not accepted');
         status.textContent = 'Your message was sent. Thank you for reaching out to EXM.';
         form.reset();
       } catch {
         status.textContent = 'We couldn’t confirm delivery. Your message is still here—please try again or message @exclusivemembrs on Instagram.';
-      } finally {button.disabled = false; button.textContent = label;}
+      } finally {if(timer !== null) clearTimeout(timer); button.disabled = false; button.textContent = label;}
     });
   });
 })();

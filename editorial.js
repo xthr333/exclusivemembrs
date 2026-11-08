@@ -26,8 +26,11 @@
     const scroller = document.querySelector('.bracket-scroll');
     if (!round || !scroller) return;
     event.preventDefault();
-    scroller.scrollTo({left:round.offsetLeft - scroller.querySelector('.bracket-column').offsetLeft,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
-    scroller.focus({preventScroll:true});
+    const left = round.offsetLeft - scroller.querySelector('.bracket-column').offsetLeft;
+    try {
+      scroller.scrollTo({left,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+    } catch {scroller.scrollLeft = left;}
+    try {scroller.focus({preventScroll:true});} catch {scroller.focus();}
     history.replaceState(null,'',link.hash);
   }));
 })();
