@@ -5,6 +5,8 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 /admin.html
   X-Robots-Tag: noindex, nofollow
+/admin
+  X-Robots-Tag: noindex, nofollow
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
 /updates.json

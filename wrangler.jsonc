@@ -1,5 +1,10 @@
 {
   "name": "exm",
   "compatibility_date": "2026-11-04",
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "exclusivemembrs.com", "custom_domain": true },
+    { "pattern": "www.exclusivemembrs.com", "custom_domain": true }
+  ],
   "assets": { "directory": "./dist", "not_found_handling": "404-page" }
 }
