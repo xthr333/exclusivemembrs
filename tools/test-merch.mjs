@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const root=new URL('../',import.meta.url);
+const shop=fs.readFileSync(new URL('shop.html',root),'utf8');
+const ybdd=fs.readFileSync(new URL('ybdd.html',root),'utf8');
+const catalog=JSON.parse(fs.readFileSync(new URL('assets/products/catalog.json',root),'utf8'));
+assert.ok(shop.includes('aria-labelledby="merch-lead-title"'));
+assert.ok(shop.includes('CHOOSE SIZE &amp; VIEW LIVE PRICE'));
+assert.ok(shop.includes('not metallic foil'));
+assert.ok(shop.includes('not a personalized identification tag'));
+assert.equal((shop.match(/data-gallery-title=/g)||[]).length,10);
+for(const p of catalog.products)assert.ok(shop.includes(p.storeUrl));
+assert.ok(!shop.includes('NEW DROP EVERY WEEK'));
+assert.ok(!shop.includes('Eco Essentials'));
+assert.ok(ybdd.includes('Shop EXM · Drop 001'));
+assert.ok(ybdd.indexOf('https://unitedmasters.com/a/ybddmusic')<ybdd.indexOf('Shop EXM · Drop 001'));
+for(const host of ['instagram.com/ybddmusic','open.spotify.com','music.apple.com','youtube.com/channel'])assert.ok(ybdd.includes(host));
+console.log('PASS: featured real boxy tee, truthful finish and pet-tag copy, 10 intact galleries, artist merch link without removing music/social links.');

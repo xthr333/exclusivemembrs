@@ -1,0 +1,9 @@
+/* Drop 001 merchandising: same identity, clearer route to the actual product. */
+.merch-lead{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);align-items:center;gap:clamp(24px,5vw,72px);border-block:1px solid #424c66;background:radial-gradient(ellipse at 15% 40%,#25243a 0,transparent 65%),#0d1019}
+.merch-lead-art{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.72fr);gap:14px;align-items:center;min-width:0}
+.merch-lead figure{margin:0;min-width:0}.merch-lead figure img{width:100%;height:auto;aspect-ratio:1;object-fit:contain;background:#ececf0;border-radius:14px;display:block}
+.merch-lead figcaption,.merch-caption{font:11px/1.7 var(--mono);color:#c4cbe0;letter-spacing:.04em;margin-top:12px}
+.merch-lead h2{font-family:'Barlow Condensed','Arial Narrow',Impact,sans-serif;font-size:clamp(38px,5vw,76px);line-height:1.02;letter-spacing:-.02em;margin:16px 0 22px;color:#f1f2fa;scroll-margin-top:160px}
+.merch-lead-copy>p:not(.kicker):not(.merch-caption),.merch-facts{font-size:16px;line-height:1.8;color:#c9d0e3;max-width:600px}.merch-facts{padding-left:20px;margin:20px 0 26px}.merch-facts li+li{margin-top:10px}.merch-lead .buttons{flex-wrap:wrap;gap:16px}.merch-lead .btn{white-space:normal;line-height:1.6;max-width:100%;text-align:center}.merch-lead-copy{min-width:0;overflow-wrap:anywhere}
+@media(max-width:780px){.merch-lead{grid-template-columns:minmax(0,1fr)}.merch-lead-art{max-width:620px}.merch-lead h2{font-size:clamp(36px,10vw,60px)}.merch-lead .buttons .btn{width:100%}.merch-lead figcaption{font-size:10px}}
+@media(forced-colors:active){.merch-lead{background:Canvas;border-color:CanvasText}.merch-lead h2,.merch-lead-copy>p,.merch-lead figcaption,.merch-facts{color:CanvasText}}
