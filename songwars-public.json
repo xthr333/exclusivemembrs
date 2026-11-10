@@ -1,5 +1,5 @@
 {
-  "syncedAt": "2026-11-08T13:16:45.283Z",
+  "syncedAt": "2026-11-10T03:38:32.639Z",
   "source": "SongWars III registration database",
   "approved": [
     {
@@ -69,17 +69,6 @@
       ]
     },
     {
-      "duo": "Station 614",
-      "artists": [
-        "JiggyB",
-        "Seanoiid"
-      ],
-      "handles": [
-        "jiggybxndzz",
-        "N/A"
-      ]
-    },
-    {
       "duo": "Forever Young",
       "artists": [
         "callmeLD",
@@ -124,6 +113,17 @@
       ]
     },
     {
+      "duo": "STAYUP!&WIN",
+      "artists": [
+        "projectsyth",
+        "akumasblood"
+      ],
+      "handles": [
+        "@projectsyth",
+        "@akumasblood"
+      ]
+    },
+    {
       "duo": "As5",
       "artists": [
         "Jaykurtt",
@@ -135,17 +135,5 @@
       ]
     }
   ],
-  "waitlist": [
-    {
-      "duo": "STAYUP!&WIN",
-      "artists": [
-        "projectsyth",
-        "akumasblood"
-      ],
-      "handles": [
-        "@projectsyth",
-        "@akumasblood"
-      ]
-    }
-  ]
+  "waitlist": []
 }

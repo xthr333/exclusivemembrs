@@ -16,6 +16,7 @@
     if(["SONGWARS III — MAIN FIELD LOCKED.","OFFICIAL JUDGE PANEL CONFIRMED."].includes(u.headline))return false;
     // Retire superseded Residency launch-stage notices, not the owner's records.
     const text=`${u.headline} ${u.description}`;
+    if(/songwars|song wars/i.test(text)&&/through the approved.duo music portal|uploaded through.*portal/i.test(text))return false;
     return !(/residency/i.test(text)&&/early access|applications and payments.*closed|public applications.*nov(?:ember)?\.? ?6/i.test(text));
   };
   const mergeUpdates=(...groups)=>{const seen=new Set();return groups.flat().map(normalizeUpdate).filter(currentUpdate).sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).filter(u=>{const key=String(u.headline).trim().toLowerCase();if(seen.has(key))return false;seen.add(key);return true;});};

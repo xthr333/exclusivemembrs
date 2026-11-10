@@ -17,7 +17,7 @@ window.EXM_SONGWARS = {
   maxDuos: 12,
   openSpots: 0,
   waitlistOpen: true,
-  waitlistedDuos: 1,
+  waitlistedDuos: 0,
   progress: 100
 };
 

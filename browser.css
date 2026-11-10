@@ -39,3 +39,10 @@ select{color:#f5f6ff;background-color:#080d16}select option{color:#f5f6ff;backgr
 @media(hover:none) and (max-width:850px){.membr-row:hover{padding-left:0}}
 @media(prefers-reduced-motion:reduce){html,.bracket-scroll{scroll-behavior:auto}}
 @media(forced-colors:active){.chrome-type{background:none!important;color:CanvasText!important;-webkit-text-fill-color:CanvasText!important}.btn,.profile-link,.round-nav a{border:1px solid ButtonText}.reading-status{display:none}}
+
+/* Subtle analog texture; no flashing, no blocked controls, no rebrand. */
+body::after{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(180,195,230,.16) 3px 4px);opacity:.13;mix-blend-mode:screen}
+.exm-welcome .chrome-type,.hub-emblem{animation:exm-signal-drift 18s ease-in-out infinite}
+@keyframes exm-signal-drift{0%,85%,100%{text-shadow:none}90%{text-shadow:1px 0 rgba(168,199,255,.25),-1px 0 rgba(207,181,255,.2)}95%{text-shadow:-1px 0 rgba(168,199,255,.2),1px 0 rgba(207,181,255,.15)}}
+@media(prefers-reduced-motion:reduce){.exm-welcome .chrome-type,.hub-emblem{animation:none}body::after{display:none}}
+@media(forced-colors:active){body::after{display:none}}

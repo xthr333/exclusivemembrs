@@ -1,5 +1,14 @@
 # Rollout checks — November 7, 2026
 
+## November 9 direct-delivery and maintenance pass
+
+- Kept EXM branding, typography, product galleries and real W3 photos. Added low-opacity scanlines and a slow chromatic text-shadow drift, disabled with reduced motion/forced colors; overlays do not capture clicks.
+- Re-read live registrations. Updated the public approved-field snapshot and empty waitlist without publishing private attendance/contact fields. Replaced the affected old matchup with an owner-confirmation notice rather than automatically reseeding opponents. Staff assignments remain under reconciliation; no backend records changed.
+- Made email/private Discord the primary SongWars delivery instructions, including the November 14 11:59 PM ET deadline, file order, sent acknowledgment and owner receipt distinction. Suppressed superseded portal-only notices from the merged update feed without changing source records.
+- Checked all 23 EXM pages in Chrome frames at 320px and 1280px (46 checks): no document overflow or broken loaded images. All 92 local image references resolve. Existing ten-product/33-photo and eight-photo W3 tests pass.
+- W3 Merlin, W3 Square and the Printify shop returned HTTP 200. These third-party sites were checked but not edited, and no checkout, booking, email or DM was submitted.
+- Native Safari/Firefox/Edge were not available for this run. This is responsive Chrome QA, not universal device certification.
+
 ## November 8 cross-browser style pass
 
 - Added WebKit text/gradient/mask/backdrop prefixes, safe-area spacing, dynamic viewport fallbacks, readable native form controls and reduced-motion/forced-color fallbacks without restricting pinch zoom.
