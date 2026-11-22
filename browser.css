@@ -66,3 +66,51 @@ body::after{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;ba
  .founder-heading .section-title{margin-bottom:0}
  .event-visual--solo{aspect-ratio:auto;min-height:clamp(310px,75vw,440px)}
 }
+
+/* Reading rhythm: keep the chrome for display type, not for body copy. */
+.page-hero,.section,.roll-section,.roll-statement{
+ padding-block:clamp(3.5rem,7vw,6.5rem);
+}
+.page-hero h1,.section-title,.welcome-copy h1,.editorial-head h2,
+.event-copy h2,.home-w3 h2,.roll-statement h2{
+ line-height:1.06;letter-spacing:0;word-spacing:.045em;
+}
+.page-hero h1,.section-title{font-size:clamp(2.5rem,7vw,5.5rem)}
+.eyebrow,.section-label,.kicker{
+ font-size:.875rem;line-height:1.55;letter-spacing:.065em;
+ margin-bottom:.85rem;
+}
+.section-copy,.hero-copy,.founder-story,.event-copy>p:not(.kicker),
+.portal-card p,.card p,.transmission-card p,.selected-product p,.statement-bottom p{
+ font-size:clamp(1rem,1.1vw,1.125rem);line-height:1.7;color:#d3d9e8;
+ letter-spacing:normal;max-width:64ch;
+}
+.section-copy,.hero-copy,.event-copy>p:not(.kicker){margin-top:1.25rem}
+.section-copy+.section-copy{margin-top:1em}
+.founder-story p+p{margin-top:1.5rem}
+.grid,.portal-grid,.selected-products,.transmissions,.matchup-board,.history-grid{gap:clamp(1rem,2.5vw,2rem)}
+.portal-card,.transmission-card,.card,.matchup-card{padding:clamp(1.25rem,3vw,2rem)}
+.card-index,.transmission-meta,.matchup-card p{
+ font-size:.875rem;line-height:1.55;letter-spacing:.025em;
+}
+.matchup-card p{color:#d3d9e8}
+.buttons{gap:.8rem;row-gap:.75rem;margin-top:1.65rem}
+.buttons .btn{min-height:46px;font-size:.875rem;line-height:1.35;white-space:normal;text-align:center}
+.footer-links{gap:.65rem 1.5rem;margin-top:1.25rem}
+.footer-links a{font-size:.875rem;line-height:1.6}
+.event-visual--solo .event-wordmark{word-spacing:.055em;line-height:.98}
+
+@media(max-width:550px){
+ :root{--exm-gutter:1.25rem}
+ .exm-welcome{padding-inline:max(1.25rem,env(safe-area-inset-left,0px)) max(1.25rem,env(safe-area-inset-right,0px))}
+ .welcome-stage{min-height:clamp(10rem,53vw,15rem)}
+ .welcome-stage .orbit-note{display:none}
+ .welcome-copy h1,.roll-statement h2{font-size:clamp(2.55rem,10.4vw,4rem)}
+ .editorial-head h2,.event-copy h2,.home-w3 h2{font-size:clamp(2.3rem,9.4vw,3.5rem)}
+ .welcome-copy .kicker{font-size:.875rem}
+ .welcome-copy>p:not(.kicker){max-width:33ch}
+ .welcome-copy>p:not(.kicker) br{display:none}
+ .welcome-copy .buttons .btn{flex:1 1 100%;width:100%;max-width:22rem}
+ .statement-bottom .buttons{margin-top:0}
+ .selected-caption{flex-wrap:wrap;justify-content:flex-start}
+}

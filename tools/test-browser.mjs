@@ -17,8 +17,7 @@ for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
  assert.ok(html.includes('viewport-fit=cover'),file);
  assert.ok(!/user-scalable=no|maximum-scale=1/.test(html),`${file}: keep pinch zoom`);
  assert.ok(html.includes('fonts.css?v=20261108-browser'),file);
- const layoutVersion = ['index.html','about.html'].includes(file) ? '20261122-layout' : '20261109-signal';
- assert.ok(html.includes('browser.css?v='+layoutVersion),file);
+ assert.ok(html.includes('browser.css?v=20261122-spacing'),file);
  assert.ok(html.indexOf('fonts.css')<html.indexOf('style.css'),file);
  assert.ok(html.lastIndexOf('browser.css')>html.lastIndexOf('rel="stylesheet"')-60,file);
 }
