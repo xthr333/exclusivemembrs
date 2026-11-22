@@ -55,9 +55,9 @@ for(const slug of profiles){
  assert.ok(!profile.includes('stkn=')&&!profile.includes('?si='));
 }
 const eventPage=fs.readFileSync(path.join(root,'events.html'),'utf8');
-for(const round of ['opening','wildcards','quarters','semis','final']) assert.ok(eventPage.includes(`id="round-${round}"`));
-assert.equal((eventPage.match(/class="round-slot"/g)||[]).length,6);
-assert.ok(eventPage.includes('Quarterfinal pairings have not been announced'));
+for(const id of ['bracket','round-quarters','round-semis','round-final']) assert.ok(eventPage.includes(`id="${id}"`));
+assert.equal((eventPage.match(/class="matchup-card"/g)||[]).length,13);
+assert.ok(eventPage.includes('WILDCARD RECAP'));
 const w3=fs.readFileSync(path.join(root,'studios.html'),'utf8');
 assert.ok(w3.includes('https://photogw3.merlin.site/'));
 assert.ok(!w3.includes('w3-studios.square.site'));
@@ -71,7 +71,7 @@ for(const photo of photoSources.photos){
 const home=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert.ok(!home.includes('world-panel residency-panel'));
 assert.ok(home.includes('quiet-residency'));
-console.log('PASS: 10 shareable artist hubs; five-stage no-bye bracket; 8 real W3 portfolio photos with provenance; Merlin portfolio destination; low-key Residency.');
+console.log('PASS: 10 shareable artist hubs; completed bracket and wildcard recap; 8 real W3 portfolio photos with provenance; Merlin portfolio destination; low-key Residency.');
 const orderHelp=fs.readFileSync(path.join(root,'order-help.html'),'utf8');
 assert.ok(orderHelp.includes('30 calendar days of delivery'));
 assert.ok(orderHelp.includes('wrong size or color'));

@@ -29,8 +29,11 @@ for(const file of ['updates.json','songwars-public.json','wrangler.jsonc'])JSON.
 const data=JSON.parse(fs.readFileSync(path.join(root,'songwars-public.json'),'utf8'));
 assert.equal(data.approved.length,12);assert.equal(data.waitlist.length,0);assert.equal(data.approved[11].duo,'As5');
 const event=fs.readFileSync(path.join(root,'events.html'),'utf8');
-assert.equal((event.match(/class="matchup-card"/g)||[]).length,6);
-assert.ok(!event.includes('RIPSOKA'));assert.ok(event.includes('VS As5'));assert.ok(!event.includes('24 approved artists are confirmed'));
+assert.equal((event.match(/class="matchup-card"/g)||[]).length,13);
+assert.match(event,/BallHogs.*46–39\.5/);
+assert.match(event,/As5 advanced at 48%/);
+assert.match(event,/First alternate ##00 took the open spot/);
+assert.ok(!event.includes('COUNTDOWN') && !event.includes('WAITLIST OPEN'));
 const publicData=fs.readFileSync(path.join(root,'songwars-public.json'),'utf8');
 assert.ok(!/contact_email|artist_one_discord|artist_two_discord|attendance_at|sb_secret_|service_role/.test(publicData),'Public snapshot contains no private fields');
-console.log(`PASS: ${pages.length} pages, ${links} local links/assets, ${scripts} script syntax checks, 12 approved duos, 6 matchups, 0 waitlist duos, public-field privacy check.`);
+console.log(`PASS: ${pages.length} pages, ${links} local links/assets, ${scripts} script syntax checks, 13 archived matchups and public-field privacy check.`);
