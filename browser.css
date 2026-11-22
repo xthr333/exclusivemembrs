@@ -46,3 +46,23 @@ body::after{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;ba
 @keyframes exm-signal-drift{0%,85%,100%{text-shadow:none}90%{text-shadow:1px 0 rgba(168,199,255,.25),-1px 0 rgba(207,181,255,.2)}95%{text-shadow:-1px 0 rgba(168,199,255,.2),1px 0 rgba(207,181,255,.15)}}
 @media(prefers-reduced-motion:reduce){.exm-welcome .chrome-type,.hub-emblem{animation:none}body::after{display:none}}
 @media(forced-colors:active){body::after{display:none}}
+
+/* Keep the original poster treatment, but let its labels and title occupy
+   their own rows instead of colliding at narrow widths. */
+.event-visual--solo{display:grid;grid-template-rows:auto 1fr auto auto;gap:clamp(8px,1vw,16px);align-items:center;container-type:inline-size;aspect-ratio:auto;min-height:clamp(320px,37vw,520px);padding:clamp(24px,4vw,52px)}
+.event-visual--solo>span:not(.event-roman){position:relative;inset:auto}
+.event-visual--solo .event-wordmark{font-size:clamp(54px,8vw,104px);font-size:clamp(54px,21cqw,104px);justify-self:start;max-width:100%;transform:none}
+.event-visual--solo .event-badge{justify-self:end;transform:none}
+.event-visual--solo .event-floor strong{margin-top:0}
+.event-visual--solo .event-roman{pointer-events:none}
+.event-copy h2,.founder-heading .section-title{text-wrap:balance;overflow-wrap:anywhere}
+.founder-section{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:clamp(28px,6vw,88px);align-items:start}
+.founder-heading .section-title{font-size:clamp(44px,6.5vw,86px)}
+.founder-story{max-width:62ch;color:#c2c8d8;font-size:clamp(1rem,1.35vw,1.125rem);line-height:1.8}
+.founder-story p+p{margin-top:1.2em}
+.founder-story strong{color:#f2f4ff}
+@media(max-width:850px){
+ .founder-section{grid-template-columns:minmax(0,1fr)}
+ .founder-heading .section-title{margin-bottom:0}
+ .event-visual--solo{aspect-ratio:auto;min-height:clamp(310px,75vw,440px)}
+}
