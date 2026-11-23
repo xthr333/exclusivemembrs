@@ -69,6 +69,24 @@ for(const photo of photoSources.photos){
  assert.ok(fs.statSync(path.join(root,photo.file)).size>1000);
 }
 const home=fs.readFileSync(path.join(root,'index.html'),'utf8');
+// Keep the destinations themselves in reading/tab order; CSS order alone is not enough.
+const invite=fs.readFileSync(path.join(root,'config.js'),'utf8').match(/DISCORD_URL:\s*"([^"]+)"/)[1];
+const season4=eventPage.match(/href="(https:[^"]+\/season-4)"/)[1];
+const heroLinks=[...home.split('<div class="welcome-copy">')[1].split('<div class="welcome-bottom">')[0].matchAll(/<a\b[^>]*?href="([^"]+)"/g)].map(m=>m[1]);
+assert.deepEqual(heroLinks,[season4,invite]);
+const sections=[...home.split('<main id="main">')[1].split('</main>')[0].matchAll(/<section\b([^>]*)>/g)].map(m=>m[1]);
+assert.match(sections[1],/id="songwars"/);
+assert.match(sections[2],/id="discord"/);
+assert.match(sections.at(-1),/id="shop-exm"/);
+for(const f of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
+ const page=fs.readFileSync(path.join(root,f),'utf8');
+ const menu=page.match(/<ul class="nav-links"[^>]*>([\s\S]*?)<\/ul>/);
+ if(!menu)continue;
+ const paths=[...menu[1].matchAll(/<a\b[^>]*?href="([^"]+)"/g)].map(m=>m[1]);
+ assert.deepEqual(paths.slice(0,2),['events.html',invite],f+' navigation');
+ assert.equal(paths.at(-1),'shop.html',f+' shop position');
+ for(const [href] of page.matchAll(/https:\/\/discord\.gg\/[A-Za-z0-9_-]+/g))assert.equal(href,invite,f+' Discord invite');
+}
 assert.ok(!home.includes('world-panel residency-panel'));
 assert.ok(home.includes('quiet-residency'));
 console.log('PASS: 10 shareable artist hubs; completed bracket and wildcard recap; 8 real W3 portfolio photos with provenance; Merlin portfolio destination; low-key Residency.');
