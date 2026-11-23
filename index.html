@@ -1,11 +1,37 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>EXCLUSIVEMEMBRS — It’s Exclusive.</title><meta name="description" content="The official world of ExclusiveMembrs. Discover the artists, shop the EXM collection, join SongWars and explore the creative collective behind the chrome.">
+<!-- Keep the first screen usable even when an embedded browser misses a stylesheet. -->
+<style id="exm-first-paint">
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#08090d;color:#f5f6fc;font:1rem/1.5 Arial,Helvetica,sans-serif}
+img{max-width:100%;height:auto}
+h1,h2,h3,p,a{overflow-wrap:break-word}
+.skip-link:not(:focus){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);clip-path:inset(50%);white-space:nowrap}
+.skip-link:focus{position:absolute;top:.75rem;left:.75rem;z-index:30000;padding:.75rem 1rem;background:#fff;color:#08090d}
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:.75rem 5%}
+.navbar .brand{display:flex;align-items:center;gap:.625rem;min-width:0}
+.navbar .brand::before,.navbar .brand::after{content:none}
+.nav-mark{width:3.25rem;max-width:18vw;height:auto;object-fit:contain}
+.nav-toggle{display:none}
+.nav-links{display:flex;gap:1rem;list-style:none;margin:0;padding:0}
+@media(max-width:850px){.navbar{position:relative}.nav-toggle{display:block;min-height:44px}.nav-links{display:none}.nav-links.open{position:absolute;z-index:2;top:100%;left:0;right:0;display:flex;flex-direction:column;padding:1rem;background:#08090d}}
+.exm-welcome{padding:1rem 5%;text-align:center}
+.welcome-meta{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.375rem 1rem;font:600 .75rem/1.5 Arial,sans-serif}
+.welcome-stage{position:relative;display:grid;place-items:center;min-width:0;margin:1rem auto;max-width:68rem}
+.welcome-logo{display:block;width:70%;max-width:40.625rem;height:auto;object-fit:contain;margin-inline:auto}
+.exm-spark{position:absolute}.spark-one{top:15%;left:10%}.spark-two{right:10%;bottom:15%}
+.welcome-copy{max-width:48rem;margin:1.25rem auto}
+.welcome-copy h1{margin:.4em 0 .2em;line-height:1.08}
+.welcome-copy .buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:.75rem}
+@media(max-width:550px){.welcome-logo{width:100%;max-width:27.5rem}.welcome-stage .orbit-note{display:none}}
+</style>
 <link rel="preload" href="assets/brand/exm-logo.webp" as="image"><link rel="stylesheet" href="fonts.css?v=20261108-browser"><link rel="stylesheet" href="style.css?v=20261107-vibe"><link rel="stylesheet" href="rollout.css?v=20261108-browser"><meta name="theme-color" content="#08090d"><link rel="canonical" href="https://exclusivemembrs.com/"><link rel="icon" href="assets/brand/exm-logo.webp" type="image/webp"><meta property="og:type" content="website"><meta property="og:site_name" content="EXCLUSIVEMEMBRS"><meta property="og:title" content="EXCLUSIVEMEMBRS — It’s Exclusive."><meta property="og:image" content="https://exclusivemembrs.com/assets/brand/exm-logo.webp"><meta name="twitter:card" content="summary_large_image"><link rel="stylesheet" href="editorial.css?v=20261108"><link rel="stylesheet" href="browser.css?v=20261122-spacing"></head><body class="rollout-home">
 <a class="skip-link" href="#main">SKIP TO CONTENT</a><nav class="navbar" aria-label="Main navigation"><a class="brand" href="index.html" aria-label="ExclusiveMembrs home"><img class="nav-mark" src="assets/brand/exm-logo.webp" width="90" height="36" alt=""><span>EXCLUSIVEMEMBRS</span></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-navigation" aria-label="Toggle navigation">MENU +</button><ul class="nav-links" id="main-navigation"><li><a data-page="shop.html" href="shop.html">🛍️ Shop</a></li><li><a data-page="artists.html" href="artists.html">🎧 The Membrs</a></li><li><a data-page="events.html" href="events.html">⚔️ SongWars</a></li><li><a data-page="residency.html" href="residency.html">🏡 Residency</a></li><li><a data-page="studios.html" href="studios.html">📸 W3 Studios</a></li><li class="nav-more"><button class="nav-more-toggle" type="button" aria-expanded="false" aria-controls="more-navigation">MORE +</button><div class="nav-more-menu" id="more-navigation"><a data-page="updates.html" href="updates.html">📡 Updates</a><a data-page="about.html" href="about.html">✦ About EXM</a><a data-page="submit.html" href="submit.html">✨ Submit your work</a><a data-page="contact.html" href="contact.html">💬 Contact</a></div></li></ul></nav>
 <main id="main">
 <section class="exm-welcome" aria-labelledby="welcome-title">
-<div class="welcome-meta"><span>✦ WELCOME TO EXM</span><span>NOT A POPULARITY CONTEST.</span></div>
+<div class="welcome-meta"><span>✦ WELCOME TO EXM</span> <span>NOT A POPULARITY CONTEST.</span></div>
 <div class="welcome-stage"><span class="orbit-note note-left" aria-hidden="true">🎧 MUSIC<br>WITH IDENTITY.</span><div class="chrome-orbit" aria-hidden="true"></div><img class="welcome-logo" src="assets/brand/exm-logo.webp" width="1200" height="480" alt="Official chrome ExclusiveMembrs logo" fetchpriority="high"><span class="orbit-note note-right" aria-hidden="true">YOUR PEOPLE.<br>YOUR NEXT CHAPTER. ✨</span><span class="exm-spark spark-one" aria-hidden="true">✦</span><span class="exm-spark spark-two" aria-hidden="true">✧</span></div>
 <div class="welcome-copy"><p class="kicker">ARTISTS · PRODUCERS · CREATORS · COMMUNITY</p><h1 id="welcome-title">IT’S <span class="chrome-type">EXCLUSIVE.</span></h1><p>Music, creative work and the people behind it.<br> Meet the Membrs, find your next piece, or get tapped into what’s happening.</p><div class="buttons"><a class="btn" href="shop.html">🛍️ Shop EXM</a><a class="btn btn-dark" href="artists.html">🎧 The Membrs</a></div></div>
 <div class="welcome-bottom"><span>EXCLUSIVEMEMBRS / EST. 2026</span><a href="#inside">SCROLL INTO EXM ↓</a></div>
