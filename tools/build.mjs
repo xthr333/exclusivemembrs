@@ -42,7 +42,8 @@ for (const file of renderableFiles) {
     continue;
   }
   const source = await readFile(resolve(root, file), 'utf8');
-  const html = source.replace(/<!-- exm:preview ([\s\S]+?) -->/g, (_, markup) => preview ? markup : '');
+  const html = source.replace(/<!-- exm:preview ([\s\S]+?) -->/g, (_, markup) => preview ? markup : '')
+    .replace('<!-- exm:preview-editorial -->', preview ? '<script src="editorial-preview.js"></script>' : '');
   await writeFile(resolve(out, file), inlineLayout(html, file));
 }
 await cp(resolve(root, 'assets'), resolve(out, 'assets'), { recursive: true });

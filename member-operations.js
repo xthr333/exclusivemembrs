@@ -324,10 +324,10 @@
   async function campaignStudio(rebuild) {
     const data = await api('campaign_studio');
     const card = el('article', null, 'platform-card');
-    card.append(el('h3', 'Homepage campaign and spotlight'));
+    card.append(el('h3', 'Featured event and member spotlight'));
     const pending = Boolean(data.revision > data.publishedRevision);
-    card.append(el('p', pending ? 'Saved draft awaiting approval.' : 'Homepage preview is up to date.'));
-    const draft = task(card, 'Save homepage draft', async values => {
+    card.append(el('p', pending ? 'Saved draft awaiting approval.' : 'Editorial preview is up to date.'));
+    const draft = task(card, 'Save editorial draft', async values => {
       await api('editorial_save', { revision: data.revision, event: values.event || null,
         creator: values.creator || null, description: values.description.trim() });
       await rebuild();
@@ -344,7 +344,7 @@
       const featured = data.events.find(event => event.id === data.draft.event);
       const creator = data.creators.find(person => person.slug === data.draft.creator);
       const details = el('details');
-      details.append(el('summary', 'Review saved homepage draft'),
+      details.append(el('summary', 'Review saved editorial draft'),
         el('p', 'Campaign: ' + (featured?.name || 'Official SongWars campaign')),
         el('p', 'Spotlight: ' + (creator?.name || 'Official community spotlight')));
       if (data.draft.description) details.append(el('p', data.draft.description));
@@ -353,7 +353,7 @@
         await api('editorial_publish', { revision: data.revision });
         await rebuild();
       });
-      card.append(actionButton('Publish saved homepage draft to preview', publish));
+      card.append(actionButton('Publish saved editorial draft to preview', publish));
     }
     const view = el('a', 'View homepage in this preview', 'text-link');
     view.href = 'index.html';

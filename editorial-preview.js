@@ -1,48 +1,38 @@
 (() => {
-  // The static campaign remains the fallback and the only source on the live site.
   if (!['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) return;
-  const states = {
-    scheduled: 'Upcoming test event', registration_open: 'Test registration open',
-    live: 'Test event live', completed: 'Test event recap',
-  };
-  const profileSlugs = /^(?:mayo|bitchyounotayop|vantiva)$/;
+  const slugs = /^(?:mayo|bitchyounotayop|vantiva)$/;
   const eventIds = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  function el(tag, text) {
+    const node = document.createElement(tag);
+    if (text) node.textContent = text;
+    return node;
+  }
 
   function featureEvent(campaign) {
-    if (!campaign || !eventIds.test(campaign.id) || !Object.hasOwn(states, campaign.status)) return;
-    const lead = document.querySelector('.welcome-copy .btn');
-    const poster = document.querySelector('#songwars .event-visual');
-    const copy = document.querySelector('#songwars .event-copy');
-    const url = 'events.html#event-' + campaign.id;
-    const original = document.createElement('a');
-    original.className = 'text-link';
-    original.href = lead.getAttribute('href');
-    original.textContent = 'SongWars IV interest form';
-    copy.querySelector('.buttons').append(original);
-    lead.href = url;
-    lead.textContent = 'Explore featured event';
-    poster.href = url;
-    poster.setAttribute('aria-label', 'Details for ' + campaign.name);
-    poster.classList.add('preview-event-poster');
-    poster.querySelector('.event-roman').textContent = 'EXM';
-    poster.querySelector('.event-wordmark').textContent = campaign.name;
-    poster.querySelector('.event-badge').textContent = 'Local preview';
-    poster.querySelector('.event-floor').textContent = states[campaign.status];
-    copy.querySelector('.kicker').textContent = states[campaign.status];
-    copy.querySelector('h2').textContent = campaign.name;
-    copy.querySelector('p:not(.kicker)').textContent = campaign.description;
-    copy.querySelector('.btn').href = url;
+    const calendar = document.getElementById('event-calendar-heading');
+    if (!calendar || !campaign || !eventIds.test(campaign.id)) return;
+    const card = el('aside');
+    card.className = 'section platform-section';
+    card.id = 'preview-featured-event';
+    const link = el('a', 'Open featured event');
+    link.href = '#event-' + campaign.id;
+    card.append(el('p', 'Featured in this preview'), el('h2', campaign.name),
+      el('p', campaign.description), link);
+    calendar.closest('section').before(card);
   }
 
   function featureCreator(creator) {
-    if (!creator || !profileSlugs.test(creator.slug)) return;
-    const spotlight = document.querySelector('#inside .platform-card');
-    spotlight.querySelector('.kicker').textContent = 'Preview creator spotlight';
-    spotlight.querySelector('h3').textContent = creator.name;
-    spotlight.querySelector('p:not(.kicker)').textContent = creator.description || 'Explore this creator’s public EXM profile.';
-    const link = spotlight.querySelector('a');
+    const spotlight = document.getElementById('spotlight-track');
+    if (!spotlight || !creator || !slugs.test(creator.slug)) return;
+    const card = el('li');
+    card.className = 'platform-card';
+    card.id = 'preview-featured-creator';
+    const link = el('a', creator.name);
     link.href = creator.slug + '.html';
-    link.textContent = 'View ' + creator.name + '’s profile';
+    const title = el('h3');
+    title.append(link);
+    card.append(title, el('p', creator.description || 'Preview creator spotlight'));
+    spotlight.prepend(card);
   }
 
   fetch('/api/platform/featured_content', { signal: AbortSignal.timeout(4000) })

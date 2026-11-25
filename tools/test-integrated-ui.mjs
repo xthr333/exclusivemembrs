@@ -99,26 +99,28 @@ try {
   await eventEditor.getByText('Published in local preview').waitFor();
 
   const guest = await pageFor();
-  const editorial = card(owner, 'Homepage campaign and spotlight');
+  const editorial = card(owner, 'Featured event and member spotlight');
   await editorial.getByLabel('Featured campaign').selectOption({ label: eventName });
   await editorial.getByLabel('Creator spotlight').selectOption('vantiva');
   await editorial.getByLabel('Spotlight description (optional)').fill('TEST · Editorial spotlight');
-  await editorial.getByRole('button', { name: 'Save homepage draft' }).click();
-  const publishHomepage = editorial.getByRole('button', { name: 'Publish saved homepage draft to preview' });
+  await editorial.getByRole('button', { name: 'Save editorial draft' }).click();
+  const publishHomepage = editorial.getByRole('button', { name: 'Publish saved editorial draft to preview' });
   await publishHomepage.waitFor();
   await guest.goto(base + '/');
-  await guest.locator('.welcome-copy').getByRole('link', { name: 'SongWars IV interest form' }).waitFor();
+  await guest.locator('.welcome-copy').getByRole('link', { name: 'Explore Events' }).waitFor();
+  assert.equal(await guest.locator('#preview-featured-creator').count(), 0);
   await publishHomepage.click();
-  await editorial.getByText('Homepage preview is up to date.').waitFor();
+  await editorial.getByText('Editorial preview is up to date.').waitFor();
   await guest.reload();
-  await guest.locator('#songwars').getByRole('heading', { name: eventName, exact: true }).waitFor();
-  await guest.locator('#inside').getByRole('link', { name: 'View Vantiva’s profile' }).waitFor();
-  assert.equal(await guest.locator('#songwars').getByRole('link', { name: 'SongWars IV interest form' }).isVisible(), true);
+  await guest.locator('#preview-featured-creator').getByRole('link', { name: 'Vantiva' }).waitFor();
+  await guest.goto(base + '/events');
+  await guest.locator('#preview-featured-event').getByRole('heading', { name: eventName, exact: true }).waitFor();
+  await guest.locator('#featured-event').getByRole('link', { name: 'SongWars IV interest form' }).waitFor();
   await editorial.getByLabel('Featured campaign').selectOption('');
   await editorial.getByLabel('Creator spotlight').selectOption('');
-  await editorial.getByRole('button', { name: 'Save homepage draft' }).click();
+  await editorial.getByRole('button', { name: 'Save editorial draft' }).click();
   await publishHomepage.click();
-  await editorial.getByText('Homepage preview is up to date.').waitFor();
+  await editorial.getByText('Editorial preview is up to date.').waitFor();
 
   await guest.goto(base + '/events');
   const publicEvent = card(guest, eventName);
