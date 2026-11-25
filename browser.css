@@ -254,6 +254,8 @@ body::after{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;ba
 .legacy-table th,.legacy-table td{text-align:start;padding:.65rem;border-bottom:1px solid var(--line)}
 .legacy-table small{display:block;margin-top:.25rem;color:#dddce8}
 .legacy-emblem{display:inline-grid;place-items:center;min-width:2rem;min-height:2rem;margin-inline-end:.4rem;background:#292d3a;color:#fff;border-radius:50%;font-weight:750}
+.legacy-tabs{display:flex;gap:.45rem;flex-wrap:wrap}
+.legacy-tabs [aria-selected=true]{background:#f5f6fc;color:#08090d}
 .member-avatar img.member-photo{width:100%;height:100%;object-fit:cover;border-radius:50%}
 #profile-photo-preview{width:6rem;height:6rem;object-fit:cover;border-radius:50%}
 .cosmetic-profile-preview{display:grid;gap:.55rem;padding:.85rem;background:#141724;color:#fff;border-radius:4px;margin-block:.65rem}

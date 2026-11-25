@@ -90,7 +90,10 @@ try {
   await legacySection.getByRole('row').filter({ hasText: 'BitchYouNotAYop' }).getByText('90', { exact: true }).waitFor();
   await legacySection.getByLabel('Legacy period').selectOption('s3');
   await legacySection.getByRole('row').filter({ hasText: 'Mayo_' }).getByText('80', { exact: true }).waitFor();
-  await legacySection.getByLabel('Legacy category').selectOption('producer');
+  const artistTab = legacySection.getByRole('tab', { name: 'Artists' });
+  await artistTab.focus();
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await legacySection.getByRole('tab', { name: 'Producers' }).getAttribute('aria-selected'), 'true');
   await legacySection.getByText('No verified producer competition results qualify for these standings.').waitFor();
   await page.goto(origin + '/legacy.html#legacy-bracket');
   await page.getByText('Final · BallHogs defeated Yopz · 46–39.5 / 50').waitFor();

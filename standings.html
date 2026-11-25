@@ -50,10 +50,13 @@
       <h2 class="section-title">SongWars Legacy</h2>
       <p>Legacy Points count verified SongWars results separately from lifetime XP and spendable points.</p>
       <form class="hub-filters">
-        <label>Legacy category <select name="category"><option value="artist">Artists</option><option value="producer">Producers</option></select></label>
+        <div class="legacy-tabs" role="tablist" aria-label="Legacy category">
+          <button class="btn btn-dark" type="button" role="tab" id="legacy-artist-tab" aria-controls="legacy-scores" aria-selected="true" data-category="artist">Artists</button>
+          <button class="btn btn-dark" type="button" role="tab" id="legacy-producer-tab" aria-controls="legacy-scores" aria-selected="false" tabindex="-1" data-category="producer">Producers</button>
+        </div>
         <label>Legacy period <select name="season"><option value="all">All-Time</option><option value="s3">Season III</option><option value="s2">Season II</option></select></label>
       </form>
-      <div data-legacy-scores aria-live="polite"></div>
+      <div id="legacy-scores" data-legacy-scores role="tabpanel" aria-labelledby="legacy-artist-tab" tabindex="0" aria-live="polite"></div>
       <p><a href="legacy.html">Brackets, participants and judging credits</a></p>
     </section></main>
   <!-- exm:footer -->

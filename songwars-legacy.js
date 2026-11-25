@@ -31,6 +31,9 @@ function list(parent, heading, rows) {
 function archivePage(target, archive) {
   const { source, teams, matches } = archive;
   const sections = el('div', null, 'platform-grid hub-grid');
+  list(sections, 'Season credits', source.seasons.map(season =>
+    season.label + ' · ' + season.credits.join(' & ') +
+    (season.status === 'archive' ? ' · Archive credit' : season.status === 'pending' ? ' · Verification pending' : ' · Verified title')));
   list(sections, 'Season II · Announced opening matchups', source.s2Announced.map(pair => pair.join(' vs. ')));
   list(sections, 'Season II · Recap credits', source.s2Credits);
   list(sections, 'Season II · Lineup conflict', [...source.s2Disputed, 'Runner-up and round results pending final bracket or VOD.']);
@@ -95,10 +98,12 @@ function profile(target, archive, person) {
 function standings(target, archive) {
   const form = target.querySelector('form');
   const results = target.querySelector('[data-legacy-scores]');
+  const tabs = [...form.querySelectorAll('[role="tab"]')];
+  let category = 'artist';
   function render() {
     results.replaceChildren();
     const period = form.elements.season.value;
-    if (form.elements.category.value === 'producer') {
+    if (category === 'producer') {
       results.append(el('p', 'No verified producer competition results qualify for these standings.'));
       results.append(link('Vantiva · verified EXM producer roster credit', 'vantiva.html'));
       return;
@@ -132,6 +137,26 @@ function standings(target, archive) {
     wrap.setAttribute('aria-label','Scrollable Legacy standings table');
     wrap.append(table);
     results.append(wrap, el('p','¹ Most recent published score within the selected period. Unpublished scores use a dash. Older results are incomplete.'));
+  }
+  function selectTab(tab) {
+    category = tab.dataset.category;
+    results.setAttribute('aria-labelledby',tab.id);
+    for (const choice of tabs) {
+      choice.setAttribute('aria-selected',String(choice === tab));
+      choice.tabIndex = choice === tab ? 0 : -1;
+    }
+    render();
+  }
+  for (const tab of tabs) {
+    tab.addEventListener('click', () => selectTab(tab));
+    tab.addEventListener('keydown', event => {
+      const positions = { ArrowLeft:1-tabs.indexOf(tab), ArrowRight:1-tabs.indexOf(tab), Home:0, End:1 };
+      if (!Object.hasOwn(positions,event.key)) return;
+      event.preventDefault();
+      const next = tabs[positions[event.key]];
+      selectTab(next);
+      next.focus();
+    });
   }
   form.addEventListener('change', render);
   render();
