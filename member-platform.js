@@ -119,7 +119,9 @@
     const progress = byId('member-progress');
     progress.max = data.nextLevelXp ? data.nextLevelXp - data.levelFloor : 1;
     progress.value = data.nextLevelXp ? data.xp - data.levelFloor : 1;
-    progress.setAttribute('aria-valuetext', data.nextLevelXp ? fmt(data.nextLevelXp - data.xp) + ' XP to next level' : 'Maximum level');
+    const next = data.nextLevelXp ? fmt(data.nextLevelXp - data.xp) + ' XP to level ' + (data.level + 1) : 'Maximum level';
+    progress.setAttribute('aria-valuetext', next);
+    byId('member-next-level').textContent = next;
     const checkIn = byId('daily-check-in');
     checkIn.disabled = data.checkedIn;
     checkIn.textContent = data.checkedIn ? 'Checked in today' : 'Check in today';

@@ -415,9 +415,11 @@
       const notices = el('div', null, 'platform-grid hub-grid');
       notices.append(editorCard(null, 'notice', rebuild), ...data.notices.map(item => editorCard(item, 'notice', rebuild)));
       children.push(el('h3', 'Announcements'), notices, codesCard(data));
+    }
+    if (owner && (!hosted || window.EXMHostedMode === 'members')) {
       const recovery = el('article', null, 'platform-card');
       recovery.append(el('h3', 'Recovery references'),
-        el('p', 'Recording review does not reset credentials. Account ownership needs a separate verified process.'));
+        el('p', 'Verify account ownership through the Auth provider before approving any password reset.'));
       for (const item of data.recovery) {
         const row = el('div');
         row.append(el('p', '@' + item.username + ' · ' + date(item.created_at) + ' · ' + item.reference));

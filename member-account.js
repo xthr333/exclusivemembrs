@@ -130,7 +130,7 @@
     await showSession();
   });
 
-  if (hosted) {
+  if (window.EXMHostedMode === 'events') {
     const recoveryForm = byId('member-recover');
     recoveryForm.previousElementSibling.textContent = 'Contact EXM support for account assistance.';
     recoveryForm.replaceWith(Object.assign(document.createElement('a'), {

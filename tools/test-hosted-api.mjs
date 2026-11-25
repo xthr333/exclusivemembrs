@@ -87,6 +87,13 @@ assert.ok(!(await (await platform('events')).text()).includes(application.contac
 assert.equal((await platform('check_in', { cookie: ordinary, data: {} })).status, 404);
 
 const mode = 'members';
+const newLogin = await members('login', { mode, data: { email: handles[1] + '@example.com', password } });
+assert.equal(newLogin.status, 200);
+const { recoveryCodes } = await newLogin.json();
+assert.equal(recoveryCodes.length, 8);
+const backup = { mode, data: { username: handles[1], code: recoveryCodes[0] } };
+const [firstRecovery, usedCode] = await Promise.all([members('recover', backup), members('recover', backup)]);
+assert.deepEqual([firstRecovery.status, usedCode.status].sort(), [200, 401]);
 assert.equal((await members('profile', { mode, cookie: ordinary, data: {
   displayName: 'Rehearsal artist', bio: '', discoverable: true, creativeRoles: ['artist'],
 } })).status, 200);
@@ -103,4 +110,7 @@ for (const action of ['redeem', 'equip']) {
 assert.ok((await (await platform('rewards', { mode, cookie: ordinary })).json()).items
   .some(item => item.slug === 'signal-frame' && item.owned && item.equipped));
 assert.equal((await platform('owner', { mode, cookie: ordinary })).status, 403);
+const standings = await ranking('artist');
+assert.ok(standings.every(row => Array.isArray(row.titles) && typeof row.champion === 'boolean'));
+assert.equal((await members('signup', { mode, data: {} })).status, 403);
 console.log('PASS: isolated production Worker routes, session cookies, publish and review, application privacy, signup and recovery gates, category rankings, redemption and equip.');

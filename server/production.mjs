@@ -8,10 +8,11 @@ const eventPages = new Set(['/events', '/account', '/member-hub']);
 const hostedAssets = '/__exm/';
 
 function activeMode(env) {
-  if (!['events', 'members'].includes(env.EXM_MEMBER_MODE) ||
+  if (!['events', 'events-only', 'members'].includes(env.EXM_MEMBER_MODE) ||
       !env.EXM_MEMBER_SERVICE_ROLE_KEY ||
       !/^[0-9a-f]{64}$/i.test(env.EXM_MEMBER_PEPPER ?? '')) return null;
-  return env.EXM_MEMBER_MODE;
+  if (env.EXM_MEMBER_MODE === 'events-only') return 'events';
+  return env.EXM_MEMBER_MODE === 'events' && env.EXM_MEMBER_RELEASE === 'members' ? 'members' : env.EXM_MEMBER_MODE;
 }
 
 export default {

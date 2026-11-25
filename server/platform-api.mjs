@@ -17,6 +17,7 @@ const editorialViews = new Set(['featured_content', 'campaign_studio']);
 const editorialActions = new Set(['editorial_save', 'editorial_publish']);
 const hostedOperations = new Set(['events', 'applications', 'studio', 'apply',
   'event_save', 'event_publish', 'event_assign', 'application_review', 'roster_link']);
+const hostedMemberOperations = new Set([...hostedOperations, 'recovery_review']);
 const hostedEventsOnly = new Set(['dashboard', ...hostedOperations]);
 const states = new Set(['draft', 'scheduled', 'registration_open', 'live', 'completed', 'canceled', 'archived']);
 const eventKinds = new Set(['gaming', 'community', 'stream', 'residency', 'screening', 'in_person', 'other']);
@@ -265,7 +266,7 @@ export async function handlePlatformRequest(request, env) {
   const hosted = env.EXM_HOSTED === true;
   if (hosted && ((env.EXM_MEMBER_MODE === 'events' && !hostedEventsOnly.has(name)) ||
       ((operationViews.has(name) || operationActions.has(name) || editorialViews.has(name) || editorialActions.has(name) ||
-        competitionViews.has(name) || competitionActions.has(name)) && !hostedOperations.has(name)))) {
+        competitionViews.has(name) || competitionActions.has(name)) && !hostedMemberOperations.has(name)))) {
     return respond({ error: 'Page not found.' }, 404);
   }
   const reading = request.method === 'GET' && (views.has(name) || operationViews.has(name) || competitionViews.has(name) || editorialViews.has(name));
@@ -289,6 +290,9 @@ export async function handlePlatformRequest(request, env) {
       return domainResponse(await db.rpc('link_invited_roster', { p_token, p_handle, p_email }));
     }
     if (reading) {
+      if (hosted && name === 'rankings') {
+        return domainResponse(await db.rpc('standings', { p_options: optionsFor(name, url.searchParams) }));
+      }
       if (name === 'feed') {
         const cursor = optionsFor(name, url.searchParams);
         return domainResponse(await db.rpc('feed_visible', {

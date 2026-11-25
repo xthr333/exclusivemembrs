@@ -9,6 +9,7 @@
     { "pattern": "www.exclusivemembrs.com", "custom_domain": true }
   ],
   "vars": {
+    "EXM_MEMBER_RELEASE": "members",
     "EXM_MEMBER_AUTH_URL": "https://ldtmapwemttqoygcqlqu.supabase.co/auth/v1",
     "EXM_MEMBER_DATA_URL": "https://ldtmapwemttqoygcqlqu.supabase.co/rest/v1",
     "EXM_MEMBER_ANON_KEY": "sb_publishable_fnnYUGRotjuA_56F1F3Yvg_l_1mYYY5"

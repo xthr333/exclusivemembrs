@@ -174,7 +174,7 @@ async function signup(db, request, body) {
   return respond({ message: 'If your account was created, you can sign in to save your one-time recovery codes.' }, 202);
 }
 
-async function login(db, request, body, hosted) {
+async function login(db, request, body, hosted, backupCodes) {
   const { email, password } = credentials(body, false);
   await throttle(db, request, 'login', email);
   const authEmail = hosted ? email : await db.alias(email);
@@ -193,10 +193,11 @@ async function login(db, request, body, hosted) {
     throw new RequestError(403, 'This account requires additional verification. Contact EXM support.');
   }
   const token = randomHex(32);
-  const codes = hosted ? [] : Array.from({ length: 8 }, () => randomHex(16));
+  const codes = backupCodes ? Array.from({ length: 8 }, () => randomHex(16)) : [];
   const session = { p_id: accountId, p_token: await sha256(token) };
-  if (!hosted) session.p_codes = await Promise.all(codes.map(code => db.digest('recovery', code)));
-  const issued = await db.rpc(hosted ? 'open_hosted_session' : 'open_session', session);
+  if (backupCodes) session.p_codes = await Promise.all(codes.map(code => db.digest('recovery', code)));
+  const procedure = !hosted ? 'open_session' : backupCodes ? 'open_hosted_session_with_codes' : 'open_hosted_session';
+  const issued = await db.rpc(procedure, session);
   if (issued === null) throw new RequestError(401, 'We could not sign you in with those credentials.');
   return respond({ recoveryCodes: issued ? codes : [] }, 200, {
     'Set-Cookie': cookieName + '=' + token + '; ' + cookieAttributes + '; Max-Age=86400',
@@ -232,7 +233,9 @@ export async function handleMemberRequest(request, env) {
   if (method === 'POST' && request.headers.get('Origin') !== url.origin) {
     return respond({ error: 'Request origin was not accepted.' }, 403);
   }
-  if (env.EXM_HOSTED === true && ['/api/members/signup', '/api/members/recover'].includes(url.pathname)) {
+  const hosted = env.EXM_HOSTED === true;
+  const backupCodes = !hosted || env.EXM_MEMBER_MODE === 'members';
+  if (hosted && (url.pathname === '/api/members/signup' || (!backupCodes && url.pathname === '/api/members/recover'))) {
     return respond({ error: url.pathname.endsWith('/signup') ? 'Public signup is closed.' :
       'Use the EXM support contact for account assistance.' }, 403);
   }
@@ -250,7 +253,7 @@ export async function handleMemberRequest(request, env) {
       }
       return await signup(db, request, await readBody(request));
     }
-    if (path === '/api/members/login') return await login(db, request, await readBody(request), env.EXM_HOSTED === true);
+    if (path === '/api/members/login') return await login(db, request, await readBody(request), hosted, backupCodes);
     if (path === '/api/members/recover') return await recover(db, request, await readBody(request));
 
     const token = readCookie(request);
