@@ -6,7 +6,9 @@ const root=path.resolve(import.meta.dirname,'..');
 const css=fs.readFileSync(path.join(root,'browser.css'),'utf8');
 for(const feature of ['-webkit-text-size-adjust:100%','-webkit-background-clip:text','-webkit-text-fill-color:transparent','-webkit-backdrop-filter','safe-area-inset-top','safe-area-inset-bottom','100svh','100dvh','forced-colors:active'])assert.ok(css.includes(feature),feature);
 assert.ok(!fs.readFileSync(path.join(root,'rollout.css'),'utf8').includes('fonts.googleapis.com'));
-assert.ok(css.includes('.nav-links{flex-wrap:nowrap;'),'Short-screen menus must scroll vertically, not form hidden columns');
+assert.ok(css.includes('.nav-links{flex-wrap:nowrap;'),'Short-screen menus must scroll vertically');
+assert.match(css, /prefers-reduced-motion:no-preference[^]*?animation:exm-logo-glitch/);
+assert.match(css, /\.navbar:not\(\.nav-ready\) \.nav-links/);
 const fontCss=fs.readFileSync(path.join(root,'fonts.css'),'utf8');
 const fontPaths=[...fontCss.matchAll(/url\('([^']+)'\)/g)].map(m=>m[1]);
 assert.equal(fontPaths.length,7);
@@ -17,7 +19,7 @@ for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
  assert.ok(html.includes('viewport-fit=cover'),file);
  assert.ok(!/user-scalable=no|maximum-scale=1/.test(html),`${file}: keep pinch zoom`);
  assert.ok(html.includes('fonts.css?v=20261108-browser'),file);
- assert.ok(html.includes('browser.css?v=20261122-spacing'),file);
+ assert.ok(html.includes('browser.css?v=exm2'),file);
  assert.ok(html.indexOf('fonts.css')<html.indexOf('style.css'),file);
  assert.ok(html.lastIndexOf('browser.css')>html.lastIndexOf('rel="stylesheet"')-60,file);
 }

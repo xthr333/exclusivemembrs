@@ -75,18 +75,23 @@ const season4=eventPage.match(/href="(https:[^"]+\/season-4)"/)[1];
 const heroLinks=[...home.split('<div class="welcome-copy">')[1].split('<div class="welcome-bottom">')[0].matchAll(/<a\b[^>]*?href="([^"]+)"/g)].map(m=>m[1]);
 assert.deepEqual(heroLinks,[season4,invite]);
 const sections=[...home.split('<main id="main">')[1].split('</main>')[0].matchAll(/<section\b([^>]*)>/g)].map(m=>m[1]);
-assert.match(sections[1],/id="songwars"/);
-assert.match(sections[2],/id="discord"/);
-assert.match(sections.at(-1),/id="shop-exm"/);
+assert.deepEqual(sections.map(section => section.match(/ id="([^"]+)"/)?.[1]), [
+ undefined, 'songwars', 'events', 'inside', 'media', 'shop-exm', undefined, 'discord',
+]);
 for(const f of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
  const page=fs.readFileSync(path.join(root,f),'utf8');
- const menu=page.match(/<ul class="nav-links"[^>]*>([\s\S]*?)<\/ul>/);
- if(!menu)continue;
- const paths=[...menu[1].matchAll(/<a\b[^>]*?href="([^"]+)"/g)].map(m=>m[1]);
- assert.deepEqual(paths.slice(0,2),['events.html',invite],f+' navigation');
- assert.equal(paths.at(-1),'shop.html',f+' shop position');
+ const menu=page.match(/<ul class="nav-links"[^>]*>([\s\S]*?)<\/ul>/)[1];
+ const primary=[...menu.matchAll(/<li><a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a><\/li>/g)].map(match=>match.slice(1));
+ assert.deepEqual(primary, [
+  ['/index.html','Home'], ['/events.html','Events'], ['/artists.html','Community'],
+  ['/media.html','Media'], ['/shop.html','Shop'], ['/about.html','About'],
+ ], f+' navigation');
+ assert.ok(!menu.includes('admin.html'),f+' no public admin link');
+ assert.ok(menu.includes('/divisions.html'),f+' Divisions entry');
  for(const [href] of page.matchAll(/https:\/\/discord\.gg\/[A-Za-z0-9_-]+/g))assert.equal(href,invite,f+' Discord invite');
 }
+assert.ok(home.includes('assets/brand/exm-logo.webp'));
+assert.ok(!home.includes('assets/w3/'));
 assert.ok(!home.includes('world-panel residency-panel'));
 assert.ok(home.includes('quiet-residency'));
 console.log('PASS: 10 shareable artist hubs; completed bracket and wildcard recap; 8 real W3 portfolio photos with provenance; Merlin portfolio destination; low-key Residency.');
@@ -97,7 +102,7 @@ assert.ok(orderHelp.includes('contact.html#contact-form'));
 assert.ok(orderHelp.includes('https://printify.com/contacts/'));
 assert.ok(orderHelp.includes('delivery estimates are not guarantees'));
 assert.ok(!orderHelp.includes('support@'));
-assert.equal((orderHelp.match(/<details /g)||[]).length,3);
+assert.equal((orderHelp.split("<main")[1].match(/<details /g)||[]).length,3);
 for(const f of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
  const content=fs.readFileSync(path.join(root,f),'utf8');
  if(content.includes('<footer>'))assert.ok(content.split('<footer>')[1].includes('order-help.html'),`${f}: visible order help`);

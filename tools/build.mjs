@@ -1,7 +1,9 @@
 import { cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 const root = resolve(import.meta.dirname, '..');
 const out = resolve(root, 'dist');
+execFileSync(process.execPath, [resolve(root, 'tools/sync-layout.mjs'), '--check'], {stdio:'inherit'});
 await mkdir(out, {recursive:true});
 // The core layout travels in the HTML, in the same cascade position as the
 // source link. A stale or filtered secondary CSS request can't undo the layout.
