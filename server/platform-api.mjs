@@ -16,7 +16,7 @@ const memberInteractions = new Set(['post', 'like', 'report']);
 const editorialViews = new Set(['featured_content', 'campaign_studio']);
 const editorialActions = new Set(['editorial_save', 'editorial_publish']);
 const hostedOperations = new Set(['events', 'applications', 'studio', 'apply',
-  'event_save', 'event_publish', 'event_assign', 'application_review']);
+  'event_save', 'event_publish', 'event_assign', 'application_review', 'roster_link']);
 const hostedEventsOnly = new Set(['dashboard', ...hostedOperations]);
 const states = new Set(['draft', 'scheduled', 'registration_open', 'live', 'completed', 'canceled', 'archived']);
 const eventKinds = new Set(['gaming', 'community', 'stream', 'residency', 'screening', 'in_person', 'other']);
@@ -45,6 +45,8 @@ const errors = {
   locked: [403, 'The member gate is locked.'],
   invalid_code: [403, 'The code cannot be used for this account and purpose.'],
   self: [403, 'Ask another authorized owner to review awards or roles for your account.'],
+  claimed: [409, 'The roster profile or verified account is already linked.'],
+  unverified_invite: [409, 'The invitee needs to accept their verified EXM invitation and sign in first.'],
 };
 
 const valid = (condition, message = 'Check the submitted fields and try again.') => {
@@ -267,7 +269,8 @@ export async function handlePlatformRequest(request, env) {
     return respond({ error: 'Page not found.' }, 404);
   }
   const reading = request.method === 'GET' && (views.has(name) || operationViews.has(name) || competitionViews.has(name) || editorialViews.has(name));
-  const writing = request.method === 'POST' && (actions.has(name) || operationActions.has(name) || competitionActions.has(name) || editorialActions.has(name));
+  const writing = request.method === 'POST' && (actions.has(name) || operationActions.has(name) ||
+    competitionActions.has(name) || editorialActions.has(name) || (hosted && name === 'roster_link'));
   if (!reading && !writing) return respond({ error: 'Page not found.' }, 404);
   if (writing && request.headers.get('Origin') !== url.origin) {
     return respond({ error: 'Request origin was not accepted.' }, 403);
@@ -276,6 +279,15 @@ export async function handlePlatformRequest(request, env) {
     const db = provider(env);
     const cookie = readCookie(request);
     const p_token = matches(cookie, /^[a-f0-9]{64}$/) ? await sha256(cookie) : null;
+    if (name === 'roster_link') {
+      if (!p_token) return domainResponse({ error: 'signin' });
+      const body = await readBody(request);
+      const p_handle = text(body.handle, 24).toLowerCase();
+      const p_email = text(body.email, 254).toLowerCase();
+      valid(matches(p_handle, usernamePattern) && /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(p_email));
+      await throttle(db, request, 'roster_link', p_token, [24, 12]);
+      return domainResponse(await db.rpc('link_invited_roster', { p_token, p_handle, p_email }));
+    }
     if (reading) {
       if (name === 'feed') {
         const cursor = optionsFor(name, url.searchParams);

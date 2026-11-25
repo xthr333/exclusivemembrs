@@ -45,7 +45,7 @@ for(const [fg,bg] of [['c2c7d8','1a1d29'],['c1c6d8','08090d'],['c0c9e3','11131b'
 console.log('PASS: safe update links; retired notice filtering and deduplication; 10 real product galleries / 33 local images; no unauthorized Philadelphia positioning; core copy contrast >= 4.5:1.');
 const profiles=['ybdd','1ilriskk','luciifrmla','mayo','youngcj2x','03wayne','ydm-ski','bitchyounotayop','1chrxllo','vantiva'];
 const directory=fs.readFileSync(path.join(root,'artists.html'),'utf8');
-assert.equal((directory.match(/class="membr-row /g)||[]).length,10);
+assert.equal((directory.match(/class="membr-row /g)||[]).length,11);
 for(const slug of profiles){
  const profile=fs.readFileSync(path.join(root,`${slug}.html`),'utf8');
  assert.ok(directory.includes(`href="${slug}.html"`));
@@ -111,7 +111,7 @@ assert.ok(home.includes('assets/brand/exm-logo.webp'));
 assert.ok(!home.includes('assets/w3/'));
 assert.ok(!home.includes('world-panel residency-panel'));
 assert.ok(home.includes('quiet-residency'));
-console.log('PASS: 10 shareable artist hubs; completed bracket and wildcard recap; 8 real W3 portfolio photos with provenance; Merlin and Square handoffs; current campaign; legacy-safe links; low-key Residency.');
+console.log('PASS: 10 shareable artist hubs and the OXXX roster entry; completed bracket and wildcard recap; 8 real W3 portfolio photos with provenance; Merlin and Square handoffs; current campaign; legacy-safe links; low-key Residency.');
 const orderHelp=fs.readFileSync(path.join(root,'order-help.html'),'utf8');
 assert.ok(orderHelp.includes('30 calendar days of delivery'));
 assert.ok(orderHelp.includes('wrong size or color'));

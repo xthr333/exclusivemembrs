@@ -62,6 +62,20 @@ assert.throws(() => renderEventCalendar([event, event]), /unique ID/);
 assert.throws(() => renderEventCalendar([{ ...event, date: '2025-02-29' }]), /real calendar date/);
 assert.throws(() => renderEventCalendar([{ ...event, links: { tickets: 'javascript:alert(1)' } }]), /public HTTPS/);
 assert.match(readFileSync(resolve(out, 'hall-of-fame.html'), 'utf8'), /BitchYouNotAYop/);
+const hall = readFileSync(resolve(out, 'hall-of-fame.html'), 'utf8');
+const roster = readFileSync(resolve(out, 'artists.html'), 'utf8');
+assert.equal([...roster.matchAll(/data-roster-status="([^"]+)"/g)].length, 11);
+assert.match(roster, /data-roster-status="ybdd">Verified account/);
+for (const handle of ['03wayne', 'oxxx', '1ilriskk', 'mayo_', 'bitchyounotayop']) {
+  assert.ok(roster.includes('data-roster-status="' + handle + '">Unclaimed'));
+}
+const ybdd = readFileSync(resolve(out, 'ybdd.html'), 'utf8');
+const o3 = readFileSync(resolve(out, '03wayne.html'), 'utf8');
+assert.match(ybdd, /champion-mark">Founder<.*champion-mark">EXM Artist</);
+assert.doesNotMatch(o3, />Founder</);
+assert.match(hall, /href="1ilriskk.html">LR<\/a> and <a href="mayo.html">Mayo_<\/a>/);
+assert.match(readFileSync(resolve(out, '1ilriskk.html'), 'utf8'), /SongWars champion · Season III · Double Impact/);
+assert.match(hall, /id="season-i"[\s\S]*?original results are pending verification/);
 assert.match(readFileSync(resolve(out, 'artists.html'), 'utf8'), /href="mayo\.html"/);
 assert.match(readFileSync(resolve(out, 'admin.html'), 'utf8'), /supabase/i);
 assert.match(readFileSync(resolve(out, 'shop.html'), 'utf8'), /exclusivemembrs\.printify\.me\/product/);

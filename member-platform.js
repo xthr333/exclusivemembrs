@@ -430,7 +430,8 @@
         if (reports) showModeration(reports);
         if (owner) showOwner(owner);
         byId('operations-tools').hidden = !canOperate;
-        if (canOperate) await window.EXMMemberOperations.studio(isOwner, isOwner || roles.includes('event_staff'), isOwner || roles.includes('judge'));
+        if (canOperate) await window.EXMMemberOperations.studio(isOwner,
+          isOwner || (!window.EXMHostedMode && roles.includes('event_staff')), isOwner || roles.includes('judge'));
       }
       if (request === requestNumber) status.textContent = message;
     } catch (error) {

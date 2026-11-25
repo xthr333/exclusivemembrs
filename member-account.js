@@ -7,6 +7,7 @@
   const codes = byId('member-codes');
   const codesList = byId('member-codes-list');
   const recoveryReference = byId('member-recovery-reference');
+  const rosterBadges = byId('account-roster-badges');
   const hosted = Boolean(window.EXMHostedMode);
 
   async function request(action, payload) {
@@ -25,6 +26,30 @@
     dashboard.hidden = true;
     codesList.replaceChildren();
     codes.hidden = true;
+    rosterBadges.replaceChildren();
+    rosterBadges.hidden = true;
+  }
+
+  async function showRosterBadges(username) {
+    rosterBadges.replaceChildren();
+    rosterBadges.hidden = true;
+    if (!hosted) return;
+    const { code, data } = await request('roster-credits');
+    if (code !== 200 || dashboard.hidden || byId('account-handle').textContent !== '@' + username) return;
+    const entry = data.entries.find(candidate => candidate.linked && candidate.handle === username);
+    if (!entry) return;
+    const labels = [
+      ...(entry.founder ? ['Founder'] : []),
+      ...(entry.category === 'artist' ? ['EXM Artist'] : entry.category === 'producer' ? ['EXM Producer'] : []),
+      ...entry.titles.map(title => 'SongWars champion · ' + title.title),
+    ];
+    for (const label of labels) {
+      const badge = document.createElement('span');
+      badge.className = 'champion-mark';
+      badge.textContent = label;
+      rosterBadges.append(badge, ' ');
+    }
+    rosterBadges.hidden = labels.length === 0;
   }
 
   async function showSession() {
@@ -51,6 +76,7 @@
     status.textContent = '';
     access.hidden = true;
     dashboard.hidden = false;
+    showRosterBadges(account.username).catch(() => {});
     return true;
   }
 

@@ -396,6 +396,20 @@
     }
     if (!data.events.length && !owner) group.append(el('p', 'No events assigned to this account.'));
     children.push(group);
+    if (owner && hosted) {
+      const claims = el('article', null, 'platform-card');
+      claims.append(el('h3', 'Verified roster claims'),
+        el('p', 'Confirm ownership through EXM’s approved contact before linking an accepted invitation.'));
+      const { form, finish } = task(claims, 'Link verified invite', async values => {
+        await api('roster_link', values);
+        form.reset();
+        return 'The invited account is linked to its roster profile.';
+      });
+      field(form, 'Roster handle', 'handle').maxLength = 24;
+      field(form, 'Verified invitation email', 'email', null, 'email').maxLength = 254;
+      finish();
+      children.push(claims);
+    }
     if (owner && !hosted) {
       children.unshift(await campaignStudio(rebuild));
       const notices = el('div', null, 'platform-grid hub-grid');

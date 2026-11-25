@@ -224,6 +224,7 @@ export async function handleMemberRequest(request, env) {
     '/api/members/session': 'GET', '/api/members/logout': 'POST',
     '/api/members/profile': 'POST', '/api/members/recover': 'POST',
     '/api/members/directory': 'GET', '/api/members/public-profile': 'GET', '/api/members/follow': 'POST',
+    '/api/members/roster-credits': 'GET',
   };
   const method = available[url.pathname];
   if (!method) return respond({ error: 'Page not found.' }, 404);
@@ -239,6 +240,10 @@ export async function handleMemberRequest(request, env) {
   try {
     const db = provider(env);
     const path = url.pathname;
+    if (path === '/api/members/roster-credits') {
+      if (env.EXM_HOSTED !== true) return respond({ error: 'Page not found.' }, 404);
+      return respond({ entries: await db.rpc('roster_credits') });
+    }
     if (path === '/api/members/signup') {
       if (env.EXM_MEMBER_PREVIEW_SIGNUP !== 'fixture' || !isLoopback(request.url)) {
         return respond({ error: 'Public signup is closed.' }, 403);
