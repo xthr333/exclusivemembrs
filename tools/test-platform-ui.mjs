@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { readdir, stat } from 'node:fs/promises';
 import { resolve, sep } from 'node:path';
+import { randomBytes } from 'node:crypto';
+import { handleMemberRequest } from '../server/member-api.mjs';
 
 const { chromium } = await import(process.env.EXM_PLAYWRIGHT_MODULE || 'playwright');
 const root = resolve(import.meta.dirname, '../dist');
@@ -87,6 +89,55 @@ try {
   await fallbackNav.getByRole('link', { name: 'EXM Divisions' }).click();
   await fallback.waitForURL(origin + '/divisions.html');
   assert.equal(await fallback.getByRole('link', { name: 'See the W3 portfolio' }).getAttribute('href'), 'studios.html');
+  if (process.env.EXM_MEMBER_UI_TEST === '1') {
+    for (const variable of ['EXM_MEMBER_AUTH_URL', 'EXM_MEMBER_DATA_URL']) {
+      assert.ok(['localhost', '127.0.0.1', '[::1]'].includes(new URL(process.env[variable]).hostname));
+    }
+    await context.route('**/api/members/*', async route => {
+      const incoming = route.request();
+      const headers = await incoming.allHeaders();
+      const response = await handleMemberRequest(new Request(incoming.url(), {
+        method: incoming.method(), headers, body: incoming.postData() ?? undefined,
+      }), process.env);
+      await route.fulfill({
+        status: response.status, headers: Object.fromEntries(response.headers), body: await response.text(),
+      });
+    });
+
+    await page.goto(origin + '/account.html');
+    const runId = randomBytes(5).toString('hex');
+    const email = 'browser-' + runId + '@example.test';
+    const username = 'browser-' + runId;
+    const password = 'Local browser test password';
+    await page.locator('#signup-email').fill(email);
+    await page.locator('#signup-username').fill(username);
+    await page.locator('#signup-password').fill(password);
+    await page.locator('#confirm-password').fill(password);
+    await page.getByRole('button', { name: 'Create account', exact: true }).click();
+    await page.getByText('If your account was created', { exact: false }).waitFor();
+    assert.equal(await page.locator('#login-email').inputValue(), email);
+    await page.locator('#login-password').fill(password);
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await page.getByText('@' + username, { exact: true }).waitFor();
+    assert.equal(await page.locator('#member-codes-list li').count(), 8);
+    const code = await page.locator('#member-codes-list code').first().textContent();
+    assert.ok((await context.cookies()).some(cookie => cookie.name === '__Host-exm_session' && cookie.secure && cookie.httpOnly));
+    await page.getByLabel('Display name', { exact: true }).fill('Local browser profile');
+    await page.getByRole('button', { name: 'Save profile' }).click();
+    await page.getByText('Profile saved.', { exact: true }).waitFor();
+    await page.reload();
+    await page.getByText('@' + username, { exact: true }).waitFor();
+    assert.equal(await page.getByLabel('Display name', { exact: true }).inputValue(), 'Local browser profile');
+    assert.equal(await page.locator('#member-codes').isVisible(), false);
+    await page.getByRole('button', { name: 'Sign out' }).click();
+    await page.getByRole('button', { name: 'Sign in', exact: true }).waitFor();
+    await page.locator('#recovery-username').fill(username);
+    await page.getByLabel('Recovery code', { exact: true }).fill(code);
+    await page.getByRole('button', { name: 'Create support reference' }).click();
+    await page.getByText('Recovery reference created.', { exact: true }).waitFor();
+    assert.match(await page.locator('#recovery-reference-value').textContent(), /^[0-9a-f-]{36}$/);
+    console.log('PASS: Chromium signup, recovery-code display, secure session, profile edit, reload, logout, and recovery reference with local data.');
+  }
   console.log('PASS: ' + pages.length * 2 + ' Chromium layout checks, short mobile hero, keyboard navigation, reduced motion, and offline/no-script fallbacks.');
 } finally {
   await browser.close();

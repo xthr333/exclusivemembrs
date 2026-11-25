@@ -2,3 +2,6 @@ dist/
 node_modules/
 .openai/
 .wrangler/
+
+.dev.vars*
+supabase/.temp/

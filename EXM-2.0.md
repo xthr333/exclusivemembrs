@@ -41,3 +41,30 @@ Base revision is `d3b778b8051910d0e74bf1d432dc8f11fc6bdab1` on `main`. Developme
 - Ready for local review. Native Safari and Firefox, physical devices, live roles, and third-party integrations remain unverified. The remaining account, progression, events, and owner work is substantial. Use working local vertical slices to estimate later phases. Codex usage and billing were unavailable.
 
 Rollback before release is to switch back to the original base branch. An eventual approved release can be reverted in Git and rebuilt with the existing Worker pipeline. No data migration is required to roll back this public foundation.
+
+## Milestone 2 · Account vertical slice
+
+- `account.html` and `member-account.js` provide signup, sign-in, initial code display, profile editing, sign-out and support reference generation. The local Worker entry point is `server/member-dev.mjs`. The existing deployment entry point still serves static assets.
+- Signup validates email, case-insensitive username and password confirmation. GoTrue hashes the password. EXM derives a keyed, non-mailing identifier from the normalized email because EXM does not verify ownership of the submitted address. Save and back up the signing secret securely. Losing or changing it would break login identifiers and recovery codes. Signup responses are generic. Sign in after signup to receive eight codes once. Each 128-bit code is stored as a keyed hash. Redeeming one atomically creates an expiring support case. A support reference does not reset a password or grant account access.
+- Session cookies are opaque, Secure, HttpOnly and same-site. Hashed sessions expire after one day and logout revokes the current session. Same-origin checks protect mutations. Password and recovery endpoints have shared database rate limits. Service calls use server-only credentials. Data API functions deny anonymous and authenticated roles by default. The browser receives neither provider tokens nor internal auth addresses.
+- The isolated migration is under `supabase/migrations/`. It reserves existing public artist and service handles. Those reservations carry no identity claims or verified history. The existing artist pages and owner/updates integration are separate from this account slice.
+
+### Local verification
+
+The standard local stack could not extract the Supabase Postgres image within the environment's disk quota. The same migration and API passed against isolated GoTrue v2.188.1, PostgreSQL 17 and PostgREST 14.3. The test exercised case-insensitive conflicts, mismatched/oversized passwords, first-login codes, profile updates, direct API permission denial, disabled direct signup, concurrent code redemption, rate limits, and cookie revocation. Chromium independently completed signup and login, saved code display, edited and reloaded a profile, signed out and opened a recovery support case. No provider account outside the local fixture was used.
+
+On a machine with a local Supabase stack, initialize an unlinked local project, set `auth.enable_signup = false`, and start it from this checkout with the migration. Local auth services need email/password enabled and public signup disabled. Supply these settings to the dev Worker or tests from an ignored local environment file.
+
+| Setting | Local value |
+| --- | --- |
+| `EXM_MEMBER_AUTH_URL` | GoTrue endpoint, usually the local Supabase gateway's `/auth/v1` path |
+| `EXM_MEMBER_DATA_URL` | PostgREST endpoint, usually the local gateway's `/rest/v1` path |
+| `EXM_MEMBER_ANON_KEY` | Local Auth API JWT for the anon role |
+| `EXM_MEMBER_SERVICE_ROLE_KEY` | Local service-role API JWT |
+| `EXM_MEMBER_PEPPER` | Random 32-byte secret encoded as 64 hex characters |
+
+Run `npm run build` and `wrangler dev -c wrangler.member-dev.jsonc --local` for an isolated preview of `/account.html`. The real-database checks run with `node tools/test-member-api.mjs` and `EXM_MEMBER_UI_TEST=1 node tools/test-platform-ui.mjs` after setting those variables. The test scripts reject remote service URLs.
+
+### Work remaining and release gates
+
+Milestone 2 is in progress. Staff review and recovery completion, historical identity reservation and claims, full public profile metadata, avatars, and account abuse moderation need more integration work. Verify operational cleanup for expired sessions, recovery references, and rate buckets before hosted enablement. Staff authentication remains independent of member signup and there is no access to legacy draft updates through this local account flow. Hosted-provider Auth settings, quotas, and backup/restore remain unverified. The dedicated hosted account database is a proposed isolation choice and has not been provisioned. Its eligibility for the variable free-project allowance needs confirmation before production planning.
