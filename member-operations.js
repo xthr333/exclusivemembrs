@@ -305,6 +305,48 @@
     panel.replaceChildren(render(), ...items.map(render));
   }
 
+  async function campaignStudio(rebuild) {
+    const data = await api('campaign_studio');
+    const card = el('article', null, 'platform-card');
+    card.append(el('h3', 'Homepage campaign and spotlight'));
+    const pending = Boolean(data.revision > data.publishedRevision);
+    card.append(el('p', pending ? 'Saved draft awaiting approval.' : 'Homepage preview is up to date.'));
+    const draft = task(card, 'Save homepage draft', async values => {
+      await api('editorial_save', { revision: data.revision, event: values.event || null,
+        creator: values.creator || null, description: values.description.trim() });
+      await rebuild();
+    });
+    useValue(draft.form, 'Featured campaign', 'event', data.draft.event || '', [
+      ['', 'Official SongWars campaign'], ...data.events.map(event => [event.id, event.name]),
+    ], 'text', false);
+    useValue(draft.form, 'Creator spotlight', 'creator', data.draft.creator || '', [
+      ['', 'Official community spotlight'], ...data.creators.map(person => [person.slug, person.name]),
+    ], 'text', false);
+    useValue(draft.form, 'Spotlight description (optional)', 'description', data.draft.description, null, 'text', false).maxLength = 180;
+    draft.finish();
+    if (pending) {
+      const featured = data.events.find(event => event.id === data.draft.event);
+      const creator = data.creators.find(person => person.slug === data.draft.creator);
+      const details = el('details');
+      details.append(el('summary', 'Review saved homepage draft'),
+        el('p', 'Campaign: ' + (featured?.name || 'Official SongWars campaign')),
+        el('p', 'Spotlight: ' + (creator?.name || 'Official community spotlight')));
+      if (data.draft.description) details.append(el('p', data.draft.description));
+      card.append(details);
+      const publish = task(card, null, async () => {
+        await api('editorial_publish', { revision: data.revision });
+        await rebuild();
+      });
+      card.append(actionButton('Publish saved homepage draft to preview', publish));
+    }
+    const view = el('a', 'View homepage in this preview', 'text-link');
+    view.href = 'index.html';
+    const footer = el('p');
+    footer.append(view);
+    card.append(footer);
+    return card;
+  }
+
   async function studio(owner, canReview, canScore) {
     const data = await api('studio');
     const target = byId('operations-tools');
@@ -339,6 +381,7 @@
     if (!data.events.length && !owner) group.append(el('p', 'No events assigned to this account.'));
     children.push(group);
     if (owner) {
+      children.unshift(await campaignStudio(rebuild));
       const notices = el('div', null, 'platform-grid hub-grid');
       notices.append(editorCard(null, 'notice', rebuild), ...data.notices.map(item => editorCard(item, 'notice', rebuild)));
       children.push(el('h3', 'Announcements'), notices, codesCard(data));

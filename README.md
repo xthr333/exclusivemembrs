@@ -6,7 +6,7 @@ See [ROLLOUT.md](ROLLOUT.md) for current build/deploy workflow and [TESTING.md](
 
 # EXCLUSIVEMEMBRS® connected master build
 
-Upload every file in this folder to the root of the GitHub Pages repository.
+Build the publishable public site with `npm run build` and check it with `npm run check:public`. The output goes to `dist/`. Use `npm run build:preview` for the isolated integrated member preview in `dist-preview/`. [Preview setup and release boundaries](EXM-2.0.md#integrated-release-review).
 
 Public pages share:
 - style.css

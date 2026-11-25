@@ -80,8 +80,10 @@
   if (details) {
     const status = byId('public-profile-status');
     const button = byId('public-profile-follow');
+    const block = byId('public-profile-block');
     const username = new URLSearchParams(location.search).get('username') || '';
     let following = false;
+    let blocked = false;
 
     async function load() {
       const response = await fetch(api('public-profile?username=' + encodeURIComponent(username)));
@@ -122,6 +124,9 @@
         return item;
       }));
       byId('public-profile-counts').textContent = profile.followers + (profile.followers === 1 ? ' follower' : ' followers') + ' · ' + profile.following + ' following';
+      block.hidden = !profile.canBlock;
+      blocked = profile.blockedByViewer;
+      block.textContent = blocked ? 'Unblock member' : 'Block member';
       button.hidden = !profile.canFollow;
       following = profile.isFollowing;
       button.textContent = following ? 'Unfollow' : 'Follow';
@@ -148,6 +153,22 @@
         status.textContent = 'Could not update this follow. Please try again.';
       } finally {
         button.disabled = false;
+      }
+    });
+    block.addEventListener('click', async () => {
+      if (block.disabled) return;
+      block.disabled = true;
+      try {
+        const response = await fetch('/api/platform/set_block', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, blocked: !blocked }),
+        });
+        if (!response.ok) throw new Error('Block setting unavailable');
+        if (await load()) status.textContent = blocked ? 'Member blocked. Manage blocks in the Member hub.' : 'Member unblocked.';
+      } catch {
+        status.textContent = 'Could not update the block. Try again.';
+      } finally {
+        block.disabled = false;
       }
     });
     load().catch(() => { status.textContent = 'Member profiles are temporarily unavailable.'; });

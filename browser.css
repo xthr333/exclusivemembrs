@@ -228,3 +228,8 @@ body::after{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;ba
 #public-avatar{margin-bottom:.7rem}
 #public-profile-links{list-style:none;padding:0}
 #public-profile-history ul{padding-inline-start:1.3rem}
+
+.preview-event-poster .event-wordmark{
+  font-size:clamp(2.5rem,8cqw,5rem);
+  overflow-wrap:anywhere
+}

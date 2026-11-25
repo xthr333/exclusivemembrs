@@ -69,7 +69,8 @@
   const feedMore = byId('feed-more');
   let requestNumber = 0;
   let inventory = false;
-  let before = '';
+  let before = null;
+  let blockedAfter = '';
   let roles = [];
   let rankingPage = 1;
 
@@ -276,7 +277,8 @@
     if (!append) byId('feed-items').replaceChildren();
     byId('feed-items').append(...data.items.map(feedCard));
     if (!append && !data.items.length) byId('feed-items').append(el('p', 'No community updates yet.'));
-    before = data.items.length === 20 ? data.items.at(-1).created_at : '';
+    const tail = data.hasMore ? data.items.at(-1) : null;
+    before = tail ? { before: tail.created_at, beforeId: tail.id } : null;
     feedMore.hidden = !before;
   }
 
@@ -354,6 +356,20 @@
     setList('audit-items', data.audit.map(entry => el('li', date(entry.occurred_at) + ' · ' + pretty(entry.action) + ' · ' + entry.subject)), 'No owner actions recorded.');
   }
 
+  function showBlocks(data, append = false) {
+    const list = byId('blocked-members');
+    if (!append) list.replaceChildren();
+    for (const username of data.members) {
+      const row = el('li', null, 'hub-actions');
+      row.append(el('span', '@' + username), actionButton('Unblock ' + username, button =>
+        mutate(button, 'set_block', { username, blocked: false }, 'Member unblocked.')));
+      list.append(row);
+    }
+    if (!append && !data.members.length) list.append(el('li', 'You have no blocked members.'));
+    blockedAfter = data.nextAfter || '';
+    byId('blocked-more').hidden = !blockedAfter;
+  }
+
   async function load(message = '') {
     const requested = location.hash.slice(1);
     const view = panels.some(panel => panel.dataset.panel === requested) ? requested : 'dashboard';
@@ -387,6 +403,10 @@
         showRewards(data);
       } else if (view === 'access') {
         await window.EXMMemberOperations.access();
+      } else if (view === 'privacy') {
+        const data = await api('blocked_members');
+        if (request !== requestNumber) return;
+        showBlocks(data);
       } else if (view === 'staff') {
         const data = await api('dashboard');
         roles = data.roles;
@@ -432,12 +452,25 @@
     feedMore.disabled = true;
     const request = requestNumber;
     try {
-      const data = await api('feed?before=' + encodeURIComponent(before));
+      const data = await api('feed?' + new URLSearchParams(before));
       if (request === requestNumber) showFeed(data, true);
     } catch (error) {
       if (request === requestNumber) status.textContent = error.message;
     } finally {
       feedMore.disabled = false;
+    }
+  });
+  byId('blocked-more').addEventListener('click', async event => {
+    const button = event.currentTarget;
+    const request = requestNumber;
+    button.disabled = true;
+    try {
+      const data = await api('blocked_members?after=' + encodeURIComponent(blockedAfter));
+      if (request === requestNumber) showBlocks(data, true);
+    } catch (error) {
+      if (request === requestNumber) status.textContent = error.message;
+    } finally {
+      button.disabled = false;
     }
   });
   rankingForm.addEventListener('submit', event => { event.preventDefault(); rankingPage = 1; load(); });

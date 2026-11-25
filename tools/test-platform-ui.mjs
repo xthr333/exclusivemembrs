@@ -5,7 +5,7 @@ import { randomBytes } from 'node:crypto';
 import { handleMemberRequest } from '../server/member-api.mjs';
 
 const { chromium } = await import(process.env.EXM_PLAYWRIGHT_MODULE || 'playwright');
-const root = resolve(import.meta.dirname, '../dist');
+const root = resolve(import.meta.dirname, process.env.EXM_BUILD_PROFILE === 'public' ? '../dist' : '../dist-preview');
 const origin = 'http://localhost';
 const legacy = 'https://legacy.exm.test';
 const projectPrefix = '/exclusivemembrs';

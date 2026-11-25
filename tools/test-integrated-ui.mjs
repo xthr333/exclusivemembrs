@@ -99,6 +99,27 @@ try {
   await eventEditor.getByText('Published in local preview').waitFor();
 
   const guest = await pageFor();
+  const editorial = card(owner, 'Homepage campaign and spotlight');
+  await editorial.getByLabel('Featured campaign').selectOption({ label: eventName });
+  await editorial.getByLabel('Creator spotlight').selectOption('vantiva');
+  await editorial.getByLabel('Spotlight description (optional)').fill('TEST · Editorial spotlight');
+  await editorial.getByRole('button', { name: 'Save homepage draft' }).click();
+  const publishHomepage = editorial.getByRole('button', { name: 'Publish saved homepage draft to preview' });
+  await publishHomepage.waitFor();
+  await guest.goto(base + '/');
+  await guest.locator('.welcome-copy').getByRole('link', { name: 'SongWars IV interest form' }).waitFor();
+  await publishHomepage.click();
+  await editorial.getByText('Homepage preview is up to date.').waitFor();
+  await guest.reload();
+  await guest.locator('#songwars').getByRole('heading', { name: eventName, exact: true }).waitFor();
+  await guest.locator('#inside').getByRole('link', { name: 'View Vantiva’s profile' }).waitFor();
+  assert.equal(await guest.locator('#songwars').getByRole('link', { name: 'SongWars IV interest form' }).isVisible(), true);
+  await editorial.getByLabel('Featured campaign').selectOption('');
+  await editorial.getByLabel('Creator spotlight').selectOption('');
+  await editorial.getByRole('button', { name: 'Save homepage draft' }).click();
+  await publishHomepage.click();
+  await editorial.getByText('Homepage preview is up to date.').waitFor();
+
   await guest.goto(base + '/events');
   const publicEvent = card(guest, eventName);
   await publicEvent.getByLabel('Test display name').fill('TEST · Browser guest ' + run);
@@ -111,11 +132,19 @@ try {
   await guestRecord.getByRole('button', { name: 'Save review' }).click();
   await guestRecord.getByText('Review saved.', { exact: true }).waitFor();
 
+  await producer.goto(base + '/member?username=preview-artist');
+  await producer.getByRole('button', { name: 'Block member', exact: true }).click();
+  await producer.getByRole('button', { name: 'Unblock member', exact: true }).waitFor();
+  await producer.goto(base + '/member-hub#privacy');
+  const unblock = producer.getByRole('button', { name: 'Unblock preview-artist' });
+  await unblock.click();
+  await producer.getByText('You have no blocked members.').waitFor();
+
   await guest.goto(base + '/hall-of-fame');
   await guest.getByRole('heading', { name: 'BallHogs' }).waitFor();
   await guest.getByRole('link', { name: 'BitchYouNotAYop' }).waitFor();
   assert.equal(await guest.getByText('Past champion badge', { exact: true }).count(), 2);
-  console.log('PASS: shared Worker preview across mobile and desktop, signed-in roles, check-in, redemption/equip, rankings/profile, text-only moderation, event publishing, guest intake/review and verified champions.');
+  console.log('PASS: shared Worker preview across mobile and desktop, signed-in roles, check-in, redemption/equip, rankings/profile, text-only moderation, event publishing, guest intake/review, campaign/spotlight approval, blocks and verified champions.');
 } finally {
   await browser.close();
 }

@@ -3,15 +3,18 @@ import {
   isLoopback, handleMemberRequest,
 } from './member-api.mjs';
 
-const views = new Set(['dashboard', 'rankings', 'public_progress', 'rewards', 'feed', 'moderation', 'owner']);
+const views = new Set(['dashboard', 'rankings', 'public_progress', 'rewards', 'feed', 'moderation', 'owner', 'blocked_members']);
 const actions = new Set(['check_in', 'redeem', 'equip', 'unequip', 'post', 'like', 'report',
-  'moderate', 'award', 'rule', 'role', 'catalog', 'season', 'point_adjust']);
+  'moderate', 'award', 'rule', 'role', 'catalog', 'season', 'point_adjust', 'set_block']);
 const operationViews = new Set(['events', 'notices', 'access', 'protected', 'applications', 'studio']);
 const operationActions = new Set(['apply', 'unlock', 'claim', 'issue_access', 'issue_claim', 'legacy_reserve',
   'event_save', 'event_publish', 'event_assign', 'application_review', 'notice_save', 'notice_publish',
   'notice_archive', 'recovery_review']);
 const competitionViews = new Set(['matches', 'match_drafts', 'preview_champions']);
 const competitionActions = new Set(['match_save', 'match_publish']);
+const memberInteractions = new Set(['post', 'like', 'report']);
+const editorialViews = new Set(['featured_content', 'campaign_studio']);
+const editorialActions = new Set(['editorial_save', 'editorial_publish']);
 const states = new Set(['draft', 'scheduled', 'registration_open', 'live', 'completed', 'canceled', 'archived']);
 const eventKinds = new Set(['gaming', 'community', 'stream', 'residency', 'screening', 'in_person', 'other']);
 const categories = new Set(['overall', 'artist', 'producer', 'judge', 'spectator', 'creator', 'songwars']);
@@ -32,6 +35,7 @@ const errors = {
   unowned: [403, 'Own the reward before equipping it.'],
   discoverable: [403, 'Enable a public profile in your account before posting to the member feed.'],
   duplicate: [409, 'This verified activity has already been recorded.'],
+  stale: [409, 'Another edit was saved. Reopen the campaign studio before changing the draft.'],
   answer: [400, 'Answer the event’s application question before submitting.'],
   capacity: [409, 'This event is at capacity. Keep the applicant on the waitlist.'],
   closed: [409, 'This event or registration is closed. Save an approved status before publishing a draft.'],
@@ -67,7 +71,9 @@ function optionsFor(view, query) {
   if (view === 'feed' && query.has('before')) {
     const before = query.get('before');
     valid(before.length < 40 && /^\d{4}-\d\d-\d\dT/.test(before) && !Number.isNaN(Date.parse(before)));
-    return { before };
+    const id = query.get('beforeId');
+    valid(id === null || matches(id, uuidPattern));
+    return { before, id };
   }
   return {};
 }
@@ -77,6 +83,9 @@ function payloadFor(action, body) {
     active, cost, xp, points, key, name } = body;
   switch (action) {
     case 'check_in': return {};
+    case 'set_block':
+      valid(matches(username, usernamePattern) && typeof body.blocked === 'boolean');
+      return { username, blocked: body.blocked };
     case 'redeem':
     case 'equip':
     case 'unequip':
@@ -154,6 +163,14 @@ function operationPayload(action, body) {
     return { id };
   }
   switch (action) {
+    case 'editorial_save':
+    case 'editorial_publish': {
+      const { revision, creator, description } = body;
+      valid(integer(revision, 0, 2147483646));
+      if (action === 'editorial_publish') return { revision };
+      valid((event == null || matches(event, uuidPattern)) && (creator == null || matches(creator, slugPattern)));
+      return { revision, event: event ?? null, creator: creator ?? null, description: creator ? optionalText(description, 180) : null };
+    }
     case 'match_publish':
       valid(matches(id, uuidPattern) && matches(event, uuidPattern));
       return { id, event };
@@ -236,8 +253,8 @@ function domainResponse(result) {
 export async function handlePlatformRequest(request, env) {
   const url = new URL(request.url);
   const name = url.pathname.slice('/api/platform/'.length);
-  const reading = request.method === 'GET' && (views.has(name) || operationViews.has(name) || competitionViews.has(name));
-  const writing = request.method === 'POST' && (actions.has(name) || operationActions.has(name) || competitionActions.has(name));
+  const reading = request.method === 'GET' && (views.has(name) || operationViews.has(name) || competitionViews.has(name) || editorialViews.has(name));
+  const writing = request.method === 'POST' && (actions.has(name) || operationActions.has(name) || competitionActions.has(name) || editorialActions.has(name));
   if (!reading && !writing) return respond({ error: 'Page not found.' }, 404);
   if (writing && request.headers.get('Origin') !== url.origin) {
     return respond({ error: 'Request origin was not accepted.' }, 403);
@@ -247,14 +264,27 @@ export async function handlePlatformRequest(request, env) {
     const cookie = readCookie(request);
     const p_token = matches(cookie, /^[a-f0-9]{64}$/) ? await sha256(cookie) : null;
     if (reading) {
+      if (name === 'feed') {
+        const cursor = optionsFor(name, url.searchParams);
+        return domainResponse(await db.rpc('feed_visible', {
+          p_token, p_before: cursor.before ?? null, p_before_id: cursor.id ?? null,
+        }));
+      }
+      if (name === 'blocked_members') {
+        const after = url.searchParams.get('after') || '';
+        valid(after === '' || matches(after, usernamePattern));
+        return domainResponse(await db.rpc('block_list', { p_token, p_after: after }));
+      }
+      const editorial = editorialViews.has(name);
       const competition = competitionViews.has(name);
-      const operations = competition || operationViews.has(name);
-      return domainResponse(await db.rpc(competition ? 'competition_read' : operations ? 'operations_read' : 'platform_read', {
+      const operations = editorial || competition || operationViews.has(name);
+      const reader = editorial ? 'editorial_read' : competition ? 'competition_read' : operations ? 'operations_read' : 'platform_read';
+      return domainResponse(await db.rpc(reader, {
         p_token, p_view: name,
         p_options: operations ? operationOptions(name, url.searchParams) : optionsFor(name, url.searchParams),
       }));
     }
-    if (operationActions.has(name) || competitionActions.has(name)) {
+    if (operationActions.has(name) || competitionActions.has(name) || editorialActions.has(name)) {
       if (env.EXM_PREVIEW_CONSOLE !== '1' || !isLoopback(request.url)) return domainResponse({ error: 'forbidden' });
       if (!p_token && name !== 'apply') return domainResponse({ error: 'signin' });
       const operation = operationPayload(name, await readBody(request));
@@ -269,7 +299,9 @@ export async function handlePlatformRequest(request, env) {
         operation.hash = await db.digest(purpose, raw);
         delete operation.code;
       }
-      const result = await db.rpc(competitionActions.has(name) ? 'competition_write' : 'operations_write', {
+      const writer = editorialActions.has(name) ? 'editorial_write'
+        : competitionActions.has(name) ? 'competition_write' : 'operations_write';
+      const result = await db.rpc(writer, {
         p_token, p_action: name, p_payload: operation,
       });
       return issued && !result?.error ? respond({ ...result, code: issued }) : domainResponse(result);
@@ -277,7 +309,11 @@ export async function handlePlatformRequest(request, env) {
     if (!p_token) return domainResponse({ error: 'signin' });
     const p_payload = payloadFor(name, await readBody(request));
     await throttle(db, request, 'platform:' + name, p_token, [160, 60]);
-    return domainResponse(await db.rpc('platform_write', { p_token, p_action: name, p_payload }));
+    if (name === 'set_block') {
+      return domainResponse(await db.rpc('set_block', { p_token, p_username: p_payload.username, p_block: p_payload.blocked }));
+    }
+    const writer = memberInteractions.has(name) ? 'interaction_write' : 'platform_write';
+    return domainResponse(await db.rpc(writer, { p_token, p_action: name, p_payload }));
   } catch (error) {
     if (error instanceof RequestError) return respond({ error: error.message }, error.status);
     if (error instanceof ProviderError && error.status === 429) return respond({ error: 'Too many attempts.' }, 429);

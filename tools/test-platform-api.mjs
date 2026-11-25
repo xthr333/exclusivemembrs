@@ -120,6 +120,33 @@ assert.equal(feed.length, 1);
 assert.equal(feed[0].body, post.body);
 assert.equal(feed[0].likes, 1);
 assert.equal(feed[0].comments[0].id, comment.id);
+assert.equal((await send('members/follow', { cookie: artist, data: { username: producerAccount.username, follow: true } })).status, 200);
+assert.equal((await send('members/follow', { cookie: producer, data: { username: artistAccount.username, follow: true } })).status, 200);
+const artistBlock = { username: producerAccount.username, blocked: true };
+assert.equal((await platform('set_block', undefined, artistBlock)).status, 401);
+assert.equal((await platform('set_block', artist, { username: artistAccount.username, blocked: true })).status, 404);
+assert.equal((await platform('set_block', artist, artistBlock)).status, 200);
+assert.equal((await platform('set_block', artist, artistBlock)).status, 200);
+assert.deepEqual((await read('blocked_members', artist)).members, [producerAccount.username]);
+assert.deepEqual((await read('blocked_members', producer)).members, []);
+assert.ok(!(await read('feed', producer)).items.some(item => item.id === post.id));
+const afterBlock = (await read('feed', artist)).items.find(item => item.id === post.id);
+assert.equal(afterBlock.likes, 0);
+assert.equal(afterBlock.comments.length, 0);
+assert.equal((await platform('post', producer, { ...comment, id: randomUUID() })).status, 404);
+assert.equal((await platform('like', producer, { id: post.id, liked: true })).status, 404);
+assert.equal((await send('members/follow', { cookie: producer, data: { username: artistAccount.username, follow: true } })).status, 404);
+const publicIdentity = 'members/public-profile?username=' + producerAccount.username;
+const signedProfile = (await (await send(publicIdentity, { cookie: artist })).json()).profile;
+const anonymousProfile = (await (await send(publicIdentity)).json()).profile;
+assert.equal(signedProfile.blockedByViewer, true);
+assert.equal(signedProfile.canFollow, false);
+assert.equal(signedProfile.following, 0);
+assert.equal(anonymousProfile.blockedByViewer, false);
+assert.equal((await platform('set_block', artist, { ...artistBlock, blocked: false })).status, 200);
+assert.ok((await read('feed', producer)).items.some(item => item.id === post.id));
+assert.equal((await (await send(publicIdentity, { cookie: artist })).json()).profile.isFollowing, false);
+
 assert.equal((await platform('report', producer, { id: post.id, reason: 'spam' })).status, 200);
 assert.equal((await platform('moderate', artist, { id: post.id, decision: 'hide' })).status, 403);
 assert.ok((await read('moderation', moderator)).items.some(item => item.id === post.id));
@@ -218,9 +245,30 @@ const corrected = await read('dashboard', artist);
 assert.equal(corrected.xp, pointsBefore.xp);
 assert.equal(corrected.points, pointsBefore.points - 1);
 
+const editorial = await read('campaign_studio', owner);
+const editorialPayload = { revision: editorial.revision, event: draft.id, creator: 'vantiva', description: 'Isolated test spotlight' };
+assert.equal((await platform('campaign_studio', moderator)).status, 403);
+assert.equal((await platform('editorial_save', artist, editorialPayload)).status, 403);
+assert.equal((await platform('editorial_save', owner, { ...editorialPayload, creator: 'unverified-person' })).status, 404);
+const publishedBeforeEdit = await read('featured_content');
+assert.equal((await platform('editorial_save', owner, editorialPayload)).status, 200);
+assert.deepEqual(await read('featured_content'), publishedBeforeEdit);
+assert.equal((await platform('editorial_save', owner, editorialPayload)).status, 409);
+assert.equal((await platform('editorial_publish', owner, { revision: editorial.revision })).status, 409);
+const saved = await read('campaign_studio', owner);
+assert.equal((await platform('editorial_publish', owner, { revision: saved.revision })).status, 200);
+const featured = await read('featured_content');
+assert.equal(featured.campaign.id, draft.id);
+assert.equal(featured.creator.slug, 'vantiva');
+assert.equal(featured.creator.description, editorialPayload.description);
+const fallback = { revision: saved.revision, event: null, creator: null, description: '' };
+assert.equal((await platform('editorial_save', owner, fallback)).status, 200);
+assert.equal((await platform('editorial_publish', owner, { revision: saved.revision + 1 })).status, 200);
+assert.deepEqual(await read('featured_content'), { campaign: null, creator: null });
+
 const unauthorizedRpc = await fetch(env.EXM_MEMBER_DATA_URL + '/rpc/exm_member_platform_write', {
   method: 'POST', headers: { Authorization: 'Bearer ' + env.EXM_MEMBER_ANON_KEY, 'Content-Type': 'application/json' },
   body: JSON.stringify({ p_token: null, p_action: 'award', p_payload: officialArtist }),
 });
 assert.ok([401, 403, 404].includes(unauthorizedRpc.status));
-console.log('PASS: local sessions, closed public signup, role boundaries, duplicate check-ins, category isolation, concurrent spending, inventory and earned-only badge, moderated feed, scoped gates and claims, event preview and concurrent application decisions, scoring and corrections, notices, audit and database ACLs.');
+console.log('PASS: local sessions, closed public signup, role boundaries, duplicate check-ins, category isolation, concurrent spending, inventory and earned-only badge, moderated feed, scoped gates and claims, event preview and concurrent application decisions, scoring and corrections, notices, privacy blocks, owner-only campaign drafts, audit and database ACLs.');

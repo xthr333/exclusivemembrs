@@ -145,3 +145,33 @@ Local preview setup adds no recurring infrastructure. The preview uses synthetic
 Production approval, youth/privacy and moderation procedures, real recovery ownership verification, production quota confirmation, and provider migration approval remain separate release decisions. The integrated stack leaves public account signup closed. Direct DMs, community polls, uploads or remote embeds, merchandise perks, automatic event publication and authoritative SongWars imports remain tied to their original approvals or data prerequisites in the traceability table.
 
 The integrated release gate passed all 29 routes, 87 Chromium viewport checks, nine Python tests, the merchandise suite, both API suites through Wrangler, and the multi-role browser journey. The 13 archived matchup cards, public snapshots, approved assets and production configuration matched the review base. A private dump of the synthetic fixture restored into a separate local database with matching profile, permission, ledger, inventory, event, application, community and scoring counts. Native Safari, real-device in-app browsers, and hosted account policies are outside the verified preview.
+
+## Integrated release review
+
+This review extends the verified local `385a463` checkout, descended from `9114c5f`. The supplied blueprints and the existing EXM assets were available. The referenced Pennhurst, Winner Clothing and SongWars screenshots were absent from the shared files for this update. The existing visual system and original static mark were reused.
+
+| Requirement | Source and phase | Verification and status |
+| --- | --- | --- |
+| Owner-controlled homepage campaigns and creator curation | Latest §§3–4, Phases 1–2 | Owners can select an already published test event and an existing EXM creator profile, save and review a draft, publish it to the isolated preview, or restore the official static selections. API and browser checks cover the private draft, stale revision rejection, publish, and fallback. The static SongWars interest link remains available. |
+| Member privacy controls | Latest §4, Phases 2–3 | Signed-in members can block and unblock privately. The database removes follows and filters feed visibility and interactions in both directions. API and browser tests cover repeats, hidden content, denied direct follow/like/comment paths and unblocking. Intentionally public information remains visible to anonymous visitors. |
+| Safe public delivery without member hosting | Latest §§1, 5, Phases 1–3 | The default production-shaped build includes 26 public pages and verified Hall of Fame routes. It excludes private member routes, test account code and dynamic preview boards. The independent integrated preview still includes all 29 routes and uses the tested fixture services. |
+| Real identities and gates | Latest §§2, 4–5, Phase 2 | The connected hosted Supabase plan is Free. A read-only inventory of its EXM public and member schemas returned only the existing `public.exm_updates` table. An authorized source for legacy members, balances and access rules is still required. The check did not read application rows, private Auth records, or usable codes. |
+| Hosted full release | Latest §§1, 4–5, all phases | The interactive Worker and test selectors are loopback-only. Public signup is server-closed outside the synthetic fixture. Current hosted authorization, youth safeguards, account continuity and approved backup/migration remain launch inputs. No authenticated member backend was deployed by this review. |
+
+### Build and verify
+
+```sh
+npm run check
+npm run build
+npm run check:public
+npm run build:preview
+wrangler dev -c wrangler.member-dev.jsonc --local --ip 127.0.0.1 --port 8788 --env-file .dev.vars.integrated
+```
+
+For the integrated preview, create the loopback fixture using the preceding setup instructions or reuse the same isolated fixture. Use `/account` to select a test role. In the owner view, open Staff tools and use Homepage campaign and spotlight. Member privacy settings are under the Member hub’s Privacy tab. The public fallback can be inspected with `python3 tools/preview.py` after `npm run build`. Set `EXM_BUILD_PROFILE=public` to run the Chromium viewport checks against that fallback. Keep using the existing legacy Pages URLs, with only approved public assets in any future Pages delivery.
+
+The verified Free organization has one visible project, the current announcements project. This check did not reserve a new project or establish the account’s available headroom. Supabase applies a two-project limit across organizations where an account has Owner or Administrator access, a 500 MB database threshold that switches Free projects to read-only, and 5 GB uncached plus 5 GB cached egress at the organization level. Low-activity Free projects can pause after seven days. A read-only or paused member backend can interrupt sign-in, posting, check-ins, redemptions and event administration. The no-charge fallback is the independent static public build with official campaign, archive, roster and vendor links. No account change, metered service or new recurring cost was introduced. [Billing and project limits](https://supabase.com/docs/guides/platform/billing-on-supabase) · [Database-size limits](https://supabase.com/docs/guides/platform/database-size) · [Egress limits](https://supabase.com/docs/guides/storage/serving/bandwidth) · [Free project pausing](https://supabase.com/docs/guides/platform/free-project-pausing)
+
+For a full production release, approve the hosted member project and release separately from public signup. Confirm the source and private export path for stable accounts and earned history, plus supported verification for existing gate scopes. Confirm the youth privacy and credential recovery procedures first. The hosted launch must rehearse migrations and restoration with sanitized data, verify current quotas and complete a live read-only smoke check. Never switch the local fixture runtime into hosted production. The authorized animated EXM file is still needed for its intended motion treatment.
+
+Final verification for this review passed both build profiles, nine Python tests, both member API suites through Wrangler, 78 public and 87 integrated Chromium layout checks, and the multi-role browser journey including draft publication and member blocks. The read-only release check confirmed the public Season IV interest form and the separate anonymous password gate. Production routes, historical snapshots, vendor configuration and official assets matched the prior integrated checkout. Physical Safari and in-app browsers still need real-device validation.
