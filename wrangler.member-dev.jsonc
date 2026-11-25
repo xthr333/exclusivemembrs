@@ -1,0 +1,13 @@
+{
+  "name": "exm-member-local",
+  "main": "server/member-dev.mjs",
+  "compatibility_date": "2026-11-04",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/members/*"],
+    "not_found_handling": "404-page"
+  }
+}

@@ -182,3 +182,12 @@ body::after{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;ba
   .platform-home .welcome-logo{animation:none}
   .navbar .nav-links a.active,.platform-more summary.active{outline:1px solid Highlight}
 }
+[hidden]{display:none!important}
+#member-dashboard .platform-card+.platform-card{margin-top:1rem}
+#member-codes-list{padding-inline-start:1.25rem;overflow-wrap:anywhere}
+#member-recovery-reference{overflow-wrap:anywhere}
+.directory-results{list-style:none;padding:0;margin:1rem 0}
+.role-picker{border:1px solid var(--platform-border);padding:.75rem}
+.role-picker div{display:flex;flex-wrap:wrap;gap:.5rem 1rem}
+.role-picker label{min-height:44px;display:flex;align-items:center;gap:.4rem}
+#member-name,#public-profile p,.directory-results li{overflow-wrap:anywhere}

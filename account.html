@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Member account — ExclusiveMembrs</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/brand/exm-logo.webp" type="image/webp">
+  <link rel="stylesheet" href="fonts.css?v=20261108-browser">
+  <link rel="stylesheet" href="style.css?v=20261107-vibe">
+  <link rel="stylesheet" href="rollout.css?v=20261108-browser">
+  <link rel="stylesheet" href="browser.css?v=exm2">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <!-- exm:navigation -->
+<nav class="navbar" aria-label="Main navigation">
+  <a class="brand" href="index.html" aria-label="ExclusiveMembrs home"><img class="nav-mark" src="assets/brand/exm-logo.webp" width="90" height="36" alt=""><span>EXCLUSIVEMEMBRS</span></a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-navigation">Menu</button>
+  <ul class="nav-links" id="main-navigation">
+    <li><a data-page="index.html" href="index.html">Home</a></li>
+    <li><a data-page="events.html" href="events.html">Events</a></li>
+    <li><a data-page="artists.html" href="artists.html">Community</a></li>
+    <li><a data-page="media.html" href="media.html">Media</a></li>
+    <li><a data-page="shop.html" href="shop.html">Shop</a></li>
+    <li><a data-page="about.html" href="about.html">About</a></li>
+    <li class="nav-more">
+      <details class="platform-more">
+        <summary>More</summary>
+        <div class="platform-more-menu">
+          <a data-page="account.html" href="account.html">Member account</a>
+          <a data-page="divisions.html" href="divisions.html">EXM Divisions</a>
+          <a data-page="updates.html" href="updates.html">Announcements</a>
+          <a data-page="residency.html" href="residency.html">Creator Residency</a>
+          <a data-page="submit.html" href="submit.html">Submit your work</a>
+          <a data-page="contact.html" href="contact.html">Contact</a>
+          <a href="https://discord.gg/u8DuaKMZqP" target="_blank" rel="noopener noreferrer">Discord ↗</a>
+        </div>
+      </details>
+    </li>
+  </ul>
+</nav>
+<!-- /exm:navigation -->
+  <main id="main">
+    <section class="section">
+      <h1 class="section-title">EXM member account</h1>
+      <p id="account-status" role="status"></p>
+      <noscript><p>Enable JavaScript to manage your EXM account.</p></noscript>
+      <div id="account-access" class="platform-grid" hidden>
+        <section class="platform-card">
+          <h2>Sign in</h2>
+          <form class="form-shell" id="member-login" method="post">
+            <div class="field"><label for="login-email">Email</label><input id="login-email" name="email" type="email" maxlength="254" autocomplete="username" required></div>
+            <div class="field"><label for="login-password">Password</label><input id="login-password" name="password" type="password" autocomplete="current-password" required></div>
+            <button class="btn" type="submit">Sign in</button>
+          </form>
+        </section>
+        <section class="platform-card">
+          <h2>Create an account</h2>
+          <form class="form-shell" id="member-signup" method="post">
+            <div class="field"><label for="signup-email">Email</label><input id="signup-email" name="email" type="email" maxlength="254" autocomplete="email" required></div>
+            <div class="field"><label for="signup-username">Username</label><input id="signup-username" name="username" minlength="3" maxlength="24" autocomplete="username" aria-describedby="username-hint" required></div>
+            <p id="username-hint">Use 3–24 letters, digits, hyphens or underscores. Start with a letter or digit.</p>
+            <div class="field"><label for="signup-password">Password</label><input id="signup-password" name="password" type="password" minlength="12" autocomplete="new-password" required></div>
+            <div class="field"><label for="confirm-password">Confirm password</label><input id="confirm-password" name="confirmPassword" type="password" minlength="12" autocomplete="new-password" required></div>
+            <button class="btn" type="submit">Create account</button>
+          </form>
+        </section>
+        <section class="platform-card">
+          <h2>Account recovery</h2>
+          <p>Use one recovery code to create a support reference. EXM support verifies account recovery requests.</p>
+          <form class="form-shell" id="member-recover" method="post">
+            <div class="field"><label for="recovery-username">Username</label><input id="recovery-username" name="username" minlength="3" maxlength="24" autocomplete="username" required></div>
+            <div class="field"><label for="recovery-code">Recovery code</label><input id="recovery-code" name="code" minlength="32" maxlength="32" autocomplete="off" spellcheck="false" required></div>
+            <button class="btn" type="submit">Create support reference</button>
+          </form>
+          <p id="member-recovery-reference" hidden>Contact <a href="contact.html">EXM support</a> with this reference. Share only the reference.
+            <strong id="recovery-reference-value"></strong>
+          </p>
+        </section>
+      </div>
+      <div id="member-dashboard" hidden>
+        <section class="platform-card" id="member-codes" hidden>
+          <h2>Save your recovery codes</h2>
+          <p>These codes are shown once. Save them somewhere private. Each code works once.</p>
+          <ul id="member-codes-list"></ul>
+        </section>
+        <section class="platform-card">
+          <h2>Your profile</h2>
+          <p id="account-handle"></p>
+          <p><a href="artists.html#members">Browse the member directory</a></p>
+          <form class="form-shell" id="member-profile" method="post">
+            <div class="field"><label for="profile-name">Display name</label><input id="profile-name" name="displayName" maxlength="60" required></div>
+            <div class="field"><label for="profile-bio">Bio</label><textarea id="profile-bio" name="bio" maxlength="600"></textarea></div>
+            <fieldset class="role-picker">
+              <legend>Creative roles</legend>
+              <p>Choose up to eight roles.</p>
+              <div>
+                <label><input type="checkbox" name="creativeRoles" value="artist"> Artist</label>
+                <label><input type="checkbox" name="creativeRoles" value="producer"> Producer</label>
+                <label><input type="checkbox" name="creativeRoles" value="songwriter"> Songwriter</label>
+                <label><input type="checkbox" name="creativeRoles" value="photographer"> Photographer</label>
+                <label><input type="checkbox" name="creativeRoles" value="filmmaker"> Filmmaker</label>
+                <label><input type="checkbox" name="creativeRoles" value="animator"> Animator</label>
+                <label><input type="checkbox" name="creativeRoles" value="streamer"> Streamer</label>
+                <label><input type="checkbox" name="creativeRoles" value="gamer"> Gamer</label>
+                <label><input type="checkbox" name="creativeRoles" value="designer"> Designer</label>
+                <label><input type="checkbox" name="creativeRoles" value="entertainer"> Entertainer</label>
+                <label><input type="checkbox" name="creativeRoles" value="creator"> Creator</label>
+              </div>
+            </fieldset>
+            <div class="field"><label for="profile-discoverable"><input id="profile-discoverable" name="discoverable" type="checkbox"> Show my profile in the community directory</label></div>
+            <button class="btn" type="submit">Save profile</button>
+          </form>
+          <button class="btn btn-dark" id="member-logout" type="button">Sign out</button>
+        </section>
+      </div>
+    </section>
+  </main>
+  <!-- exm:footer -->
+<footer>
+  <div class="footer-logo">IT’S EXCLUSIVE.</div>
+  <div class="footer-links">
+    <a href="events.html">Events</a><a href="artists.html">Community</a><a href="media.html">Media</a>
+    <a href="shop.html">Shop</a><a href="about.html">About</a><a href="divisions.html">EXM Divisions</a>
+    <a href="updates.html">Announcements</a><a href="residency.html">Creator Residency</a>
+    <a href="submit.html">Submit</a><a href="contact.html">Contact</a><a href="order-help.html">Shipping, returns &amp; order help</a>
+  </div>
+  <div class="footer-links">
+    <a href="https://www.instagram.com/exclusivemembrs/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+    <a href="https://discord.gg/u8DuaKMZqP" target="_blank" rel="noopener noreferrer">Discord ↗</a>
+    <a href="https://exclusivemembrs.printify.me/" target="_blank" rel="noopener noreferrer">Official store ↗</a>
+  </div>
+  <div class="footer-base"><p class="copyright">© 2026 ExclusiveMembrs</p></div>
+</footer>
+<!-- /exm:footer -->
+  <script src="script.js?v=exm2"></script>
+  <script src="member-account.js"></script>
+</body>
+</html>
