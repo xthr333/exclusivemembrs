@@ -5,7 +5,6 @@ import { renderEventCalendar } from './event-calendar.mjs';
 const root = resolve(import.meta.dirname, '..');
 const check = process.argv.includes('--check');
 const campaignPages = {
-  'index.html': ['campaign-entry', 'campaign-feature'],
   'events.html': ['campaign-meta', 'campaign-event'],
 };
 const templateNames = ['navigation', 'footer', ...Object.values(campaignPages).flat()];

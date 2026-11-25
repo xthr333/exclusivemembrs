@@ -52,24 +52,18 @@ try {
   const skip = page.getByRole('link', { name: 'Skip to content' });
   assert.ok(await skip.evaluate(node => node === document.activeElement));
   const nav = page.getByRole('navigation', { name: 'Main navigation' });
-  assert.equal(await nav.locator('[aria-current="page"]').textContent(), 'Home');
+  assert.equal(await nav.getByRole('link', { name: 'ExclusiveMembrs home' }).getAttribute('href'), 'index.html');
   const menu = nav.getByRole('button', { name: 'Menu' });
-  const more = nav.getByText('More', { exact: true });
+  const navEvents = nav.getByRole('link', { name: 'Events', exact: true });
   await menu.click();
   assert.equal(await menu.getAttribute('aria-expanded'), 'true');
-  await more.click();
-  const contact = nav.getByRole('link', { name: 'Contact', exact: true });
-  await contact.focus();
-  await page.keyboard.press('Escape');
-  assert.equal(await contact.isVisible(), false);
-  assert.equal(await more.evaluate(node => node === document.activeElement), true);
+  await navEvents.focus();
   await page.keyboard.press('Escape');
   assert.equal(await menu.getAttribute('aria-expanded'), 'false');
   assert.equal(await menu.evaluate(node => node === document.activeElement), true);
   await menu.click();
-  await more.click();
-  await contact.click();
-  await page.waitForURL(origin + '/contact.html');
+  await navEvents.click();
+  await page.waitForURL(origin + '/events.html');
   await page.goBack();
   await page.waitForURL(origin + '/');
   assert.equal(await menu.getAttribute('aria-expanded'), 'false');
@@ -79,16 +73,30 @@ try {
     await page.setViewportSize({ width, height });
     await page.goto(origin + '/');
     assert.equal(await logo.evaluate(node => getComputedStyle(node).animationName), 'none');
-    for (const action of await page.locator('.welcome-copy .btn').all()) {
+    for (const action of await page.locator('.event-entry-actions a').all()) {
       const box = await action.boundingBox();
       assert.ok(box && box.y + box.height <= height, 'Hero action fits at ' + width + '×' + height);
     }
   }
-  await page.getByText('Showing saved EXM updates', { exact: false }).waitFor();
-  assert.ok(await page.locator('#homeUpdates article').count());
+  const spotlight = page.locator('#spotlight-track');
+  await spotlight.focus();
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(() => document.getElementById('spotlight-track').scrollLeft > 0);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   assert.equal(await logo.evaluate(node => getComputedStyle(node).animationName), 'exm-logo-glitch');
   assert.equal(await logo.evaluate(node => getComputedStyle(node).animationIterationCount), '1');
+  await page.goto(origin + '/standings.html#legacy');
+  const legacySection = page.locator('#legacy');
+  await legacySection.getByRole('row').filter({ hasText: 'BitchYouNotAYop' }).getByText('90', { exact: true }).waitFor();
+  await legacySection.getByLabel('Legacy period').selectOption('s3');
+  await legacySection.getByRole('row').filter({ hasText: 'Mayo_' }).getByText('80', { exact: true }).waitFor();
+  await legacySection.getByLabel('Legacy category').selectOption('producer');
+  await legacySection.getByText('No verified producer competition results qualify for these standings.').waitFor();
+  await page.goto(origin + '/legacy.html#legacy-bracket');
+  await page.getByText('Final · BallHogs defeated Yopz · 46–39.5 / 50').waitFor();
+  assert.equal(await page.locator('#legacy-bracket li').count(), 13);
+  await page.goto(origin + '/index.html#songwars');
+  await page.waitForURL(origin + '/events.html#featured-event');
 
   const noScript = await browser.newContext({
     javaScriptEnabled: false, reducedMotion: 'reduce', viewport: { width: 320, height: 640 },
@@ -100,8 +108,7 @@ try {
   const fallbackNav = fallback.getByRole('navigation', { name: 'Main navigation' });
   await fallbackNav.getByRole('link', { name: 'Media', exact: true }).click();
   await fallback.waitForURL(origin + '/media.html');
-  await fallbackNav.getByText('More', { exact: true }).click();
-  await fallbackNav.getByRole('link', { name: 'EXM Divisions' }).click();
+  await fallback.locator('footer').getByRole('link', { name: 'EXM Divisions' }).click();
   await fallback.waitForURL(origin + '/divisions.html');
   assert.equal(await fallback.getByRole('link', { name: 'See the W3 portfolio' }).getAttribute('href'), 'studios.html');
   await fallback.goto(legacy + projectPrefix + '/index.html');

@@ -1,3 +1,5 @@
+import { parseAvatar } from './avatar.mjs';
+
 const cookieName = '__Host-exm_session';
 const usernamePattern = /^[a-z0-9][a-z0-9_-]{2,23}$/;
 const creativeRoles = new Set([
@@ -226,6 +228,7 @@ export async function handleMemberRequest(request, env) {
     '/api/members/profile': 'POST', '/api/members/recover': 'POST',
     '/api/members/directory': 'GET', '/api/members/public-profile': 'GET', '/api/members/follow': 'POST',
     '/api/members/roster-credits': 'GET',
+    '/api/members/avatar': 'GET',
   };
   const method = available[url.pathname];
   if (!method) return respond({ error: 'Page not found.' }, 404);
@@ -258,6 +261,16 @@ export async function handleMemberRequest(request, env) {
 
     const token = readCookie(request);
     const p_token = /^[a-f0-9]{64}$/.test(token) ? await sha256(token) : null;
+    if (path === '/api/members/avatar') {
+      const p_username = normalizeUsername(url.searchParams.get('username'));
+      if (!usernamePattern.test(p_username)) return respond({ error: 'Avatar unavailable.' }, 404);
+      const encoded = await db.rpc('avatar_read', { p_token, p_username });
+      if (!encoded) return respond({ error: 'Avatar unavailable.' }, 404);
+      return new Response(Uint8Array.from(atob(encoded), byte => byte.charCodeAt(0)), {
+        headers: { 'Content-Type': 'image/webp', 'Cache-Control': 'private, no-store',
+          'X-Content-Type-Options': 'nosniff' },
+      });
+    }
     if (path === '/api/members/directory') {
       const p_query = (url.searchParams.get('q') || '').trim().toLowerCase();
       const p_role = url.searchParams.get('role') || '';
@@ -294,7 +307,7 @@ export async function handleMemberRequest(request, env) {
       return respond({ profile });
     }
 
-    const body = await readBody(request);
+    const body = await readBody(request, path === '/api/members/profile' ? 73728 : 4096);
     if (path === '/api/members/follow') {
       const p_username = normalizeUsername(body.username);
       if (!usernamePattern.test(p_username) || typeof body.follow !== 'boolean') {
@@ -316,15 +329,20 @@ export async function handleMemberRequest(request, env) {
       throw new RequestError(400, 'Check the profile fields and try again.');
     }
     const p_avatar = body.avatar ?? null;
-    if (p_avatar !== null && !['initials', 'chrome'].includes(p_avatar)) {
+    if (p_avatar !== null && !['initials', 'chrome', 'custom'].includes(p_avatar)) {
       throw new RequestError(400, 'Choose a profile avatar style.');
     }
-    const changed = await db.rpc('identity', {
+    if (body.avatarData != null && (p_avatar !== 'custom' || !parseAvatar(body.avatarData))) {
+      throw new RequestError(400, 'Upload an optimized still WebP avatar up to 256×256 and 48 KiB.');
+    }
+    await throttle(db, request, 'profile_save', p_token, [50, 30]);
+    const changed = await db.rpc('save_profile', {
       p_token, p_name: name, p_bio: bio, p_visible: body.discoverable,
-      p_roles: [...new Set(roles)], p_avatar, p_links: profileLinks(body.links),
+      p_roles: [...new Set(roles)], p_avatar, p_links: profileLinks(body.links), p_image: body.avatarData ?? null,
     });
     if (!changed) throw new RequestError(401, 'Sign in to continue.');
-    return respond({ saved: true });
+    if (changed.error === 'image_missing') throw new RequestError(400, 'Choose a photo to use a custom avatar.');
+    return respond(changed);
   } catch (error) {
     if (error instanceof RequestError) return respond({ error: error.message }, error.status);
     if (error instanceof ProviderError && error.status === 429) {

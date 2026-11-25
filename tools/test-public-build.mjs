@@ -32,7 +32,7 @@ for (const page of pages) {
     assert.ok(existsSync(resolve(out, file)), page + ' links to missing ' + value);
   }
 }
-assert.match(readFileSync(resolve(out, 'index.html'), 'utf8'), /SongWars IV interest form/);
+assert.match(readFileSync(resolve(out, 'index.html'), 'utf8'), /href="events.html">Explore Events/);
 const eventsPage = readFileSync(resolve(out, 'events.html'), 'utf8');
 assert.match(eventsPage, /46–39\.5/);
 for (const view of ['upcoming', 'live', 'past']) {

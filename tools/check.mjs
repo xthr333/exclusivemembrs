@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 const root=path.resolve(import.meta.dirname,'..');
 const pages=fs.readdirSync(root).filter(f=>f.endsWith('.html'));
@@ -24,7 +25,7 @@ for(const file of pages){
   }
   for(const m of html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)){new vm.Script(m[1],{filename:file});scripts++;}
 }
-for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.js'))){new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});scripts++;}
+for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.js'))){execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'inherit'});scripts++;}
 for(const file of ['updates.json','songwars-public.json','wrangler.jsonc'])JSON.parse(fs.readFileSync(path.join(root,file),'utf8'));
 const data=JSON.parse(fs.readFileSync(path.join(root,'songwars-public.json'),'utf8'));
 assert.equal(data.approved.length,12);assert.equal(data.waitlist.length,0);assert.equal(data.approved[11].duo,'As5');

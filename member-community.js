@@ -4,7 +4,15 @@
   const api = path => '/api/members/' + path;
 
   function renderAvatar(avatar, profile) {
-    if (profile.avatar === 'chrome') {
+    if (profile.avatar === 'custom') {
+      const photo = document.createElement('img');
+      photo.src = api('avatar?username=' + encodeURIComponent(profile.username));
+      photo.className = 'member-photo';
+      photo.width = photo.height = 96;
+      photo.alt = '';
+      photo.addEventListener('error', () => { avatar.textContent = profile.username.slice(0, 2).toUpperCase(); }, { once: true });
+      avatar.replaceChildren(photo);
+    } else if (profile.avatar === 'chrome') {
       const logo = document.createElement('img');
       logo.src = 'assets/brand/exm-logo.webp';
       logo.width = 90;

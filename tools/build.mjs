@@ -13,7 +13,7 @@ const previewScripts = new Set([
 ]);
 const hostedPages = new Set(['account.html', 'member.html', 'member-hub.html', 'events.html', 'artists.html']);
 const hostedScripts = [...previewScripts].filter(file => file !== 'editorial-preview.js');
-const publicFiles = new Set(['updates.json', 'songwars-public.json', 'exm-main-logo.png', 'robots.txt', 'sitemap.xml', '_headers']);
+const publicFiles = new Set(['updates.json', 'songwars-public.json', 'songwars-legacy.json', 'exm-main-logo.png', 'robots.txt', 'sitemap.xml', '_headers']);
 const renderableFiles = (await readdir(root)).filter(file => /\.(html|css|js)$/.test(file) || publicFiles.has(file));
 
 execFileSync(process.execPath, [resolve(root, 'tools/sync-layout.mjs'), '--check'], { stdio: 'inherit' });

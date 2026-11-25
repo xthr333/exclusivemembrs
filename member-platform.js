@@ -52,6 +52,11 @@
     api('public_progress?username=' + encodeURIComponent(username)).then(data => {
       const avatar = byId('public-avatar');
       if (data.equipped?.frame) avatar.classList.add('cosmetic-' + data.equipped.frame.appearance);
+      const banner = byId('public-profile-banner');
+      if (banner && data.equipped?.banner) {
+        banner.classList.add('cosmetic-' + data.equipped.banner.appearance);
+        banner.hidden = false;
+      }
       publicProgress.append(el('p', data.rank + ' · Level ' + data.level + ' · ' + fmt(data.xp) + ' XP'));
       cosmetics(publicProgress, data.equipped);
     }).catch(() => {});
@@ -149,6 +154,17 @@
     }), 'No verified scores in this category and period yet.');
   }
 
+  function cosmeticProfilePreview(item) {
+    const preview = el('div', null, 'cosmetic-profile-preview');
+    preview.setAttribute('aria-label', 'Profile preview');
+    if (item.kind === 'banner') preview.append(el('div', null, 'cosmetic-profile-banner cosmetic-' + item.appearance));
+    const avatar = el('span', 'EX', 'member-avatar');
+    if (item.kind === 'frame') avatar.classList.add('cosmetic-' + item.appearance);
+    preview.append(avatar, el('strong', 'EXM profile'));
+    if (item.kind === 'badge') preview.append(sample(item, 'badge'));
+    return preview;
+  }
+
   function showRewards(data) {
     byId('rewards-balance').textContent = fmt(data.points) + ' points available';
     catalogButton.setAttribute('aria-pressed', String(!inventory));
@@ -156,9 +172,10 @@
     const items = data.items.filter(item => inventory ? item.owned : item.active);
     const cards = items.map(item => {
       const card = el('article', null, 'platform-card');
-      card.append(el('h3', item.name), sample(item, item.kind));
+      card.append(el('h3', item.name), cosmeticProfilePreview(item));
       card.append(el('p', item.kind + ' · ' + (item.cost == null ? 'Earned only' : item.cost + ' points')));
       if (item.owned) {
+        card.append(el('p', item.equipped ? 'Owned · equipped' : 'Owned'));
         const action = item.equipped ? 'unequip' : 'equip';
         card.append(actionButton(item.equipped ? 'Unequip' : 'Equip', button =>
           mutate(button, action, { reward: item.slug }, item.equipped ? 'Item unequipped.' : 'Cosmetic equipped.')));
@@ -166,10 +183,16 @@
         const button = actionButton('Redeem for ' + item.cost + ' points', button =>
           mutate(button, 'redeem', { reward: item.slug }, 'Reward added to your inventory.'));
         button.disabled = item.cost > data.points;
-        card.append(button);
+        card.append(el('p', button.disabled ? 'Earn ' + (item.cost - data.points) + ' more points' : 'Available'), button);
       }
       return card;
     });
+    if (!inventory) {
+      const next = el('article', null, 'platform-card');
+      next.append(el('h3', 'Banner preview'), cosmeticProfilePreview({ kind: 'banner', appearance: 'chrome' }),
+        el('p', 'Coming Soon · Preview only'));
+      cards.push(next);
+    }
     byId('reward-items').replaceChildren(...cards);
     if (!items.length) byId('reward-items').append(el('p', 'Your inventory is empty.'));
   }

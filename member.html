@@ -17,29 +17,12 @@
   <a class="brand" href="index.html" aria-label="ExclusiveMembrs home"><img class="nav-mark" src="assets/brand/exm-logo.webp" width="90" height="36" alt=""><span>EXCLUSIVEMEMBRS</span></a>
   <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-navigation">Menu</button>
   <ul class="nav-links" id="main-navigation">
-    <li><a data-page="index.html" href="index.html">Home</a></li>
     <li><a data-page="events.html" href="events.html">Events</a></li>
     <li><a data-page="artists.html" href="artists.html">Community</a></li>
     <li><a data-page="media.html" href="media.html">Media</a></li>
     <li><a data-page="shop.html" href="shop.html">Shop</a></li>
-    <li><a data-page="about.html" href="about.html">About</a></li>
-    <li class="nav-more">
-      <details class="platform-more">
-        <summary>More</summary>
-        <div class="platform-more-menu">
-          <!-- exm:preview <a data-page="member-hub.html" href="member-hub.html">Member hub</a> -->
-          <a data-page="hall-of-fame.html" href="hall-of-fame.html">SongWars Hall of Fame</a>
-          <!-- exm:preview <a data-page="account.html" href="account.html">Member account</a> -->
-          <a data-page="divisions.html" href="divisions.html">EXM Divisions</a>
-          <a data-page="updates.html" href="updates.html">Announcements</a>
-          <a data-page="residency.html" href="residency.html">Creator Residency</a>
-          <a data-page="submit.html" href="submit.html">Submit your work</a>
-          <a data-page="contact.html" href="contact.html">Contact</a>
-          <a href="https://discord.gg/u8DuaKMZqP" target="_blank" rel="noopener noreferrer">Discord ↗</a>
-        </div>
-      </details>
-    </li>
   </ul>
+  <a class="account-utility" href="https://exclusivemembrs.com/account">Account</a>
 </nav>
 <!-- /exm:navigation -->
   <main id="main">
@@ -49,7 +32,7 @@
       <noscript><p>Enable JavaScript to view member profiles.</p></noscript>
       <p id="public-profile-status" role="status"></p>
       <div class="platform-card" id="public-profile" hidden>
-        <div id="public-avatar" class="member-avatar" aria-hidden="true"></div><div id="public-progress"></div>
+        <div id="public-profile-banner" class="cosmetic-profile-banner" hidden></div><div id="public-avatar" class="member-avatar" aria-hidden="true"></div><div id="public-progress"></div>
         <p id="public-profile-handle"></p>
         <p id="public-profile-roles"></p>
         <p id="public-profile-bio"></p>
@@ -57,6 +40,7 @@
         <p id="public-profile-team"></p>
         <p id="public-champion" hidden><span class="champion-mark">SongWars champion</span></p>
         <ul id="public-profile-links" class="hub-links" aria-label="Public profile links"></ul>
+        <div data-legacy-view="profile"></div>
         <section id="public-profile-history" hidden><h2>Verified activity</h2><ul></ul></section>
         <div class="hub-actions"><button class="btn" id="public-profile-follow" type="button" hidden>Follow</button><button class="btn btn-dark" id="public-profile-block" type="button" hidden>Block member</button></div>
       </div>
@@ -69,7 +53,7 @@
     <a href="events.html">Events</a><a href="artists.html">Community</a><a href="media.html">Media</a>
     <a href="shop.html">Shop</a><a href="about.html">About</a><a href="divisions.html">EXM Divisions</a>
     <a href="updates.html">Announcements</a><a href="residency.html">Creator Residency</a>
-    <a href="submit.html">Submit</a><a href="contact.html">Contact</a><a href="order-help.html">Shipping, returns &amp; order help</a>
+    <a href="studios.html">W3 Studios</a><a href="submit.html">Submit</a><a href="contact.html">Contact</a><a href="order-help.html">Shipping, returns &amp; order help</a>
   </div>
   <div class="footer-links">
     <a href="https://www.instagram.com/exclusivemembrs/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
@@ -82,5 +66,5 @@
   <script src="script.js?v=exm2"></script>
   <script src="member-community.js"></script>
   <script src="member-platform.js"></script>
-</body>
+<script type="module" src="songwars-legacy.js"></script></body>
 </html>

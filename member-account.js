@@ -9,6 +9,58 @@
   const recoveryReference = byId('member-recovery-reference');
   const rosterBadges = byId('account-roster-badges');
   const hosted = Boolean(window.EXMHostedMode);
+  const photo = byId('profile-photo');
+  const photoPreview = byId('profile-photo-preview');
+  const photoStatus = byId('profile-photo-status');
+  let pendingPhoto = null;
+  let photoVersion = 0;
+
+  photo.addEventListener('change', async () => {
+    const version = ++photoVersion;
+    pendingPhoto = null;
+    photoPreview.hidden = true;
+    const file = photo.files[0];
+    if (!file) return;
+    photoStatus.textContent = 'Preparing your preview…';
+    const url = URL.createObjectURL(file);
+    try {
+      if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 4194304) {
+        throw new Error('Choose a JPEG, PNG or WebP file up to 4 MiB.');
+      }
+      const image = new Image();
+      image.src = url;
+      await image.decode();
+      if (!image.naturalWidth || !image.naturalHeight || Math.max(image.naturalWidth, image.naturalHeight) > 4096) {
+        throw new Error('Choose an image up to 4096 pixels wide or tall.');
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 256;
+      const ctx = canvas.getContext('2d', { alpha: false });
+      if (!ctx) throw new Error('This browser could not make an avatar preview.');
+      const size = Math.min(image.naturalWidth, image.naturalHeight);
+      ctx.fillStyle = '#20222b';
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.drawImage(image, (image.naturalWidth - size) / 2, (image.naturalHeight - size) / 2, size, size, 0, 0, 256, 256);
+      let optimized;
+      for (const quality of [.83, .7, .55, .4]) {
+        optimized = canvas.toDataURL('image/webp', quality);
+        if (optimized.startsWith('data:image/webp;base64,') && optimized.length <= 65559) break;
+      }
+      if (!optimized.startsWith('data:image/webp;base64,') || optimized.length > 65559) {
+        throw new Error('This browser could not make a small WebP. Try a different image or browser.');
+      }
+      if (version !== photoVersion) return;
+      pendingPhoto = optimized.split(',')[1];
+      photoPreview.src = optimized;
+      photoPreview.hidden = false;
+      profile.elements.avatar.value = 'custom';
+      photoStatus.textContent = 'Preview ready. Save your profile to apply the photo.';
+    } catch (error) {
+      if (version === photoVersion) photoStatus.textContent = error.message;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  });
 
   async function request(action, payload) {
     const response = await fetch('/api/members/' + action, payload === undefined ? {} : {
@@ -26,6 +78,12 @@
     dashboard.hidden = true;
     codesList.replaceChildren();
     codes.hidden = true;
+    ++photoVersion;
+    pendingPhoto = null;
+    photo.value = '';
+    photoPreview.removeAttribute('src');
+    photoPreview.hidden = true;
+    photoStatus.textContent = '';
     rosterBadges.replaceChildren();
     rosterBadges.hidden = true;
   }
@@ -63,6 +121,10 @@
     profile.elements.displayName.value = account.displayName;
     profile.elements.bio.value = account.bio;
     profile.elements.avatar.value = account.avatar;
+    if (account.avatar === 'custom' && !pendingPhoto) {
+      photoPreview.src = '/api/members/avatar?username=' + encodeURIComponent(account.username);
+      photoPreview.hidden = false;
+    }
     profile.querySelectorAll('[name="links"]').forEach((input, position) => {
       input.value = account.links[position] || '';
     });
@@ -148,13 +210,25 @@
   });
 
   onSubmit(profile, async formData => {
+    const progress = byId('profile-save-progress');
+    progress.textContent = '';
     const { code, data } = await request('profile', {
       ...formData,
       creativeRoles: new FormData(profile).getAll('creativeRoles'),
       links: new FormData(profile).getAll('links').map(link => link.trim()).filter(Boolean),
       discoverable: profile.elements.discoverable.checked,
+      avatarData: formData.avatar === 'custom' ? pendingPhoto : null,
     });
     status.textContent = code === 200 ? 'Profile saved.' : data.error || 'Could not save your profile.';
+    if (code === 200) {
+      pendingPhoto = null;
+      photo.value = '';
+      photoStatus.textContent = '';
+      const awards = (data.awards || []).map(award => award === 'first_bio' ? 'First bio earned.' : 'First custom avatar earned.').join(' ');
+      const wallet = data.progress;
+      if (wallet) progress.textContent = [awards, wallet.points + ' spendable points.',
+        wallet.xp + ' lifetime XP.', wallet.nextLevelXp ? (wallet.nextLevelXp - wallet.xp) + ' XP to the next level.' : ''].filter(Boolean).join(' ');
+    }
   });
 
   byId('member-logout').addEventListener('click', async event => {
