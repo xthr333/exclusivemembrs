@@ -5,6 +5,8 @@ import { resolve, sep } from 'node:path';
 const { chromium } = await import(process.env.EXM_PLAYWRIGHT_MODULE || 'playwright');
 const root = resolve(import.meta.dirname, '../dist');
 const origin = 'https://exm.test';
+const legacy = 'https://legacy.exm.test';
+const projectPrefix = '/exclusivemembrs';
 const browser = await chromium.launch({ executablePath: process.env.EXM_CHROMIUM || undefined });
 
 try {
@@ -13,8 +15,11 @@ try {
   // including Supabase, to verify the public fallback without production calls.
   const serve = async route => {
     const url = new URL(route.request().url());
-    if (url.origin !== origin) return route.abort();
-    const file = resolve(root, '.' + url.pathname + (url.pathname.endsWith('/') ? 'index.html' : ''));
+    if (url.origin !== origin && url.origin !== legacy) return route.abort();
+    const isLegacy = url.origin === legacy;
+    const path = isLegacy ? url.pathname.slice(projectPrefix.length) : url.pathname;
+    if (isLegacy && !url.pathname.startsWith(projectPrefix + '/')) return route.fulfill({ status: 404 });
+    const file = resolve(root, '.' + path + (path.endsWith('/') ? 'index.html' : ''));
     if (!file.startsWith(root + sep)) return route.abort();
     if (!(await stat(file).catch(() => null))?.isFile()) {
       return route.fulfill({ status: 404, path: resolve(root, '404.html') });
@@ -25,7 +30,8 @@ try {
 
   const page = await context.newPage();
   const pages = (await readdir(root)).filter(file => file.endsWith('.html'));
-  for (const width of [320, 1280]) {
+  const widthsToTest = [320, 768, 1280];
+  for (const width of widthsToTest) {
     await page.setViewportSize({ width, height: 720 });
     for (const file of pages) {
       await page.goto(origin + '/' + file);
@@ -40,6 +46,9 @@ try {
 
   await page.setViewportSize({ width: 844, height: 390 });
   await page.goto(origin + '/');
+  await page.keyboard.press('Tab');
+  const skip = page.getByRole('link', { name: 'Skip to content' });
+  assert.ok(await skip.evaluate(node => node === document.activeElement));
   const nav = page.getByRole('navigation', { name: 'Main navigation' });
   assert.equal(await nav.locator('[aria-current="page"]').textContent(), 'Home');
   const menu = nav.getByRole('button', { name: 'Menu' });
@@ -59,14 +68,19 @@ try {
   await more.click();
   await contact.click();
   await page.waitForURL(origin + '/contact.html');
+  await page.goBack();
+  await page.waitForURL(origin + '/');
+  assert.equal(await menu.getAttribute('aria-expanded'), 'false');
 
-  await page.setViewportSize({ width: 390, height: 650 });
-  await page.goto(origin + '/');
   const logo = page.locator('.welcome-logo');
-  assert.equal(await logo.evaluate(node => getComputedStyle(node).animationName), 'none');
-  for (const action of await page.locator('.welcome-copy .btn').all()) {
-    const box = await action.boundingBox();
-    assert.ok(box && box.y + box.height <= 650, 'Hero action fits in a short mobile viewport');
+  for (const [width, height] of [[320, 568], [390, 650]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto(origin + '/');
+    assert.equal(await logo.evaluate(node => getComputedStyle(node).animationName), 'none');
+    for (const action of await page.locator('.welcome-copy .btn').all()) {
+      const box = await action.boundingBox();
+      assert.ok(box && box.y + box.height <= height, 'Hero action fits at ' + width + '×' + height);
+    }
   }
   await page.getByText('Showing saved EXM updates', { exact: false }).waitFor();
   assert.ok(await page.locator('#homeUpdates article').count());
@@ -75,11 +89,12 @@ try {
   assert.equal(await logo.evaluate(node => getComputedStyle(node).animationIterationCount), '1');
 
   const noScript = await browser.newContext({
-    javaScriptEnabled: false, viewport: { width: 320, height: 640 },
+    javaScriptEnabled: false, reducedMotion: 'reduce', viewport: { width: 320, height: 640 },
   });
   await noScript.route('**/*', serve);
   const fallback = await noScript.newPage();
-  await fallback.goto(origin + '/missing/nested/page');
+  const missing = await fallback.goto(origin + '/missing/nested/page');
+  assert.equal(missing.status(), 404);
   const fallbackNav = fallback.getByRole('navigation', { name: 'Main navigation' });
   await fallbackNav.getByRole('link', { name: 'Media', exact: true }).click();
   await fallback.waitForURL(origin + '/media.html');
@@ -87,7 +102,18 @@ try {
   await fallbackNav.getByRole('link', { name: 'EXM Divisions' }).click();
   await fallback.waitForURL(origin + '/divisions.html');
   assert.equal(await fallback.getByRole('link', { name: 'See the W3 portfolio' }).getAttribute('href'), 'studios.html');
-  console.log('PASS: ' + pages.length * 2 + ' Chromium layout checks, short mobile hero, keyboard navigation, reduced motion, and offline/no-script fallbacks.');
+  await fallback.goto(legacy + projectPrefix + '/index.html');
+  assert.ok(await fallback.locator('.nav-mark').evaluate(image => image.naturalWidth > 0));
+  await fallbackNav.getByRole('link', { name: 'Events', exact: true }).click();
+  await fallback.waitForURL(legacy + projectPrefix + '/events.html');
+  await fallback.getByRole('link', { name: 'Season III results', exact: true }).click();
+  await fallback.waitForURL(legacy + projectPrefix + '/events.html#double-impact');
+  const orderHelp = fallback.locator('footer').getByRole('link', { name: 'Shipping, returns & order help' });
+  await orderHelp.focus();
+  await fallback.keyboard.press('Enter');
+  await fallback.waitForURL(legacy + projectPrefix + '/order-help.html');
+
+  console.log('PASS: ' + pages.length * widthsToTest.length + ' Chromium layout checks, keyboard/back navigation, reduced motion, legacy subpath, and offline/no-script fallbacks.');
 } finally {
   await browser.close();
 }

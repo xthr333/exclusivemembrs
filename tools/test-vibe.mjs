@@ -60,7 +60,7 @@ assert.equal((eventPage.match(/class="matchup-card"/g)||[]).length,13);
 assert.ok(eventPage.includes('WILDCARD RECAP'));
 const w3=fs.readFileSync(path.join(root,'studios.html'),'utf8');
 assert.ok(w3.includes('https://photogw3.merlin.site/'));
-assert.ok(!w3.includes('w3-studios.square.site'));
+assert.ok(w3.includes('href="https://w3-studios.square.site/"') && w3.includes('W3 services on Square'));
 const photoSources=JSON.parse(fs.readFileSync(path.join(root,'assets/w3/sources.json'),'utf8'));
 assert.equal(photoSources.photos.length,8);
 for(const photo of photoSources.photos){
@@ -74,6 +74,20 @@ const invite=fs.readFileSync(path.join(root,'config.js'),'utf8').match(/DISCORD_
 const season4=eventPage.match(/href="(https:[^"]+\/season-4)"/)[1];
 const heroLinks=[...home.split('<div class="welcome-copy">')[1].split('<div class="welcome-bottom">')[0].matchAll(/<a\b[^>]*?href="([^"]+)"/g)].map(m=>m[1]);
 assert.deepEqual(heroLinks,[season4,invite]);
+const campaign = JSON.parse(fs.readFileSync(path.join(root,'content/featured-campaign.json'),'utf8'));
+assert.equal(campaign.actionUrl, season4);
+assert.equal(campaign.status, 'Interest open');
+assert.ok(eventPage.includes("<title>" + campaign.name + ": " + campaign.headline));
+assert.ok(home.includes('href="events.html#featured-event"'));
+for (const page of [home,eventPage]) {
+ assert.ok(page.includes('first-time SongWars judges'));
+ assert.ok(page.includes('Winner gets a prize.'));
+ assert.equal(page.split(campaign.actionUrl).length, 2, 'One interest CTA per page');
+}
+assert.ok(eventPage.includes('does not reserve a bracket spot'));
+assert.ok(eventPage.includes('Audience votes do not affect the outcome.'));
+assert.ok(eventPage.includes('Moderators and spectators'));
+assert.ok(eventPage.includes('OFFICIAL SEASON 2</span><h3>BitchYouNotAYop</h3>'));
 const sections=[...home.split('<main id="main">')[1].split('</main>')[0].matchAll(/<section\b([^>]*)>/g)].map(m=>m[1]);
 assert.deepEqual(sections.map(section => section.match(/ id="([^"]+)"/)?.[1]), [
  undefined, 'songwars', 'events', 'inside', 'media', 'shop-exm', undefined, 'discord',
@@ -82,19 +96,22 @@ for(const f of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
  const page=fs.readFileSync(path.join(root,f),'utf8');
  const menu=page.match(/<ul class="nav-links"[^>]*>([\s\S]*?)<\/ul>/)[1];
  const primary=[...menu.matchAll(/<li><a[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a><\/li>/g)].map(match=>match.slice(1));
+ const prefix = f === '404.html' ? '/' : '';
  assert.deepEqual(primary, [
-  ['/index.html','Home'], ['/events.html','Events'], ['/artists.html','Community'],
-  ['/media.html','Media'], ['/shop.html','Shop'], ['/about.html','About'],
+  [prefix+'index.html','Home'], [prefix+'events.html','Events'], [prefix+'artists.html','Community'],
+  [prefix+'media.html','Media'], [prefix+'shop.html','Shop'], [prefix+'about.html','About'],
  ], f+' navigation');
+ assert.ok(page.includes('src="'+prefix+'assets/brand/exm-logo.webp"'), f+' navigation mark');
+ assert.ok(page.split('<footer>')[1].includes('href="'+prefix+'order-help.html"'), f+' order help location');
  assert.ok(!menu.includes('admin.html'),f+' no public admin link');
- assert.ok(menu.includes('/divisions.html'),f+' Divisions entry');
+ assert.ok(menu.includes('href="'+prefix+'divisions.html"'),f+' Divisions entry');
  for(const [href] of page.matchAll(/https:\/\/discord\.gg\/[A-Za-z0-9_-]+/g))assert.equal(href,invite,f+' Discord invite');
 }
 assert.ok(home.includes('assets/brand/exm-logo.webp'));
 assert.ok(!home.includes('assets/w3/'));
 assert.ok(!home.includes('world-panel residency-panel'));
 assert.ok(home.includes('quiet-residency'));
-console.log('PASS: 10 shareable artist hubs; completed bracket and wildcard recap; 8 real W3 portfolio photos with provenance; Merlin portfolio destination; low-key Residency.');
+console.log('PASS: 10 shareable artist hubs; completed bracket and wildcard recap; 8 real W3 portfolio photos with provenance; Merlin and Square handoffs; current campaign; legacy-safe links; low-key Residency.');
 const orderHelp=fs.readFileSync(path.join(root,'order-help.html'),'utf8');
 assert.ok(orderHelp.includes('30 calendar days of delivery'));
 assert.ok(orderHelp.includes('wrong size or color'));
