@@ -38,7 +38,7 @@ function readCookie(request) {
     .find(cookie => cookie.startsWith(cookieName + '='))?.slice(cookieName.length + 1) ?? '';
 }
 
-async function readBody(request) {
+async function readBody(request, maxBytes = 4096) {
   if (request.headers.get('Content-Type')?.split(';')[0] !== 'application/json') {
     throw new RequestError(415, 'Send a JSON request.');
   }
@@ -52,7 +52,7 @@ async function readBody(request) {
       const { done, value } = await reader.read();
       if (done) break;
       bytes += value.byteLength;
-      if (bytes > 4096) throw new RequestError(413, 'Request is too large.');
+      if (bytes > maxBytes) throw new RequestError(413, 'Request is too large.');
       json += decoder.decode(value, { stream: true });
     }
     const data = JSON.parse(json + decoder.decode());
@@ -122,9 +122,11 @@ function provider(env) {
     toHex(await crypto.subtle.sign('HMAC', await signingKey, byteEncoder.encode(purpose + ':' + value)));
 
   const request = async (base, path, key, payload) => {
+    const headers = { apikey: key, 'Content-Type': 'application/json' };
+    if (key.startsWith('eyJ')) headers.Authorization = 'Bearer ' + key;
     const result = await fetch(base.replace(/\/$/, '') + path, {
       method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(8000),
-      headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload),
     });
     if (!result.ok) throw new ProviderError(result.status);
@@ -172,13 +174,13 @@ async function signup(db, request, body) {
   return respond({ message: 'If your account was created, you can sign in to save your one-time recovery codes.' }, 202);
 }
 
-async function login(db, request, body) {
+async function login(db, request, body, hosted) {
   const { email, password } = credentials(body, false);
   await throttle(db, request, 'login', email);
-  const alias = await db.alias(email);
+  const authEmail = hosted ? email : await db.alias(email);
   let result;
   try {
-    result = await db.signIn({ email: alias, password });
+    result = await db.signIn({ email: authEmail, password });
   } catch (error) {
     if (error instanceof ProviderError && [400, 401, 403, 422].includes(error.status)) {
       throw new RequestError(401, 'We could not sign you in with those credentials.');
@@ -187,12 +189,14 @@ async function login(db, request, body) {
   }
   const accountId = result?.user?.id;
   if (!accountId) throw new ProviderError(502);
+  if (hosted && result.user.factors?.some(factor => factor.status === 'verified')) {
+    throw new RequestError(403, 'This account requires additional verification. Contact EXM support.');
+  }
   const token = randomHex(32);
-  const codes = Array.from({ length: 8 }, () => randomHex(16));
-  const issued = await db.rpc('open_session', {
-    p_id: accountId, p_token: await sha256(token),
-    p_codes: await Promise.all(codes.map(code => db.digest('recovery', code))),
-  });
+  const codes = hosted ? [] : Array.from({ length: 8 }, () => randomHex(16));
+  const session = { p_id: accountId, p_token: await sha256(token) };
+  if (!hosted) session.p_codes = await Promise.all(codes.map(code => db.digest('recovery', code)));
+  const issued = await db.rpc(hosted ? 'open_hosted_session' : 'open_session', session);
   if (issued === null) throw new RequestError(401, 'We could not sign you in with those credentials.');
   return respond({ recoveryCodes: issued ? codes : [] }, 200, {
     'Set-Cookie': cookieName + '=' + token + '; ' + cookieAttributes + '; Max-Age=86400',
@@ -227,6 +231,10 @@ export async function handleMemberRequest(request, env) {
   if (method === 'POST' && request.headers.get('Origin') !== url.origin) {
     return respond({ error: 'Request origin was not accepted.' }, 403);
   }
+  if (env.EXM_HOSTED === true && ['/api/members/signup', '/api/members/recover'].includes(url.pathname)) {
+    return respond({ error: url.pathname.endsWith('/signup') ? 'Public signup is closed.' :
+      'Use the EXM support contact for account assistance.' }, 403);
+  }
 
   try {
     const db = provider(env);
@@ -237,7 +245,7 @@ export async function handleMemberRequest(request, env) {
       }
       return await signup(db, request, await readBody(request));
     }
-    if (path === '/api/members/login') return await login(db, request, await readBody(request));
+    if (path === '/api/members/login') return await login(db, request, await readBody(request), env.EXM_HOSTED === true);
     if (path === '/api/members/recover') return await recover(db, request, await readBody(request));
 
     const token = readCookie(request);

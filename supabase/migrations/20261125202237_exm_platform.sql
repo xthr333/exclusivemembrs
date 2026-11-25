@@ -31,7 +31,7 @@ create table exm_member.platform_settings (
   season_key text not null check (length(season_key) between 1 and 32),
   season_name text not null check (length(season_name) between 1 and 80)
 );
-insert into exm_member.platform_settings values (true,'preview','Preview season');
+insert into exm_member.platform_settings values (true,'founding','Founding season');
 
 create table exm_member.staff (
   profile_id uuid not null references exm_member.profiles(id),

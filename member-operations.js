@@ -1,6 +1,7 @@
 (() => {
   const { api, el, actionButton, field, formFor, pretty, date } = window.EXMMemberUI;
   const byId = id => document.getElementById(id);
+  const hosted = Boolean(window.EXMHostedMode);
   const states = ['draft', 'scheduled', 'registration_open', 'live', 'completed', 'canceled', 'archived'];
   const kinds = ['gaming', 'community', 'stream', 'residency', 'screening', 'in_person', 'other'];
   const choices = items => items.map(item => [item, pretty(item)]);
@@ -57,12 +58,12 @@
 
   function eventCard(event) {
     const card = el('article', null, 'platform-card');
-    card.append(el('p', 'LOCAL PREVIEW · ' + pretty(event.status), 'kicker'));
+    card.append(el('p', (hosted ? '' : 'LOCAL PREVIEW · ') + pretty(event.status), 'kicker'));
     card.append(el('h3', event.name), el('p', event.description));
     if (event.startsAt) card.append(el('p', 'Starts ' + event.startsAt.replace('T', ' ').replace(/:00(?:\.000)?Z$/, ' UTC')));
     if (event.rules) card.append(el('p', event.rules));
     if (event.format && event.format !== 'open') card.append(el('p', 'Format: ' + event.format));
-    if (['live', 'completed'].includes(event.status)) {
+    if (!hosted && ['live', 'completed'].includes(event.status)) {
       const results = el('div');
       const loadMatches = task(card, null, async () => {
         const { items } = await api('matches?id=' + encodeURIComponent(event.id));
@@ -71,19 +72,30 @@
       });
       card.append(actionButton('Show published test results', loadMatches), results);
     }
-    appendLink(card, event.link, 'External event or RSVP');
-    appendLink(card, event.stream, 'Broadcast or replay');
+    appendLink(card, event.link, 'Event website');
+    if (['scheduled', 'registration_open'].includes(event.status)) {
+      appendLink(card, event.interest, 'Express interest');
+      appendLink(card, event.registration, 'Register externally');
+    }
+    if (['scheduled', 'registration_open', 'live'].includes(event.status)) {
+      appendLink(card, event.rsvp, 'RSVP');
+      appendLink(card, event.tickets, 'Tickets');
+    }
+    appendLink(card, event.stream, event.status === 'live' ? 'Watch live' : 'Broadcast');
+    appendLink(card, event.replay, 'Watch replay');
     appendLink(card, event.recap, 'Results and recap');
     const now = Date.now();
     if (event.status === 'registration_open' && (!event.opensAt || Date.parse(event.opensAt) <= now)
         && (!event.closesAt || Date.parse(event.closesAt) > now)) {
-      const { form, finish } = task(card, 'Submit test application', async values => {
+      const { form, finish } = task(card, hosted ? 'Submit application' : 'Submit test application', async values => {
         await api('apply', { event: event.id, ...values });
         form.reset();
-        return 'Test interest received. Staff review decides placement.';
+        return hosted ? 'Application received. EXM staff will review your submission.' :
+          'Test interest received. Staff review decides placement.';
       });
-      field(form, 'Test display name', 'name').maxLength = 80;
-      const email = field(form, 'Synthetic contact ending in .test', 'contact', null, 'email');
+      if (hosted) form.append(el('p', 'EXM event staff use your contact details to review this application. Share only the information this form asks for.'));
+      field(form, hosted ? 'Display name' : 'Test display name', 'name').maxLength = 80;
+      const email = field(form, hosted ? 'Contact email' : 'Synthetic contact ending in .test', 'contact', null, 'email');
       email.maxLength = 254;
       if (event.question) field(form, event.question, 'answer').maxLength = 600;
       finish();
@@ -196,8 +208,8 @@
     const id = item?.id || crypto.randomUUID();
     const eventEditor = type === 'event';
     const card = el('article', null, 'platform-card');
-    card.append(el('h3', item ? old.name : (eventEditor ? 'New test event' : 'New preview announcement')));
-    if (item) card.append(el('p', item.archived ? 'Archived' : item.published ? 'Published in local preview' : 'Draft'));
+    card.append(el('h3', item ? old.name : (eventEditor ? (hosted ? 'New event' : 'New test event') : 'New preview announcement')));
+    if (item) card.append(el('p', item.archived ? 'Archived' : item.published ? (hosted ? 'Published' : 'Published in local preview') : 'Draft'));
     const { form, finish } = task(card, eventEditor ? 'Save event draft' : 'Save announcement draft', async values => {
       const dates = eventEditor ? { startsAt: utc(values.startsAt), opensAt: utc(values.opensAt), closesAt: utc(values.closesAt) }
         : { publishAt: utc(values.publishAt), expiresAt: utc(values.expiresAt) };
@@ -222,8 +234,12 @@
       }
       useValue(form, 'Eligibility and rules', 'rules', old.rules, null, 'text', false).maxLength = 600;
       useValue(form, 'Application question', 'question', old.question, null, 'text', false).maxLength = 200;
-      useValue(form, 'Broadcast or replay URL', 'stream', old.stream, null, 'url', false);
+      useValue(form, 'Broadcast URL', 'stream', old.stream, null, 'url', false);
       useValue(form, 'Recap or results URL', 'recap', old.recap, null, 'url', false);
+      for (const [label, key] of [['Interest form', 'interest'], ['External registration', 'registration'],
+        ['RSVP', 'rsvp'], ['Tickets', 'tickets'], ['Replay', 'replay']]) {
+        useValue(form, label + ' URL', key, old[key], null, 'url', false);
+      }
     } else {
       useValue(form, 'Pinned', 'pinned', String(Boolean(old.pinned)), [['false', 'No'], ['true', 'Yes']]);
       useValue(form, 'Related event ID (optional)', 'event', old.event, null, 'text', false);
@@ -237,7 +253,7 @@
       if (eventEditor) details.append(el('p', 'Status: ' + pretty(old.status)));
       card.append(details);
       const publish = task(card, null, async () => { await api(type + '_publish', { id }); await rebuild(); });
-      card.append(actionButton('Publish saved draft to preview', publish));
+      card.append(actionButton(hosted ? 'Publish saved event' : 'Publish saved draft to preview', publish));
       if (!eventEditor && !item.archived) {
         const archive = task(card, null, async () => { await api('notice_archive', { id }); await rebuild(); });
         card.append(actionButton('Archive announcement', archive));
@@ -260,7 +276,7 @@
       return card;
     });
     target.replaceChildren(...records);
-    if (!records.length) target.append(el('p', 'No test applications received.'));
+    if (!records.length) target.append(el('p', hosted ? 'No applications received.' : 'No test applications received.'));
   }
 
   async function scoring(panel, event, owner) {
@@ -360,9 +376,9 @@
       if (canReview) {
         const list = el('div');
         const review = task(card, null, async () => { await applications(list, event.id); return 'Applications loaded.'; });
-        card.append(actionButton('Review test applications', review), list);
+        card.append(actionButton(hosted ? 'Review applications' : 'Review test applications', review), list);
       }
-      if (canScore) {
+      if (canScore && !hosted) {
         const scoringPanel = el('div');
         const openScoring = task(card, null, async () => { await scoring(scoringPanel, event.id, owner); return 'Scoring drafts loaded.'; });
         card.append(actionButton('Open scoring and corrections', openScoring), scoringPanel);
@@ -380,7 +396,7 @@
     }
     if (!data.events.length && !owner) group.append(el('p', 'No events assigned to this account.'));
     children.push(group);
-    if (owner) {
+    if (owner && !hosted) {
       children.unshift(await campaignStudio(rebuild));
       const notices = el('div', null, 'platform-grid hub-grid');
       notices.append(editorCard(null, 'notice', rebuild), ...data.notices.map(item => editorCard(item, 'notice', rebuild)));

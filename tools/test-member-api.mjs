@@ -86,6 +86,10 @@ assert.equal((await call('signup', { payload: second })).status, 202);
 const secondLogin = await call('login', { payload: second });
 assert.equal(secondLogin.status, 200);
 const secondCookie = secondLogin.headers.get('set-cookie').split(';')[0];
+assert.equal((await call(secondPublic)).status, 404, 'New profiles are private until they opt in');
+assert.equal((await call('profile', {
+  cookie: secondCookie, payload: { displayName: second.username, bio: '', discoverable: true },
+})).status, 200);
 const visibleProfile = { ...profile, discoverable: true };
 assert.equal((await call('profile', { payload: visibleProfile, cookie })).status, 200);
 assert.deepEqual(await (await call(directory)).json(), {

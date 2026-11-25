@@ -7,6 +7,7 @@
   const codes = byId('member-codes');
   const codesList = byId('member-codes-list');
   const recoveryReference = byId('member-recovery-reference');
+  const hosted = Boolean(window.EXMHostedMode);
 
   async function request(action, payload) {
     const response = await fetch('/api/members/' + action, payload === undefined ? {} : {
@@ -69,6 +70,7 @@
     });
   }
 
+  /* exm:fixture */
   onSubmit(byId('member-signup'), async (formData, form) => {
     const { code, data } = await request('signup', formData);
     status.textContent = data.message || data.error || 'Account setup is temporarily unavailable.';
@@ -78,6 +80,7 @@
       form.reset();
     }
   });
+  /* /exm:fixture */
 
   onSubmit(byId('member-login'), async (formData, form) => {
     const { code, data } = await request('login', formData);
@@ -101,7 +104,13 @@
     await showSession();
   });
 
-  onSubmit(byId('member-recover'), async (formData, form) => {
+  if (hosted) {
+    const recoveryForm = byId('member-recover');
+    recoveryForm.previousElementSibling.textContent = 'Contact EXM support for account assistance.';
+    recoveryForm.replaceWith(Object.assign(document.createElement('a'), {
+      href: 'contact.html', textContent: 'Contact EXM support',
+    }));
+  } else onSubmit(byId('member-recover'), async (formData, form) => {
     recoveryReference.hidden = true;
     byId('recovery-reference-value').textContent = '';
     const { code, data } = await request('recover', formData);
@@ -136,6 +145,7 @@
     }
   });
 
+  /* exm:fixture */
   fetch('/api/preview/login').then(async response => {
     if (!response.ok) return;
     const { profiles } = await response.json();
@@ -169,5 +179,6 @@
   if (location.hostname === 'localhost' && new URLSearchParams(location.search).has('test-fixture')) {
     byId('fixture-signup').hidden = false;
   }
+  /* /exm:fixture */
   showSession().catch(() => { status.textContent = 'Member accounts are temporarily unavailable.'; });
 })();

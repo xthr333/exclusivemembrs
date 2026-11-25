@@ -57,7 +57,8 @@ assert.ok(['exm_fixture', 'exm_clean'].includes(dbName), 'Use a dedicated fixtur
 execFileSync('docker', ['exec', '-i', dbContainer, 'psql', '-U', 'postgres',
   '-d', dbName, '-v', 'ON_ERROR_STOP=1', '-q'], {
   input: "insert into exm_member.staff(profile_id,role) values ('" + owner.id +
-    "','owner'), ('" + moderator.id + "','moderator') on conflict do nothing;\n",
+    "','owner'), ('" + moderator.id + "','moderator') on conflict do nothing;\n" +
+    "insert into exm_member.access_scopes values ('preview-studio','Preview studio','You opened the protected test studio.') on conflict do nothing;\n",
   stdio: ['pipe', 'ignore', 'inherit'],
 });
 for (const name of ['artist', 'producer']) {

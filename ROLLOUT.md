@@ -44,3 +44,19 @@ Artist links, shop URLs, social accounts and contact endpoint were retained from
 
 ## Rollback
 All previous source remains in Git history. Revert the rollout commit to restore the prior site. Do not delete the repository, Worker, registration database or domain.
+
+## Hosted Events and member rollout
+
+The `exm` Worker serves the same public build when hosted mode is off. It uses the existing EXM Supabase Free project for hosted data. The migrations add the private `exm_member` schema and service-role RPCs. The existing announcements owner was linked by the Auth identity already used by the announcements write policy. The hosted profile starts private. Neither the provider password nor legacy grants are changed.
+
+Add these bindings on the Cloudflare Worker under **Settings → Variables and Secrets**:
+
+- `EXM_MEMBER_SERVICE_ROLE_KEY` uses the existing EXM Supabase project’s backend secret or legacy service-role key. Store it as an encrypted secret.
+- `EXM_MEMBER_PEPPER` uses a persistent output from `openssl rand -hex 32`. Store it as an encrypted secret. Changing it resets rate-limit buckets derived with the previous key.
+- `EXM_MEMBER_MODE` uses `events` for staged Events activation. Remove the variable or set it to `off` for a code-level rollback to the public site. The deployment preserves these Cloudflare settings. No credential belongs in Git.
+
+Check `/api/exm-mode.js` and `/api/platform/events` after activation. Sign in at `/account` with the existing EXM owner login, then open `/member-hub#staff`. Save a draft, open its preview, set the intended event status, and publish. An owner controls when registration opens and can review applications for that event. The form collects contact email and the event-specific answer and returns only a receipt. Staff permissions are scoped to assigned events.
+
+Use `npm run build` and `node tools/test-hosted-api.mjs` with the isolated preview environment to rehearse before inviting people or changing `EXM_MEMBER_MODE` to `members`. The rehearsal refuses hosted provider URLs. In production, public signup and code recovery are disabled. Existing Auth accounts also need an approved EXM profile link before they can sign in. Verify the private invitation and ownership recovery process, provider signup settings, actual free-tier limits, and the source for any existing member history before expanding access. An Auth account with a verified MFA factor requires a supported MFA sign-in flow. The current password-only EXM form denies it.
+
+Switching hosted mode off preserves events, applications and member history. Review access and export needs through authorized Supabase tools. Existing SongWars forms and gates remain with their current provider.

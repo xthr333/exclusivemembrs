@@ -5,8 +5,6 @@ create table exm_member.access_scopes (
   title text not null,
   body text not null
 );
-insert into exm_member.access_scopes values
-  ('preview-studio','Preview studio','You opened the protected test studio. This content uses a local EXM preview permission.');
 
 create table exm_member.legacy_identities (
   slug text primary key check (slug ~ '^[a-z0-9-]{4,45}$'),

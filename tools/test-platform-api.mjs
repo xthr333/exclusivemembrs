@@ -58,6 +58,11 @@ assert.equal((await platform('feed')).status, 401);
 assert.equal((await platform('check_in', undefined, {})).status, 401);
 
 const [artist, producer] = await Promise.all([login(artistAccount), login(producerAccount)]);
+for (const [account, cookie] of [[artistAccount, artist], [producerAccount, producer]]) {
+  assert.equal((await send('members/profile', { cookie, data: {
+    displayName: account.username, bio: '', discoverable: true,
+  } })).status, 200);
+}
 const owner = await demo('owner');
 const moderator = await demo('moderator');
 assert.equal((await platform('moderation', artist)).status, 403);

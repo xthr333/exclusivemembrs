@@ -1,10 +1,22 @@
 {
   "name": "exm",
+  "main": "server/production.mjs",
   "compatibility_date": "2026-11-04",
+  "keep_vars": true,
   "workers_dev": true,
   "routes": [
     { "pattern": "exclusivemembrs.com", "custom_domain": true },
     { "pattern": "www.exclusivemembrs.com", "custom_domain": true }
   ],
-  "assets": { "directory": "./dist", "not_found_handling": "404-page" }
+  "vars": {
+    "EXM_MEMBER_AUTH_URL": "https://ldtmapwemttqoygcqlqu.supabase.co/auth/v1",
+    "EXM_MEMBER_DATA_URL": "https://ldtmapwemttqoygcqlqu.supabase.co/rest/v1",
+    "EXM_MEMBER_ANON_KEY": "sb_publishable_fnnYUGRotjuA_56F1F3Yvg_l_1mYYY5"
+  },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/__exm*", "/events*", "/artists*", "/account*", "/member*"],
+    "not_found_handling": "404-page"
+  }
 }

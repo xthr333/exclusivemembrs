@@ -15,6 +15,9 @@ const competitionActions = new Set(['match_save', 'match_publish']);
 const memberInteractions = new Set(['post', 'like', 'report']);
 const editorialViews = new Set(['featured_content', 'campaign_studio']);
 const editorialActions = new Set(['editorial_save', 'editorial_publish']);
+const hostedOperations = new Set(['events', 'applications', 'studio', 'apply',
+  'event_save', 'event_publish', 'event_assign', 'application_review']);
+const hostedEventsOnly = new Set(['dashboard', ...hostedOperations]);
 const states = new Set(['draft', 'scheduled', 'registration_open', 'live', 'completed', 'canceled', 'archived']);
 const eventKinds = new Set(['gaming', 'community', 'stream', 'residency', 'screening', 'in_person', 'other']);
 const categories = new Set(['overall', 'artist', 'producer', 'judge', 'spectator', 'creator', 'songwars']);
@@ -156,7 +159,7 @@ function operationOptions(view, query) {
   return {};
 }
 
-function operationPayload(action, body) {
+function operationPayload(action, body, hosted) {
   const { id, event, status, name, legacy, scope, username, code, role } = body;
   if (['event_publish', 'notice_publish', 'notice_archive', 'recovery_review'].includes(action)) {
     valid(matches(id, uuidPattern));
@@ -198,13 +201,17 @@ function operationPayload(action, body) {
         id, kind, format, status, name: text(name, 80), description: text(body.description, 600), capacity: capacity ?? null,
         startsAt: timestamp(body.startsAt), opensAt, closesAt, link: secureLink(body.link),
         stream: secureLink(body.stream), recap: secureLink(body.recap),
+        interest: secureLink(body.interest), registration: secureLink(body.registration),
+        rsvp: secureLink(body.rsvp), tickets: secureLink(body.tickets), replay: secureLink(body.replay),
         rules: optionalText(body.rules, 600), question: optionalText(body.question, 200),
       };
     }
     case 'apply': {
       valid(matches(event, uuidPattern));
       const contact = text(body.contact, 254).toLowerCase();
-      valid(/^[^\s@]+@[^\s@]+\.test$/.test(contact), 'Use a synthetic email ending in .test for this preview.');
+      if (hosted) valid(/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(contact) && !contact.endsWith('.test'),
+        'Enter a valid contact email.');
+      else valid(/^[^\s@]+@[^\s@]+\.test$/.test(contact), 'Use a synthetic email ending in .test for this preview.');
       return { event, name: text(name, 80), contact, answer: optionalText(body.answer, 600) || '' };
     }
     case 'application_review':
@@ -253,6 +260,12 @@ function domainResponse(result) {
 export async function handlePlatformRequest(request, env) {
   const url = new URL(request.url);
   const name = url.pathname.slice('/api/platform/'.length);
+  const hosted = env.EXM_HOSTED === true;
+  if (hosted && ((env.EXM_MEMBER_MODE === 'events' && !hostedEventsOnly.has(name)) ||
+      ((operationViews.has(name) || operationActions.has(name) || editorialViews.has(name) || editorialActions.has(name) ||
+        competitionViews.has(name) || competitionActions.has(name)) && !hostedOperations.has(name)))) {
+    return respond({ error: 'Page not found.' }, 404);
+  }
   const reading = request.method === 'GET' && (views.has(name) || operationViews.has(name) || competitionViews.has(name) || editorialViews.has(name));
   const writing = request.method === 'POST' && (actions.has(name) || operationActions.has(name) || competitionActions.has(name) || editorialActions.has(name));
   if (!reading && !writing) return respond({ error: 'Page not found.' }, 404);
@@ -285,9 +298,9 @@ export async function handlePlatformRequest(request, env) {
       }));
     }
     if (operationActions.has(name) || competitionActions.has(name) || editorialActions.has(name)) {
-      if (env.EXM_PREVIEW_CONSOLE !== '1' || !isLoopback(request.url)) return domainResponse({ error: 'forbidden' });
+      if (!hosted && (env.EXM_PREVIEW_CONSOLE !== '1' || !isLoopback(request.url))) return domainResponse({ error: 'forbidden' });
       if (!p_token && name !== 'apply') return domainResponse({ error: 'signin' });
-      const operation = operationPayload(name, await readBody(request));
+      const operation = operationPayload(name, await readBody(request, name === 'event_save' ? 8192 : 4096), hosted);
       const sensitive = ['unlock', 'claim', 'apply'].includes(name);
       await throttle(db, request, 'operation:' + name, p_token || operation.contact, sensitive ? [32, 7] : [120, 60]);
       const issuance = ['issue_access', 'issue_claim'].includes(name);

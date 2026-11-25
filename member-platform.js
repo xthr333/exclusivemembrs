@@ -370,9 +370,18 @@
     byId('blocked-more').hidden = !blockedAfter;
   }
 
+  const eventsOnly = window.EXMHostedMode === 'events';
+  if (window.EXMHostedMode) document.querySelector('[data-view="access"]').hidden = true;
+  if (eventsOnly) {
+    for (const link of viewLinks) link.hidden = true;
+    const staffLink = document.querySelector('[data-view="staff"]');
+    staffLink.textContent = 'Event dashboard';
+  }
+
   async function load(message = '') {
     const requested = location.hash.slice(1);
-    const view = panels.some(panel => panel.dataset.panel === requested) ? requested : 'dashboard';
+    const view = eventsOnly ? 'staff' :
+      panels.some(panel => panel.dataset.panel === requested) ? requested : 'dashboard';
     const request = ++requestNumber;
     signedOut.hidden = true;
     panels.forEach(panel => { panel.hidden = panel.dataset.panel !== view; });
@@ -410,14 +419,14 @@
       } else if (view === 'staff') {
         const data = await api('dashboard');
         roles = data.roles;
-        const canModerate = roles.includes('owner') || roles.includes('moderator');
+        const canModerate = !eventsOnly && (roles.includes('owner') || roles.includes('moderator'));
         const isOwner = roles.includes('owner');
         const canOperate = isOwner || roles.includes('event_staff') || roles.includes('judge');
         if (!canModerate && !canOperate) throw new Error('This account does not have staff access.');
-        const [reports, owner] = await Promise.all([canModerate ? api('moderation') : null, isOwner ? api('owner') : null]);
+        const [reports, owner] = await Promise.all([canModerate ? api('moderation') : null, !eventsOnly && isOwner ? api('owner') : null]);
         if (request !== requestNumber) return;
         byId('moderation-tools').hidden = !canModerate;
-        byId('owner-tools').hidden = !isOwner;
+        byId('owner-tools').hidden = !owner;
         if (reports) showModeration(reports);
         if (owner) showOwner(owner);
         byId('operations-tools').hidden = !canOperate;
