@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { renderEventCalendar } from './event-calendar.mjs';
 
 const out = resolve(import.meta.dirname, '../dist');
 const pages = readdirSync(out).filter(file => file.endsWith('.html'));
@@ -18,7 +19,34 @@ for (const page of pages) {
   }
 }
 assert.match(readFileSync(resolve(out, 'index.html'), 'utf8'), /SongWars IV interest form/);
-assert.match(readFileSync(resolve(out, 'events.html'), 'utf8'), /46–39\.5/);
+const eventsPage = readFileSync(resolve(out, 'events.html'), 'utf8');
+assert.match(eventsPage, /46–39\.5/);
+for (const view of ['upcoming', 'live', 'past']) {
+  assert.ok(eventsPage.includes('href="#calendar-' + view + '"'));
+  assert.ok(eventsPage.includes('id="calendar-' + view + '"'));
+}
+assert.match(eventsPage, /id="featured-event"[\s\S]*?<a[^>]*href="https:\/\/songwars-s3-registration\.b26xkz4v97\.chatgpt\.site\/season-4"/);
+assert.match(eventsPage, /id="calendar-event-songwars-iv"[\s\S]*?<a[^>]*href="#featured-event"/);
+assert.match(eventsPage, /id="calendar-event-songwars-iii"[\s\S]*?<a[^>]*href="#double-impact"/);
+const event = {
+  id: 'fixture', title: '<Title>', status: 'upcoming', summary: 'A & B', date: '2024-02-29',
+  links: Object.fromEntries(['interest', 'registration', 'rsvp', 'tickets', 'stream', 'replay', 'recap']
+    .map(action => [action, 'https://example.com/' + action])),
+};
+const calendar = renderEventCalendar([
+  event, { ...event, id: 'live-fixture', status: 'live' }, { ...event, id: 'past-fixture', status: 'past' },
+  { ...event, id: 'unreleased', title: 'Unreleased draft', status: 'draft' },
+]);
+const card = id => calendar.match(new RegExp('id="calendar-event-' + id + '"[\\s\\S]+?</article>'))[0];
+assert.match(card('fixture'), /&lt;Title&gt;[\s\S]+A &amp; B[\s\S]+interest[\s\S]+registration[\s\S]+rsvp[\s\S]+tickets/);
+assert.doesNotMatch(card('fixture'), /example\.com\/(stream|replay|recap)/);
+assert.match(card('live-fixture'), /example\.com\/stream/);
+assert.match(card('past-fixture'), /example\.com\/replay[\s\S]+example\.com\/recap/);
+assert.doesNotMatch(card('past-fixture'), /example\.com\/(interest|registration|rsvp|tickets|stream)/);
+assert.doesNotMatch(calendar, /Unreleased draft|calendar-event-unreleased/);
+assert.throws(() => renderEventCalendar([event, event]), /unique ID/);
+assert.throws(() => renderEventCalendar([{ ...event, date: '2025-02-29' }]), /real calendar date/);
+assert.throws(() => renderEventCalendar([{ ...event, links: { tickets: 'javascript:alert(1)' } }]), /public HTTPS/);
 assert.match(readFileSync(resolve(out, 'hall-of-fame.html'), 'utf8'), /BitchYouNotAYop/);
 assert.match(readFileSync(resolve(out, 'artists.html'), 'utf8'), /href="mayo\.html"/);
 assert.match(readFileSync(resolve(out, 'admin.html'), 'utf8'), /supabase/i);

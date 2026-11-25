@@ -1,5 +1,6 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { renderEventCalendar } from './event-calendar.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const check = process.argv.includes('--check');
@@ -13,6 +14,7 @@ const templates = new Map(await Promise.all(templateNames.map(async name => [
   (await readFile(resolve(import.meta.dirname, 'templates', name + '.html'), 'utf8')).trim(),
 ])));
 const campaign = JSON.parse(await readFile(resolve(root, 'content/featured-campaign.json'), 'utf8'));
+const calendar = renderEventCalendar(JSON.parse(await readFile(resolve(root, 'content/events.json'), 'utf8')));
 const action = new URL(campaign.actionUrl);
 if (action.protocol !== 'https:' || action.username || action.password) {
   throw new Error('The featured campaign action must use a public HTTPS URL.');
@@ -20,6 +22,7 @@ if (action.protocol !== 'https:' || action.username || action.password) {
 
 const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 function render(name, file) {
+  if (name === 'event-calendar') return calendar;
   const html = templates.get(name);
   if (name.startsWith('campaign-')) {
     return html.replace(/\{\{(\w+)\}\}/g, (_, key) => {
@@ -41,7 +44,8 @@ for (const file of (await readdir(root)).filter(file => file.endsWith('.html')))
   const path = resolve(root, file);
   const original = await readFile(path, 'utf8');
   let page = original;
-  for (const name of ['navigation', 'footer', ...(campaignPages[file] ?? [])]) {
+  const pageComponents = campaignPages[file] ?? [];
+  for (const name of ['navigation', 'footer', ...pageComponents, ...(file === 'events.html' ? ['event-calendar'] : [])]) {
     const start = '<!-- exm:' + name + ' -->';
     const end = '<!-- /exm:' + name + ' -->';
     const range = new RegExp(start + '[\\s\\S]*?' + end, 'g');

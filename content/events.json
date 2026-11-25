@@ -1,0 +1,21 @@
+[
+  {
+    "id": "songwars-iv",
+    "title": "SongWars IV · Free For All",
+    "status": "upcoming",
+    "summary": "Solo artist and first-time judge interest is open. The date and lineup are still to come.",
+    "links": {
+      "interest": "#featured-event"
+    }
+  },
+  {
+    "id": "songwars-iii",
+    "title": "SongWars III · Double Impact",
+    "status": "past",
+    "date": "2026-11-21",
+    "summary": "BallHogs won the final against Yopz, 46–39.5.",
+    "links": {
+      "recap": "#double-impact"
+    }
+  }
+]
