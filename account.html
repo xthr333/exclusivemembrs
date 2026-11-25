@@ -28,6 +28,8 @@
       <details class="platform-more">
         <summary>More</summary>
         <div class="platform-more-menu">
+          <a data-page="member-hub.html" href="member-hub.html">Member hub</a>
+          <a data-page="hall-of-fame.html" href="hall-of-fame.html">SongWars Hall of Fame</a>
           <a data-page="account.html" href="account.html">Member account</a>
           <a data-page="divisions.html" href="divisions.html">EXM Divisions</a>
           <a data-page="updates.html" href="updates.html">Announcements</a>
@@ -46,6 +48,11 @@
       <h1 class="section-title">EXM member account</h1>
       <p id="account-status" role="status"></p>
       <noscript><p>Enable JavaScript to manage your EXM account.</p></noscript>
+      <section class="platform-card" id="preview-signin" hidden>
+        <h2>Preview test accounts</h2>
+        <p>These roles use synthetic local data. Public signup is closed.</p>
+        <div id="preview-signin-buttons" class="buttons"></div>
+      </section>
       <div id="account-access" class="platform-grid" hidden>
         <section class="platform-card">
           <h2>Sign in</h2>
@@ -55,8 +62,8 @@
             <button class="btn" type="submit">Sign in</button>
           </form>
         </section>
-        <section class="platform-card">
-          <h2>Create an account</h2>
+        <section class="platform-card" id="fixture-signup" hidden>
+          <h2>Create a test account</h2>
           <form class="form-shell" id="member-signup" method="post">
             <div class="field"><label for="signup-email">Email</label><input id="signup-email" name="email" type="email" maxlength="254" autocomplete="email" required></div>
             <div class="field"><label for="signup-username">Username</label><input id="signup-username" name="username" minlength="3" maxlength="24" autocomplete="username" aria-describedby="username-hint" required></div>
@@ -87,11 +94,19 @@
         </section>
         <section class="platform-card">
           <h2>Your profile</h2>
-          <p id="account-handle"></p>
+          <p id="account-handle"></p><p><a class="text-link" href="member-hub.html">Open your member hub</a></p>
           <p><a href="artists.html#members">Browse the member directory</a></p>
           <form class="form-shell" id="member-profile" method="post">
             <div class="field"><label for="profile-name">Display name</label><input id="profile-name" name="displayName" maxlength="60" required></div>
             <div class="field"><label for="profile-bio">Bio</label><textarea id="profile-bio" name="bio" maxlength="600"></textarea></div>
+            <div class="field"><label for="profile-avatar">Avatar</label><select id="profile-avatar" name="avatar"><option value="initials">Profile initials</option><option value="chrome">EXM chrome mark</option></select></div>
+            <fieldset class="role-picker">
+              <legend>Public social or portfolio links</legend>
+              <p>Use HTTPS links from a supported platform such as Instagram, YouTube, TikTok, Twitch, SoundCloud, Spotify, Bandcamp, Vimeo, GitHub or Behance.</p>
+              <div class="field"><label for="profile-link-one">Link one</label><input id="profile-link-one" name="links" type="url" maxlength="400"></div>
+              <div class="field"><label for="profile-link-two">Link two</label><input id="profile-link-two" name="links" type="url" maxlength="400"></div>
+              <div class="field"><label for="profile-link-three">Link three</label><input id="profile-link-three" name="links" type="url" maxlength="400"></div>
+            </fieldset>
             <fieldset class="role-picker">
               <legend>Creative roles</legend>
               <p>Choose up to eight roles.</p>

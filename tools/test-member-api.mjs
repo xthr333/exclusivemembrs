@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { handleMemberRequest } from '../server/member-api.mjs';
 
-const env = process.env;
+const env = { ...process.env, EXM_MEMBER_PREVIEW_SIGNUP: 'fixture' };
 for (const variable of ['EXM_MEMBER_AUTH_URL', 'EXM_MEMBER_DATA_URL']) {
   const target = new URL(env[variable]);
   assert.ok(['localhost', '127.0.0.1', '[::1]'].includes(target.hostname), variable + ' must be local');
@@ -10,7 +10,7 @@ for (const variable of ['EXM_MEMBER_AUTH_URL', 'EXM_MEMBER_DATA_URL']) {
 const runId = randomBytes(5).toString('hex');
 const worker = env.EXM_MEMBER_WORKER_ORIGIN ? new URL(env.EXM_MEMBER_WORKER_ORIGIN) : null;
 if (worker) assert.ok(['localhost', '127.0.0.1', '[::1]'].includes(worker.hostname), 'Worker must be local');
-const origin = worker?.origin || 'https://exm.test';
+const origin = worker?.origin || 'http://localhost';
 const password = 'Local member test password';
 const [first, second] = ['one', 'two'].map(tag => ({
   email: tag + '-' + runId + '@example.test',
@@ -65,7 +65,7 @@ let response = await call('session', { cookie });
 assert.equal(response.status, 200);
 const session = (await response.json()).profile;
 assert.equal(session.username, first.username);
-assert.deepEqual(Object.keys(session).sort(), ['bio', 'creativeRoles', 'discoverable', 'displayName', 'id', 'username']);
+assert.deepEqual(Object.keys(session).sort(), ['avatar', 'bio', 'creativeRoles', 'discoverable', 'displayName', 'id', 'links', 'username']);
 
 const profile = {
   displayName: 'Local artist ' + runId, bio: '<b>Treated as text</b>',
@@ -89,7 +89,7 @@ const secondCookie = secondLogin.headers.get('set-cookie').split(';')[0];
 const visibleProfile = { ...profile, discoverable: true };
 assert.equal((await call('profile', { payload: visibleProfile, cookie })).status, 200);
 assert.deepEqual(await (await call(directory)).json(), {
-  profiles: [{ username: first.username, displayName: profile.displayName, creativeRoles: profile.creativeRoles }],
+  profiles: [{ username: first.username, displayName: profile.displayName, creativeRoles: profile.creativeRoles, avatar: 'initials' }],
   nextAfter: null,
 });
 assert.deepEqual(await (await call(directory + '&after=' + first.username)).json(), { profiles: [], nextAfter: null });

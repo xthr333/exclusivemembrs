@@ -36,6 +36,10 @@
     const account = data.profile;
     profile.elements.displayName.value = account.displayName;
     profile.elements.bio.value = account.bio;
+    profile.elements.avatar.value = account.avatar;
+    profile.querySelectorAll('[name="links"]').forEach((input, position) => {
+      input.value = account.links[position] || '';
+    });
     profile.elements.discoverable.checked = account.discoverable;
     for (const input of profile.querySelectorAll('[name="creativeRoles"]')) {
       input.checked = account.creativeRoles.includes(input.value);
@@ -112,6 +116,7 @@
     const { code, data } = await request('profile', {
       ...formData,
       creativeRoles: new FormData(profile).getAll('creativeRoles'),
+      links: new FormData(profile).getAll('links').map(link => link.trim()).filter(Boolean),
       discoverable: profile.elements.discoverable.checked,
     });
     status.textContent = code === 200 ? 'Profile saved.' : data.error || 'Could not save your profile.';
@@ -131,5 +136,38 @@
     }
   });
 
+  fetch('/api/preview/login').then(async response => {
+    if (!response.ok) return;
+    const { profiles } = await response.json();
+    byId('preview-signin').hidden = false;
+    const group = byId('preview-signin-buttons');
+    for (const name of profiles) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn btn-dark';
+      button.textContent = 'Test ' + name;
+      button.addEventListener('click', async () => {
+        if (group.querySelector('button:disabled')) return;
+        button.disabled = true;
+        try {
+          const result = await fetch('/api/preview/login', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profile: name }),
+          });
+          if (result.ok) location.assign('member-hub.html');
+          else status.textContent = (await result.json()).error || 'Preview sign-in is unavailable.';
+        } catch {
+          status.textContent = 'Preview sign-in is unavailable.';
+        } finally {
+          button.disabled = false;
+        }
+      });
+      group.append(button);
+    }
+  }).catch(() => {});
+
+  if (location.hostname === 'localhost' && new URLSearchParams(location.search).has('test-fixture')) {
+    byId('fixture-signup').hidden = false;
+  }
   showSession().catch(() => { status.textContent = 'Member accounts are temporarily unavailable.'; });
 })();

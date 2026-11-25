@@ -6,7 +6,7 @@ import { handleMemberRequest } from '../server/member-api.mjs';
 
 const { chromium } = await import(process.env.EXM_PLAYWRIGHT_MODULE || 'playwright');
 const root = resolve(import.meta.dirname, '../dist');
-const origin = 'https://exm.test';
+const origin = 'http://localhost';
 const legacy = 'https://legacy.exm.test';
 const projectPrefix = '/exclusivemembrs';
 const browser = await chromium.launch({ executablePath: process.env.EXM_CHROMIUM || undefined });
@@ -125,13 +125,13 @@ try {
       const headers = { ...await incoming.allHeaders(), 'CF-Connecting-IP': fixtureIP };
       const response = await handleMemberRequest(new Request(incoming.url(), {
         method: incoming.method(), headers, body: incoming.postData() ?? undefined,
-      }), process.env);
+      }), { ...process.env, EXM_MEMBER_PREVIEW_SIGNUP: 'fixture' });
       await route.fulfill({
         status: response.status, headers: Object.fromEntries(response.headers), body: await response.text(),
       });
     });
 
-    await page.goto(origin + '/account.html');
+    await page.goto(origin + '/account.html?test-fixture=1');
     const runId = randomBytes(5).toString('hex');
     const email = 'browser-' + runId + '@example.test';
     const username = 'browser-' + runId;
@@ -188,7 +188,7 @@ try {
       return response.status;
     }, { email: secondEmail, username: secondUsername, password: secondPassword });
     assert.equal(browserSignup, 202);
-    await page.goto(origin + '/account.html');
+    await page.goto(origin + '/account.html?test-fixture=1');
     await page.locator('#login-email').fill(secondEmail);
     await page.locator('#login-password').fill(secondPassword);
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();

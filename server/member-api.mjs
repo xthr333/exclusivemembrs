@@ -86,6 +86,26 @@ function credentials(body, signup) {
   return { email, password, username };
 }
 
+// Profiles link out to approved platforms. No remote image or media loads on view.
+const socialRoots = ['instagram.com', 'tiktok.com', 'youtube.com', 'youtu.be', 'twitch.tv',
+  'soundcloud.com', 'spotify.com', 'bandcamp.com', 'vimeo.com', 'github.com', 'behance.net'];
+function profileLinks(values) {
+  if (values == null) return null;
+  if (!Array.isArray(values) || values.length > 3) {
+    throw new RequestError(400, 'Use up to three public social or portfolio links.');
+  }
+  return [...new Set(values.map(value => {
+    let url;
+    try { if (typeof value === 'string' && value.length <= 400) url = new URL(value); }
+    catch {}
+    if (!url || url.protocol !== 'https:' || url.username || url.password || url.port ||
+        !socialRoots.some(domain => url.hostname === domain || url.hostname.endsWith('.' + domain))) {
+      throw new RequestError(400, 'Use HTTPS links from approved social and portfolio sites.');
+    }
+    return url.href;
+  }))];
+}
+
 function provider(env) {
   const authURL = env.EXM_MEMBER_AUTH_URL;
   const dataURL = env.EXM_MEMBER_DATA_URL;
@@ -131,8 +151,13 @@ async function throttle(db, request, action, principal, limits = [24, 8]) {
   if (!outcome.every(Boolean)) throw new RequestError(429, 'Too many attempts. Try again in about 15 minutes.');
 }
 
+export function isLoopback(url) {
+  return ['localhost', '127.0.0.1', '[::1]'].includes(new URL(url).hostname);
+}
+
 async function signup(db, request, body) {
   const { email, password, username } = credentials(body, true);
+  if (!email.endsWith('.test')) throw new RequestError(403, 'Only test addresses are accepted in this preview.');
   await throttle(db, request, 'signup', email, [6, 8]);
   const alias = await db.alias(email);
   try {
@@ -206,7 +231,12 @@ export async function handleMemberRequest(request, env) {
   try {
     const db = provider(env);
     const path = url.pathname;
-    if (path === '/api/members/signup') return await signup(db, request, await readBody(request));
+    if (path === '/api/members/signup') {
+      if (env.EXM_MEMBER_PREVIEW_SIGNUP !== 'fixture' || !isLoopback(request.url)) {
+        return respond({ error: 'Public signup is closed.' }, 403);
+      }
+      return await signup(db, request, await readBody(request));
+    }
     if (path === '/api/members/login') return await login(db, request, await readBody(request));
     if (path === '/api/members/recover') return await recover(db, request, await readBody(request));
 
@@ -216,11 +246,14 @@ export async function handleMemberRequest(request, env) {
       const p_query = (url.searchParams.get('q') || '').trim().toLowerCase();
       const p_role = url.searchParams.get('role') || '';
       const p_after = url.searchParams.get('after') || '';
-      if (p_query.length > 60 || p_query.includes('\0') || (p_role && !creativeRoles.has(p_role)) ||
+      const p_history = url.searchParams.get('history') || '';
+      const p_affiliation = url.searchParams.get('affiliation') || '';
+      if (!['', 'champion', 'songwars'].includes(p_history) || !['', 'staff'].includes(p_affiliation) ||
+          p_query.length > 60 || p_query.includes('\0') || (p_role && !creativeRoles.has(p_role)) ||
           (p_after && !usernamePattern.test(p_after))) {
         throw new RequestError(400, 'Check the directory search filters.');
       }
-      const rows = await db.rpc('directory', { p_query, p_role, p_after });
+      const rows = await db.rpc('roster', { p_query, p_role, p_after, p_history, p_affiliation });
       const profiles = rows.slice(0, 20);
       return respond({ profiles, nextAfter: rows.length > 20 ? profiles.at(-1).username : null });
     }
@@ -266,8 +299,13 @@ export async function handleMemberRequest(request, env) {
       !Array.isArray(roles) || roles.length > 8 || roles.some(role => !creativeRoles.has(role))) {
       throw new RequestError(400, 'Check the profile fields and try again.');
     }
-    const changed = await db.rpc('save_profile', {
-      p_token, p_display_name: name, p_bio: bio, p_discoverable: body.discoverable, p_roles: [...new Set(roles)],
+    const p_avatar = body.avatar ?? null;
+    if (p_avatar !== null && !['initials', 'chrome'].includes(p_avatar)) {
+      throw new RequestError(400, 'Choose a profile avatar style.');
+    }
+    const changed = await db.rpc('identity', {
+      p_token, p_name: name, p_bio: bio, p_visible: body.discoverable,
+      p_roles: [...new Set(roles)], p_avatar, p_links: profileLinks(body.links),
     });
     if (!changed) throw new RequestError(401, 'Sign in to continue.');
     return respond({ saved: true });
@@ -279,3 +317,5 @@ export async function handleMemberRequest(request, env) {
     return respond({ error: 'Member accounts are temporarily unavailable.' }, 503);
   }
 }
+
+export { RequestError, ProviderError, provider, readBody, readCookie, respond, sha256, throttle };

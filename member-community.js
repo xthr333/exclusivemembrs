@@ -3,6 +3,19 @@
   const rolesText = roles => roles.map(role => role[0].toUpperCase() + role.slice(1)).join(' · ');
   const api = path => '/api/members/' + path;
 
+  function renderAvatar(avatar, profile) {
+    if (profile.avatar === 'chrome') {
+      const logo = document.createElement('img');
+      logo.src = 'assets/brand/exm-logo.webp';
+      logo.width = 90;
+      logo.height = 36;
+      logo.alt = '';
+      avatar.replaceChildren(logo);
+    } else {
+      avatar.textContent = profile.username.slice(0, 2).toUpperCase();
+    }
+  }
+
   const filters = byId('directory-filters');
   if (filters) {
     const status = byId('directory-status');
@@ -35,7 +48,11 @@
           link.textContent = profile.displayName;
           const detail = document.createElement('p');
           detail.textContent = '@' + profile.username + (profile.creativeRoles.length ? ' · ' + rolesText(profile.creativeRoles) : '');
-          item.append(link, detail);
+          const avatar = document.createElement('span');
+          avatar.className = 'member-avatar';
+          avatar.setAttribute('aria-hidden', 'true');
+          renderAvatar(avatar, profile);
+          item.append(avatar, link, detail);
           return item;
         });
         results.append(...items);
@@ -79,6 +96,31 @@
       byId('public-profile-handle').textContent = '@' + profile.username;
       byId('public-profile-roles').textContent = rolesText(profile.creativeRoles);
       byId('public-profile-bio').textContent = profile.bio;
+      renderAvatar(byId('public-avatar'), profile);
+      byId('public-profile-team').textContent = profile.staffRoles.length
+        ? 'EXM team · ' + profile.staffRoles.map(role => role.replaceAll('_', ' ')).join(' · ') : '';
+      byId('public-champion').hidden = !profile.champion;
+      byId('public-profile-links').replaceChildren(...profile.links.map(value => {
+        const url = new URL(value);
+        const item = document.createElement('li');
+        if (url.protocol === 'https:') {
+          const link = document.createElement('a');
+          link.href = url.href;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = url.hostname.replace(/^www\./, '') + ' ↗';
+          item.append(link);
+        }
+        return item;
+      }));
+      const history = byId('public-profile-history');
+      history.hidden = !profile.verifiedActivity.length;
+      history.querySelector('ul').replaceChildren(...profile.verifiedActivity.map(entry => {
+        const item = document.createElement('li');
+        item.textContent = new Date(entry.occurred_at).toLocaleDateString(undefined, { timeZone: 'UTC' }) +
+          ' · ' + entry.activity.replaceAll('_', ' ');
+        return item;
+      }));
       byId('public-profile-counts').textContent = profile.followers + (profile.followers === 1 ? ' follower' : ' followers') + ' · ' + profile.following + ' following';
       button.hidden = !profile.canFollow;
       following = profile.isFollowing;

@@ -106,3 +106,42 @@ The existing Cloudflare static delivery remains the architecture decision for th
 For review rollback, switch away from this worktree or revert the review commit. For a future approved release, record the previous deployment, revert the release in Git and rebuild using the existing Cloudflare pipeline. A code rollback cannot undo external registrations, transactions or account changes. This slice needs no live migration. Any future approved import requires a private backed-up export, restore verification, sanitized rehearsal, ID/status mapping, count and row-sample reconciliation, and additive/idempotent writes.
 
 Wayne’s next release decision is approval of this public campaign and compatibility slice for production. The next member-phase decision is the authorized source for existing identities and gates, plus approved youth privacy and owner/moderator review procedures. The animated mark can follow once its original file is available. Any production deployment, provider change, account opening or live data write requires its specific approval.
+
+## Integrated preview checkpoint
+
+The integrated branch starts at `9114c5f`, with the tested account/profile branch merged into that public review. Production still uses its previously approved release. This checkpoint uses the existing assets-only production configuration and a separate loopback Worker with its own GoTrue, Postgres and PostgREST fixtures.
+
+| Workflow | Preview implementation and proof |
+| --- | --- |
+| Account, dashboard and roster | The account page uses the tested Auth/session and recovery flow. Four labeled test roles let a reviewer switch between Artist, Producer, Moderator and Owner. The profile editor supports avatar presets, approved HTTPS social links, multiple roles and discovery controls. The roster filters by role, verified SongWars participation and staff affiliation. Follow, profile privacy, retries and recovery-code single use are tested. Signup is server-disabled unless explicitly enabled for loopback synthetic addresses. |
+| Access and verified claims | Staff can issue a hashed, expiring, one-use studio code or reserve a synthetic legacy identity and issue a recipient-bound claim code. The API checks the grant on every protected request. Tests cover denied and allowed paths, account/scope mismatches and reuse. Existing external gates use their original entry points. |
+| Community and moderation | Signed-in members can post text and HTTPS links, comment, like, and report. Moderators may hide or dismiss reports. Visibility checks include parents and profile opt-outs. The feed renders member text safely, excludes private fields, and preserves audit events. |
+| Check-ins, ranks and points | The ledger owns one UTC check-in per member/day, consecutive-day streaks, profile completion, configured verified activity awards, rank thresholds, and separate spendable points. Rankings use category-specific verified awards, All-Time/Season/Month filters, stable username tie order and pagination. The signed-in dashboard shows progress, history, inventory, upcoming local events, announcements and followed milestones. |
+| Rewards and champions | The points-only shop has five frames, five banners, ten collectible badges and an earned-only champion badge. Debit and ownership are transactional. Tests cover duplicate and concurrent spending, insufficient funds, and unowned equip. The public Hall of Fame credits the verified Season II and III winners, links confirmed profile routes and preserves the official 46–39.5 final. Local championship records and corrections are labeled separately. |
+| Events, scoring, announcements and owner controls | Owner and appointed staff have server-checked privileges. Owners can save drafts, preview and explicitly publish test events, assign scoped application reviewers/judges, review account-recovery references and configure the catalog, award rules and audited point corrections. Tests cover guest applications, concurrent approval capacity, waitlisting, solo/duo templates, tied scores requiring a note, and corrections remaining private until approved. Local announcements support schedule, pin, expiry, links and archival. The public SongWars form, records and archive stay authoritative. |
+
+### Open the same isolated stack
+
+Docker, Node 22+ and a local Wrangler installation are needed. In a fresh local environment:
+
+```sh
+bash tools/setup-preview-fixture.sh
+npm run build
+wrangler dev -c wrangler.member-dev.jsonc --local --ip 127.0.0.1 --port 8788 --env-file .dev.vars.integrated
+```
+
+Open the loopback Worker’s `/account` page. Select one of the labeled test roles. The venue browser for this task used port 8790. The local Worker rejects API access from a non-loopback host and serves preview pages with external script/network/form actions restricted. Intentional outbound navigation remains available. Fixture bindings are generated with restrictive permissions and left out of Git. Fixture user identifiers, issued codes and account credentials are outside the built assets and test output.
+
+`tools/test-member-api.mjs` and `tools/test-platform-api.mjs` accept the local provider bindings from the fixture. Set `EXM_MEMBER_WORKER_ORIGIN` to test through the same running Worker. Run `tools/test-integrated-ui.mjs` against that URL for the real browser journey. The existing public viewport suite remains `tools/test-platform-ui.mjs`; set `EXM_MEMBER_UI_TEST=1` to include account/profile/follow flows. All provider and Worker test targets are restricted to local addresses. The full release gate also runs the documented build, repository, Python and merchandise checks.
+
+Local preview setup adds no recurring infrastructure. The preview uses synthetic data and the retained static public content. Select any hosted member store only after verifying account limits, permissions, backup and quota fallbacks. Preserve both earned XP and the points ledger during any approved continuity migration. Rollback is a Git/deployment operation and cannot undo prior external activity.
+
+### Owner inputs before real-account use
+
+- Provide the approved source location or private export procedure for existing account and profile identifiers, verified aliases, visibility and roles, earned XP/points history, badges, and inventory. Raw credentials and contact details should stay with their authorized owner. Historical aliases and verified claims need an ownership and duplicate-resolution process before linking real accounts.
+- Provide the authorized inventory of existing gates and their scopes, plus the supported server verification interface or a sanitized allowed/denied fixture. Existing code values should stay private. The Season IV interest form and separately locked entry remain with the authoritative SongWars portal.
+- Provide Wayne’s original animated EXM file or approved asset location. The preview uses the existing official static mark and reduced-motion-safe CSS effect.
+
+Production approval, youth/privacy and moderation procedures, real recovery ownership verification, production quota confirmation, and provider migration approval remain separate release decisions. The integrated stack leaves public account signup closed. Direct DMs, community polls, uploads or remote embeds, merchandise perks, automatic event publication and authoritative SongWars imports remain tied to their original approvals or data prerequisites in the traceability table.
+
+The integrated release gate passed all 29 routes, 87 Chromium viewport checks, nine Python tests, the merchandise suite, both API suites through Wrangler, and the multi-role browser journey. The 13 archived matchup cards, public snapshots, approved assets and production configuration matched the review base. A private dump of the synthetic fixture restored into a separate local database with matching profile, permission, ledger, inventory, event, application, community and scoring counts. Native Safari, real-device in-app browsers, and hosted account policies are outside the verified preview.
