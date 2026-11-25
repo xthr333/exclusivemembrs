@@ -4,13 +4,27 @@ import { resolve } from 'node:path';
 import { renderEventCalendar } from './event-calendar.mjs';
 
 const out = resolve(import.meta.dirname, '../dist');
+const root = resolve(out, '..');
 const pages = readdirSync(out).filter(file => file.endsWith('.html'));
 const privatePages = ['account.html', 'member.html', 'member-hub.html'];
 const unavailable = [...privatePages, 'server', 'supabase', 'tools', '.dev.vars',
   'member-account.js', 'member-community.js', 'member-platform.js', 'member-operations.js', 'editorial-preview.js'];
 for (const name of unavailable) assert.ok(!existsSync(resolve(out, name)), name + ' must stay out of public assets');
+const legacyExclusions = readFileSync(resolve(root, '_config.yml'), 'utf8').split('\n')
+  .filter(line => /^  - /.test(line)).map(line => line.slice(4));
+for (const name of unavailable.filter(name => name !== '.dev.vars')) {
+  assert.ok(legacyExclusions.includes(name), name + ' must stay out of GitHub Pages');
+}
 for (const page of pages) {
   const html = readFileSync(resolve(out, page), 'utf8');
+  const legacyHtml = readFileSync(resolve(root, page), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+  for (const markup of [html, legacyHtml]) {
+    for (const [, path] of markup.matchAll(/(?:href|src)="([^"]+)"/g)) {
+      const filename = path.replace(/^\//, '').split(/[?#]/, 1)[0];
+      assert.ok(!unavailable.includes(filename), page + ' references preview-only ' + path);
+    }
+    assert.doesNotMatch(markup, /id="(?:members|event-board|notice-board|preview-champions)"/, page);
+  }
   assert.doesNotMatch(html, /Preview test accounts|Synthetic contact|Local test finals|local preview/i, page);
   for (const [, value] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(value)) continue;

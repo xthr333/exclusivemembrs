@@ -25,6 +25,8 @@ npx wrangler deploy
 
 Cloudflare Git build settings: build `npm run build`; deploy `npx wrangler deploy`. Root `/`, production branch `main`. Wrangler declares name `exm`, compatibility date and static assets in `dist`. Do not create a second Worker or replace the domain's nameservers.
 
+The legacy GitHub Pages mirror uses the repository root on `main`. Its Jekyll exclusions in `_config.yml` keep local member fixtures and build tools off that host. The isolated preview build activates its navigation, boards and scripts. The public build verifies that neither public delivery path offers preview-only routes.
+
 The old copy-based build still delivers the HTML/CSS/JS/assets, but **does not copy robots.txt, sitemap.xml or _headers**. Use the new build command for the complete release. If the deleted Worker was the only Git integration, connect the existing **exm** Worker to this repository instead. No Cloudflare credential is stored in this repo.
 
 ## Data boundaries

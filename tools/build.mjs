@@ -10,10 +10,6 @@ const previewPages = new Set(['account.html', 'member.html', 'member-hub.html'])
 const previewScripts = new Set([
   'editorial-preview.js', 'member-account.js', 'member-community.js', 'member-operations.js', 'member-platform.js',
 ]);
-const previewSections = new Map([
-  ['artists.html', 'members'], ['events.html', 'event-board'], ['updates.html', 'notice-board'],
-  ['hall-of-fame.html', 'preview-champions'],
-]);
 const publicFiles = new Set(['updates.json', 'songwars-public.json', 'exm-main-logo.png', 'robots.txt', 'sitemap.xml', '_headers']);
 const renderableFiles = (await readdir(root)).filter(file => /\.(html|css|js)$/.test(file) || publicFiles.has(file));
 
@@ -31,19 +27,6 @@ if (!preview) {
   }
 }
 
-function publicMarkup(html, file) {
-  const hidden = previewSections.get(file);
-  if (hidden) {
-    const region = new RegExp('<section\\b[^>]*\\bid="' + hidden + '"[^>]*>[\\s\\S]*?</section>','g');
-    if ([...html.matchAll(region)].length !== 1) throw new Error(file + ': expected one preview section');
-    html = html.replace(region, '');
-  }
-  html = html.replace(/^[ \t]*<a\b[^>]*data-page="([^"]+)"[^>]*>[^<]*<\/a>\s*$/gm,
-    (tag, destination) => previewPages.has(destination) ? '' : tag);
-  return html.replace(/<script\b[^>]*src="([^"]+)"[^>]*><\/script>/g,
-    (tag, source) => previewScripts.has(source) ? '' : tag);
-}
-
 // Inline the same core layout used by the existing Worker build.
 const layout = await readFile(resolve(root, 'rollout.css'), 'utf8');
 if (/<\/style\b/i.test(layout) || /(?:url\s*\(|@import\b)/i.test(layout)) {
@@ -56,7 +39,7 @@ for (const file of renderableFiles) {
     continue;
   }
   const source = await readFile(resolve(root, file), 'utf8');
-  const html = preview ? source : publicMarkup(source, file);
+  const html = source.replace(/<!-- exm:preview ([\s\S]+?) -->/g, (_, markup) => preview ? markup : '');
   let matches = 0;
   const built = html.replace(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="\/?rollout\.css(?:\?[^"]*)?"[^>]*>/gi, () => {
     matches++;
