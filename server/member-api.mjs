@@ -1,5 +1,9 @@
 const cookieName = '__Host-exm_session';
 const usernamePattern = /^[a-z0-9][a-z0-9_-]{2,23}$/;
+const creativeRoles = new Set([
+  'artist', 'producer', 'songwriter', 'photographer', 'filmmaker', 'animator',
+  'streamer', 'gamer', 'designer', 'entertainer', 'creator',
+]);
 const byteEncoder = new TextEncoder();
 const cookieAttributes = 'Path=/; Secure; HttpOnly; SameSite=Lax';
 
@@ -99,7 +103,7 @@ function provider(env) {
 
   const request = async (base, path, key, payload) => {
     const result = await fetch(base.replace(/\/$/, '') + path, {
-      method: 'POST', redirect: 'error', signal: AbortSignal.timeout(8000),
+      method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(8000),
       headers: { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
@@ -117,11 +121,11 @@ function provider(env) {
   };
 }
 
-async function throttle(db, request, action, principal) {
+async function throttle(db, request, action, principal, limits = [24, 8]) {
   const ip = request.headers.get('CF-Connecting-IP') || 'local';
   const buckets = [
-    [await db.digest(action + ':ip', ip), action === 'signup' ? 6 : 24],
-    [await db.digest(action + ':principal', principal), 8],
+    [await db.digest(action + ':ip', ip), limits[0]],
+    [await db.digest(action + ':principal', principal), limits[1]],
   ];
   const outcome = await Promise.all(buckets.map(([p_bucket, p_max]) => db.rpc('rate', { p_bucket, p_max })));
   if (!outcome.every(Boolean)) throw new RequestError(429, 'Too many attempts. Try again in about 15 minutes.');
@@ -129,7 +133,7 @@ async function throttle(db, request, action, principal) {
 
 async function signup(db, request, body) {
   const { email, password, username } = credentials(body, true);
-  await throttle(db, request, 'signup', email);
+  await throttle(db, request, 'signup', email, [6, 8]);
   const alias = await db.alias(email);
   try {
     await db.createAccount({
@@ -190,6 +194,7 @@ export async function handleMemberRequest(request, env) {
     '/api/members/signup': 'POST', '/api/members/login': 'POST',
     '/api/members/session': 'GET', '/api/members/logout': 'POST',
     '/api/members/profile': 'POST', '/api/members/recover': 'POST',
+    '/api/members/directory': 'GET', '/api/members/public-profile': 'GET', '/api/members/follow': 'POST',
   };
   const method = available[url.pathname];
   if (!method) return respond({ error: 'Page not found.' }, 404);
@@ -206,8 +211,28 @@ export async function handleMemberRequest(request, env) {
     if (path === '/api/members/recover') return await recover(db, request, await readBody(request));
 
     const token = readCookie(request);
-    if (!/^[a-f0-9]{64}$/.test(token)) throw new RequestError(401, 'Sign in to continue.');
-    const p_token = await sha256(token);
+    const p_token = /^[a-f0-9]{64}$/.test(token) ? await sha256(token) : null;
+    if (path === '/api/members/directory') {
+      const p_query = (url.searchParams.get('q') || '').trim().toLowerCase();
+      const p_role = url.searchParams.get('role') || '';
+      const p_after = url.searchParams.get('after') || '';
+      if (p_query.length > 60 || p_query.includes('\0') || (p_role && !creativeRoles.has(p_role)) ||
+          (p_after && !usernamePattern.test(p_after))) {
+        throw new RequestError(400, 'Check the directory search filters.');
+      }
+      const rows = await db.rpc('directory', { p_query, p_role, p_after });
+      const profiles = rows.slice(0, 20);
+      return respond({ profiles, nextAfter: rows.length > 20 ? profiles.at(-1).username : null });
+    }
+    if (path === '/api/members/public-profile') {
+      const p_username = normalizeUsername(url.searchParams.get('username'));
+      if (!usernamePattern.test(p_username)) throw new RequestError(404, 'Profile unavailable.');
+      const profile = await db.rpc('public_profile', { p_username, p_viewer: p_token });
+      if (!profile) throw new RequestError(404, 'Profile unavailable.');
+      return respond({ profile });
+    }
+
+    if (!p_token) throw new RequestError(401, 'Sign in to continue.');
     if (path === '/api/members/logout') {
       await db.rpc('close_session', { p_token });
       return respond({ signedOut: true }, 200, {
@@ -221,14 +246,28 @@ export async function handleMemberRequest(request, env) {
     }
 
     const body = await readBody(request);
+    if (path === '/api/members/follow') {
+      const p_username = normalizeUsername(body.username);
+      if (!usernamePattern.test(p_username) || typeof body.follow !== 'boolean') {
+        throw new RequestError(400, 'Check the requested profile.');
+      }
+      await throttle(db, request, 'follow', p_token, [50, 40]);
+      const changed = await db.rpc('set_follow', { p_token, p_username, p_follow: body.follow });
+      if (changed === null) throw new RequestError(401, 'Sign in to continue.');
+      if (!changed) throw new RequestError(404, 'Follow could not be changed.');
+      return respond({ following: body.follow });
+    }
+
     const name = typeof body.displayName === 'string' ? body.displayName.trim() : '';
     const bio = typeof body.bio === 'string' ? body.bio.trim() : null;
+    const roles = body.creativeRoles ?? [];
     if (!name || [...name].length > 60 || bio === null || [...bio].length > 600 ||
-      name.includes('\0') || bio.includes('\0') || typeof body.discoverable !== 'boolean') {
+      name.includes('\0') || bio.includes('\0') || typeof body.discoverable !== 'boolean' ||
+      !Array.isArray(roles) || roles.length > 8 || roles.some(role => !creativeRoles.has(role))) {
       throw new RequestError(400, 'Check the profile fields and try again.');
     }
-    const changed = await db.rpc('update_profile', {
-      p_token, p_display_name: name, p_bio: bio, p_discoverable: body.discoverable,
+    const changed = await db.rpc('save_profile', {
+      p_token, p_display_name: name, p_bio: bio, p_discoverable: body.discoverable, p_roles: [...new Set(roles)],
     });
     if (!changed) throw new RequestError(401, 'Sign in to continue.');
     return respond({ saved: true });

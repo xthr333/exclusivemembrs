@@ -8,7 +8,9 @@ for (const variable of ['EXM_MEMBER_AUTH_URL', 'EXM_MEMBER_DATA_URL']) {
   assert.ok(['localhost', '127.0.0.1', '[::1]'].includes(target.hostname), variable + ' must be local');
 }
 const runId = randomBytes(5).toString('hex');
-const origin = 'https://exm.test';
+const worker = env.EXM_MEMBER_WORKER_ORIGIN ? new URL(env.EXM_MEMBER_WORKER_ORIGIN) : null;
+if (worker) assert.ok(['localhost', '127.0.0.1', '[::1]'].includes(worker.hostname), 'Worker must be local');
+const origin = worker?.origin || 'https://exm.test';
 const password = 'Local member test password';
 const [first, second] = ['one', 'two'].map(tag => ({
   email: tag + '-' + runId + '@example.test',
@@ -24,7 +26,7 @@ function call(action, { payload, cookie, testOrigin = origin, ip = '192.0.2.' + 
   const request = new Request(origin + '/api/members/' + action, {
     method: payload === undefined ? 'GET' : 'POST', headers, body: JSON.stringify(payload),
   });
-  return handleMemberRequest(request, env);
+  return worker ? fetch(request) : handleMemberRequest(request, env);
 }
 
 assert.equal((await call('session')).status, 401);
@@ -63,13 +65,50 @@ let response = await call('session', { cookie });
 assert.equal(response.status, 200);
 const session = (await response.json()).profile;
 assert.equal(session.username, first.username);
-assert.deepEqual(Object.keys(session).sort(), ['bio', 'discoverable', 'displayName', 'id', 'username']);
+assert.deepEqual(Object.keys(session).sort(), ['bio', 'creativeRoles', 'discoverable', 'displayName', 'id', 'username']);
 
-const profile = { displayName: 'Local artist', bio: '<b>Treated as text</b>', discoverable: false };
+const profile = {
+  displayName: 'Local artist ' + runId, bio: '<b>Treated as text</b>',
+  discoverable: false, creativeRoles: ['artist', 'producer'],
+};
 assert.equal((await call('profile', { payload: profile })).status, 401);
+assert.equal((await call('profile', { payload: { ...profile, creativeRoles: ['admin'] }, cookie })).status, 400);
 assert.equal((await call('profile', { payload: profile, cookie })).status, 200);
 response = await call('session', { cookie });
 assert.deepEqual((await response.json()).profile, { ...session, ...profile });
+
+const firstPublic = 'public-profile?username=' + first.username;
+const secondPublic = 'public-profile?username=' + second.username;
+const directory = 'directory?q=' + runId + '&role=artist';
+assert.equal((await call(firstPublic)).status, 404);
+assert.deepEqual(await (await call(directory)).json(), { profiles: [], nextAfter: null });
+assert.equal((await call('signup', { payload: second })).status, 202);
+const secondLogin = await call('login', { payload: second });
+assert.equal(secondLogin.status, 200);
+const secondCookie = secondLogin.headers.get('set-cookie').split(';')[0];
+const visibleProfile = { ...profile, discoverable: true };
+assert.equal((await call('profile', { payload: visibleProfile, cookie })).status, 200);
+assert.deepEqual(await (await call(directory)).json(), {
+  profiles: [{ username: first.username, displayName: profile.displayName, creativeRoles: profile.creativeRoles }],
+  nextAfter: null,
+});
+assert.deepEqual(await (await call(directory + '&after=' + first.username)).json(), { profiles: [], nextAfter: null });
+const firstDetails = (await (await call(firstPublic)).json()).profile;
+assert.equal(firstDetails.canFollow, false);
+assert.equal(firstDetails.id, undefined);
+assert.equal(firstDetails.email, undefined);
+const follow = { username: second.username, follow: true };
+assert.equal((await call('follow', { payload: follow })).status, 401);
+assert.equal((await call('follow', { payload: { ...follow, username: first.username }, cookie })).status, 404);
+const parallelFollows = await Promise.all([call('follow', { payload: follow, cookie }), call('follow', { payload: follow, cookie })]);
+assert.ok(parallelFollows.every(result => result.ok));
+assert.equal((await (await call(secondPublic)).json()).profile.followers, 1);
+assert.equal((await (await call(secondPublic, { cookie })).json()).profile.isFollowing, true);
+assert.equal((await (await call(firstPublic, { cookie: secondCookie })).json()).profile.following, 1);
+assert.equal((await call('profile', { payload: profile, cookie })).status, 200);
+assert.equal((await (await call(secondPublic)).json()).profile.followers, 0);
+assert.equal((await call('follow', { payload: { ...follow, follow: false }, cookie })).status, 200);
+assert.equal((await call('logout', { payload: {}, cookie: secondCookie })).status, 200);
 
 const relogin = await call('login', { payload: first });
 assert.equal(relogin.status, 200);
@@ -108,4 +147,4 @@ const directSignup = await fetch(env.EXM_MEMBER_AUTH_URL + '/signup', {
 });
 assert.ok([400, 401, 403, 422].includes(directSignup.status), 'Public signup is disabled');
 
-console.log('PASS: local Auth + Postgres signup, duplicate handling, profile, permission and session checks, concurrent one-time recovery, rate limits and logout.');
+console.log('PASS: local Auth + Postgres signup, duplicate handling, role-filtered discovery, profile privacy, follow/unfollow, permission and session checks, concurrent one-time recovery, rate limits and logout.');

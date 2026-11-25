@@ -149,22 +149,6 @@ as $$
   delete from exm_member.sessions where token_hash = p_token;
 $$;
 
-create function public.exm_member_update_profile(
-  p_token text, p_display_name text, p_bio text, p_discoverable boolean
-) returns boolean
-language sql security invoker set search_path = ''
-as $$
-  with changed as (
-    update exm_member.profiles as profile
-    set display_name = p_display_name, bio = p_bio, discoverable = p_discoverable
-    from exm_member.sessions as session
-    where profile.id = session.profile_id and session.token_hash = p_token
-      and session.expires_at > now()
-    returning 1
-  )
-  select exists (select 1 from changed);
-$$;
-
 create function public.exm_member_start_recovery(p_username text, p_code text) returns uuid
 language sql security invoker set search_path = ''
 as $$
@@ -191,12 +175,10 @@ $$;
 revoke all on function
   public.exm_member_rate(text, int), public.exm_member_open_session(uuid, text, text[]),
   public.exm_member_session(text), public.exm_member_close_session(text),
-  public.exm_member_update_profile(text, text, text, boolean),
   public.exm_member_start_recovery(text, text), public.exm_member_prune()
   from public, anon, authenticated;
 grant execute on function
   public.exm_member_rate(text, int), public.exm_member_open_session(uuid, text, text[]),
   public.exm_member_session(text), public.exm_member_close_session(text),
-  public.exm_member_update_profile(text, text, text, boolean),
   public.exm_member_start_recovery(text, text), public.exm_member_prune()
   to service_role;

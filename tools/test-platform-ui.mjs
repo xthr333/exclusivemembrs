@@ -93,9 +93,10 @@ try {
     for (const variable of ['EXM_MEMBER_AUTH_URL', 'EXM_MEMBER_DATA_URL']) {
       assert.ok(['localhost', '127.0.0.1', '[::1]'].includes(new URL(process.env[variable]).hostname));
     }
+    const fixtureIP = '198.51.100.' + (randomBytes(1)[0] % 254 + 1);
     await context.route('**/api/members/*', async route => {
       const incoming = route.request();
-      const headers = await incoming.allHeaders();
+      const headers = { ...await incoming.allHeaders(), 'CF-Connecting-IP': fixtureIP };
       const response = await handleMemberRequest(new Request(incoming.url(), {
         method: incoming.method(), headers, body: incoming.postData() ?? undefined,
       }), process.env);
@@ -123,6 +124,7 @@ try {
     const code = await page.locator('#member-codes-list code').first().textContent();
     assert.ok((await context.cookies()).some(cookie => cookie.name === '__Host-exm_session' && cookie.secure && cookie.httpOnly));
     await page.getByLabel('Display name', { exact: true }).fill('Local browser profile');
+    await page.getByLabel('Photographer', { exact: true }).check();
     await page.getByRole('button', { name: 'Save profile' }).click();
     await page.getByText('Profile saved.', { exact: true }).waitFor();
     await page.reload();
@@ -136,7 +138,41 @@ try {
     await page.getByRole('button', { name: 'Create support reference' }).click();
     await page.getByText('Recovery reference created.', { exact: true }).waitFor();
     assert.match(await page.locator('#recovery-reference-value').textContent(), /^[0-9a-f-]{36}$/);
-    console.log('PASS: Chromium signup, recovery-code display, secure session, profile edit, reload, logout, and recovery reference with local data.');
+    await page.goto(origin + '/artists.html#members');
+    await page.getByLabel('Name or username', { exact: true }).fill(username);
+    await page.getByLabel('Creative role', { exact: true }).selectOption('photographer');
+    await page.getByRole('button', { name: 'Search members' }).click();
+    const filtered = page.locator('#directory-results');
+    const matchingProfile = filtered.locator('a[href="member.html?username=' + username + '"]');
+    await matchingProfile.waitFor();
+    assert.equal(await filtered.locator('li').count(), 1);
+    await matchingProfile.click();
+    await page.getByRole('heading', { name: 'Local browser profile' }).waitFor();
+    assert.equal(await page.locator('#public-profile-roles').textContent(), 'Photographer');
+    assert.equal(await page.getByRole('button', { name: 'Follow', exact: true }).isVisible(), false);
+
+    const secondPassword = 'Another local browser password';
+    const secondEmail = 'friend-' + runId + '@example.test';
+    const secondUsername = 'friend-' + runId;
+    const browserSignup = await page.evaluate(async ({ email, username, password }) => {
+      const response = await fetch('/api/members/signup', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, username, password, confirmPassword: password }),
+      });
+      return response.status;
+    }, { email: secondEmail, username: secondUsername, password: secondPassword });
+    assert.equal(browserSignup, 202);
+    await page.goto(origin + '/account.html');
+    await page.locator('#login-email').fill(secondEmail);
+    await page.locator('#login-password').fill(secondPassword);
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await page.getByText('@' + secondUsername, { exact: true }).waitFor();
+    await page.goto(origin + '/member.html?username=' + username);
+    await page.getByRole('button', { name: 'Follow', exact: true }).click();
+    await page.getByText('1 follower · 0 following', { exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Unfollow', exact: true }).click();
+    await page.getByText('0 followers · 0 following', { exact: true }).waitFor();
+    console.log('PASS: Chromium signup, recovery-code display, secure session, profile edit, reload, logout, recovery, directory filtering, follow and unfollow with local data.');
   }
   console.log('PASS: ' + pages.length * 2 + ' Chromium layout checks, short mobile hero, keyboard navigation, reduced motion, and offline/no-script fallbacks.');
 } finally {

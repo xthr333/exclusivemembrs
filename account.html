@@ -28,6 +28,7 @@
       <details class="platform-more">
         <summary>More</summary>
         <div class="platform-more-menu">
+          <a data-page="account.html" href="/account.html">Member account</a>
           <a data-page="divisions.html" href="/divisions.html">EXM Divisions</a>
           <a data-page="updates.html" href="/updates.html">Announcements</a>
           <a data-page="residency.html" href="/residency.html">Creator Residency</a>
@@ -87,10 +88,28 @@
         <section class="platform-card">
           <h2>Your profile</h2>
           <p id="account-handle"></p>
+          <p><a href="artists.html#members">Browse the member directory</a></p>
           <form class="form-shell" id="member-profile" method="post">
             <div class="field"><label for="profile-name">Display name</label><input id="profile-name" name="displayName" maxlength="60" required></div>
             <div class="field"><label for="profile-bio">Bio</label><textarea id="profile-bio" name="bio" maxlength="600"></textarea></div>
-            <div class="field"><label for="profile-discoverable"><input id="profile-discoverable" name="discoverable" type="checkbox"> Show my profile in community discovery when available</label></div>
+            <fieldset class="role-picker">
+              <legend>Creative roles</legend>
+              <p>Choose up to eight roles.</p>
+              <div>
+                <label><input type="checkbox" name="creativeRoles" value="artist"> Artist</label>
+                <label><input type="checkbox" name="creativeRoles" value="producer"> Producer</label>
+                <label><input type="checkbox" name="creativeRoles" value="songwriter"> Songwriter</label>
+                <label><input type="checkbox" name="creativeRoles" value="photographer"> Photographer</label>
+                <label><input type="checkbox" name="creativeRoles" value="filmmaker"> Filmmaker</label>
+                <label><input type="checkbox" name="creativeRoles" value="animator"> Animator</label>
+                <label><input type="checkbox" name="creativeRoles" value="streamer"> Streamer</label>
+                <label><input type="checkbox" name="creativeRoles" value="gamer"> Gamer</label>
+                <label><input type="checkbox" name="creativeRoles" value="designer"> Designer</label>
+                <label><input type="checkbox" name="creativeRoles" value="entertainer"> Entertainer</label>
+                <label><input type="checkbox" name="creativeRoles" value="creator"> Creator</label>
+              </div>
+            </fieldset>
+            <div class="field"><label for="profile-discoverable"><input id="profile-discoverable" name="discoverable" type="checkbox"> Show my profile in the community directory</label></div>
             <button class="btn" type="submit">Save profile</button>
           </form>
           <button class="btn btn-dark" id="member-logout" type="button">Sign out</button>

@@ -37,6 +37,9 @@
     profile.elements.displayName.value = account.displayName;
     profile.elements.bio.value = account.bio;
     profile.elements.discoverable.checked = account.discoverable;
+    for (const input of profile.querySelectorAll('[name="creativeRoles"]')) {
+      input.checked = account.creativeRoles.includes(input.value);
+    }
     byId('account-handle').textContent = '@' + account.username;
     byId('recovery-reference-value').textContent = '';
     recoveryReference.hidden = true;
@@ -106,7 +109,11 @@
   });
 
   onSubmit(profile, async formData => {
-    const { code, data } = await request('profile', { ...formData, discoverable: profile.elements.discoverable.checked });
+    const { code, data } = await request('profile', {
+      ...formData,
+      creativeRoles: new FormData(profile).getAll('creativeRoles'),
+      discoverable: profile.elements.discoverable.checked,
+    });
     status.textContent = code === 200 ? 'Profile saved.' : data.error || 'Could not save your profile.';
   });
 
