@@ -37,9 +37,19 @@ try {
   await artist.goto(base + '/account');
   const photoInput = artist.getByLabel('Upload a profile photo');
   await photoInput.waitFor();
+  const phoneJpeg = await artist.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 8064;
+    canvas.height = 6048;
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#a62836';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg').split(',')[1];
+  });
   await photoInput.setInputFiles({
-    name: 'avatar.webp', mimeType: 'image/webp',
-    buffer: Buffer.from('UklGRi4AAABXRUJQVlA4ICIAAABQAQCdASoQABAAAUAmJQBOgCgAAP74I2+pW/XRVki3AAAA', 'base64'),
+    name: 'phone-photo.jpg', mimeType: 'image/jpeg',
+    // A 48.8 MP input larger than the retired 4 MiB source limit.
+    buffer: Buffer.concat([Buffer.from(phoneJpeg, 'base64'), Buffer.alloc(5 * 1024 * 1024)]),
   });
   await artist.getByText('Photo ready. Tap Save profile below to apply it.', { exact: true }).waitFor();
   await artist.getByRole('button', { name: 'Save profile' }).click();

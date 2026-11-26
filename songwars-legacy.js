@@ -17,7 +17,11 @@ function leaderboard(target, data) {
   const period = target.querySelector('#legacy-period');
   const tabs = [...target.querySelectorAll('[role="tab"]')];
   const publicProfiles = new Map();
-  const artistHref = id => publicProfiles.has(id) ? memberHref(publicProfiles.get(id)) : legacyHref(id);
+  const artistHref = id => {
+    if (publicProfiles.has(id)) return memberHref(publicProfiles.get(id));
+    const artist = [...data.artists, ...data.producers].find(row => row.id === id);
+    return artist?.link && /^[a-z0-9-]+\.html$/.test(artist.link) ? artist.link : legacyHref(id);
+  };
   let selected = tabs[0];
 
   function render() {
@@ -38,6 +42,13 @@ function leaderboard(target, data) {
     if (!ranked.length) {
       const category = selected.dataset.category === 'artists' ? 'artist' : 'producer';
       panel.append(el('p', 'No verified ' + category + ' competition results in this period.', 'events-empty'));
+      if (category === 'producer') {
+        const roster = el('article', null, 'events-result');
+        roster.append(el('h3', 'Meet the producers'),
+          link('Vantiva / Tiva', 'vantiva.html', 'events-artist-name'),
+          el('p', 'EXM Producer · Not ranked'));
+        panel.append(roster);
+      }
       return;
     }
 
@@ -193,16 +204,45 @@ function events(target, data) {
 function profile(target, data, artist) {
   const section = el('section', null, 'events-history');
   const total = artist.seasons.reduce((sum, record) => sum + record.points, 0);
-  section.append(el('h2', artist.name + ' · SongWars record'), el('p', total + ' Legacy Points'));
+  const isArchive = target.dataset.legacyView === 'archive';
+  if (isArchive) {
+    target.querySelector('.events-titlebar h1').textContent = artist.name;
+    const hero = el('header', null, 'legacy-player-hero');
+    const avatar = el('span', artist.name.slice(0, 2).toUpperCase(), 'events-avatar');
+    avatar.setAttribute('aria-hidden', 'true');
+    hero.append(avatar, el('p', 'SONGWARS ARTIST', 'events-eyebrow'));
+    section.append(hero);
+  }
+  section.append(el('h2', isArchive ? 'SongWars record' : artist.name + ' · SongWars record'));
+  const stats = el('div', null, 'legacy-player-stats');
+  const knownWins = artist.seasons.filter(record => Number.isInteger(record.wins));
+  const stat = (value, label) => {
+    const card = el('div');
+    card.append(el('strong', String(value)), el('span', label));
+    return card;
+  };
+  stats.append(stat(total, 'Legacy Points'));
+  if (knownWins.length) stats.append(stat(knownWins.reduce((sum, record) => sum + record.wins, 0), 'Recorded wins'));
+  section.append(stats);
   const recordLink = artist.link && !location.pathname.endsWith('/' + artist.link) &&
     !location.pathname.endsWith('/' + artist.link.replace('.html', ''));
   if (recordLink) section.append(link('Open EXM roster profile', artist.link, 'text-link'));
+  // Winner-only archive entries retain credit without inventing bouts or payouts.
+  const winnerOnly = data.results.filter(result => !artist.seasons.some(record => record.id === result.id) &&
+    (result.winner === artist.name || result.artists?.includes(artist.name)));
+  for (const result of winnerOnly) {
+    const credit = el('p', null, 'legacy-winner-credit');
+    credit.append(el('strong', result.label), document.createTextNode(' · Winner'));
+    section.append(credit);
+  }
   for (const record of artist.seasons) {
     const result = data.results.find(item => item.id === record.id);
     section.append(el('h3', result.label));
     if (record.champion) section.append(el('p', 'SongWars Champion', 'champion-mark'));
     section.append(el('p', record.points + ' Legacy Points' + (record.wins == null ? '' : ' · ' + record.wins + ' wins')));
     if (!record.bouts) continue;
+    const disclosure = el('details', null, 'events-bracket');
+    disclosure.append(el('summary', 'Match results'));
     const bouts = el('ul', null, 'events-matches');
     for (const bout of record.bouts) {
       const match = data.brackets.find(item => item.id === bout.id);
@@ -210,7 +250,8 @@ function profile(target, data, artist) {
       if (match.outOf != null) item.append(el('span', 'Judge Score ' + (bout.won ? match.score : match.opponentScore) + ' / ' + match.outOf, 'events-score'));
       bouts.append(item);
     }
-    section.append(bouts);
+    disclosure.append(bouts);
+    section.append(disclosure);
   }
   target.append(section);
 }

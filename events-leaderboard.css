@@ -72,6 +72,13 @@
 #event-board summary { min-height: 44px; display: list-item; padding: 9px 0; cursor: pointer; }
 
 .events-shell [hidden] { display: none; }
+.legacy-player-hero { display:flex; align-items:center; gap:1rem; padding:1rem 0; }
+.legacy-player-hero .events-avatar { width:72px; height:72px; flex-basis:72px; border-color:#d7d2da; font-size:1.4rem; box-shadow:0 0 24px #ded6e222; }
+.legacy-player-stats { display:flex; flex-wrap:wrap; gap:.75rem; margin:1rem 0; }
+.legacy-player-stats > div { flex:1 1 130px; padding:1rem; border:1px solid #51434a; background:linear-gradient(135deg,#29282e,#141317); }
+.legacy-player-stats strong { display:block; color:#f5eff5; font-size:2rem; font-variant-numeric:tabular-nums; }
+.legacy-player-stats span { display:block; color:#d4c6ce; font-size:.875rem; }
+.legacy-winner-credit { border-left:2px solid #d3cbd4; padding:.6rem .8rem; background:#211b22; }
 
 /* EXM arena: decoration stays behind content and never intercepts controls. */
 .events-shell { position: relative; isolation: isolate; }

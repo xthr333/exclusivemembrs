@@ -73,8 +73,8 @@
     photoStatus.textContent = 'Preparing your preview…';
     const url = URL.createObjectURL(file);
     try {
-      if (file.size > 4194304) {
-        throw new Error('This photo is over 4 MiB. Choose a smaller photo or screenshot.');
+      if (file.size > 25 * 1024 * 1024) {
+        throw new Error('This photo is over 25 MB. Choose a smaller photo.');
       }
       const image = new Image();
       await new Promise((resolve, reject) => {
@@ -82,8 +82,8 @@
         image.onerror = () => reject(new Error('This browser could not open the photo. On iPhone, try a screenshot or export it as JPEG.'));
         image.src = url;
       });
-      if (!image.naturalWidth || !image.naturalHeight || Math.max(image.naturalWidth, image.naturalHeight) > 4096) {
-        throw new Error('Choose an image up to 4096 pixels wide or tall.');
+      if (!image.naturalWidth || !image.naturalHeight || image.naturalWidth * image.naturalHeight > 50_000_000) {
+        throw new Error('Choose a photo up to 50 megapixels.');
       }
       const canvas = document.createElement('canvas');
       canvas.width = canvas.height = 256;
