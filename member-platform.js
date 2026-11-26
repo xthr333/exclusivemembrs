@@ -91,6 +91,9 @@
   const feedMore = byId('feed-more');
   let requestNumber = 0;
   let inventory = false;
+  let rewardData = null;
+  let previewProfile = null;
+  const rewardKind = byId('reward-kind');
   let before = null;
   let blockedAfter = '';
   let roles = [];
@@ -180,18 +183,29 @@
       preview.classList.add('cosmetic-preview-banner');
       preview.append(banner);
     }
-    const avatar = el('span', 'EX', 'member-avatar');
+    const name = previewProfile?.displayName || 'EXM profile';
+    const avatar = el('span', previewProfile ? name.slice(0, 2).toUpperCase() : 'EX', 'member-avatar');
+    if (previewProfile?.avatar === 'custom') {
+      const image = el('img', null, 'member-photo');
+      image.src = '/api/members/avatar?username=' + encodeURIComponent(previewProfile.username);
+      image.alt = '';
+      image.addEventListener('error', () => { avatar.textContent = name.slice(0, 2).toUpperCase(); });
+      avatar.replaceChildren(image);
+    }
     if (item.kind === 'frame') avatar.classList.add('cosmetic-' + item.appearance);
-    preview.append(avatar, el('strong', 'EXM profile'));
+    preview.append(avatar, el('strong', name));
     if (item.kind === 'badge') preview.append(sample(item, 'badge'));
     return preview;
   }
 
   function showRewards(data) {
+    rewardData = data;
     byId('rewards-balance').textContent = fmt(data.points) + ' Rewards Points available';
     catalogButton.setAttribute('aria-pressed', String(!inventory));
     inventoryButton.setAttribute('aria-pressed', String(inventory));
-    const items = data.items.filter(item => inventory ? item.owned : item.active);
+    const items = data.items.filter(item => (inventory ? item.owned : item.active) &&
+      (rewardKind.value === 'all' || item.kind === rewardKind.value));
+    byId('reward-count').textContent = items.length + (inventory ? ' owned items' : ' items') + ' · Preview on your profile';
     function renderItem(item) {
       const card = el('article', null, 'platform-card');
       card.append(el('h3', item.name), cosmeticProfilePreview(item));
@@ -215,7 +229,7 @@
     if (inventory) {
       byId('more-rewards').hidden = true;
       grid.replaceChildren(...items.map(renderItem));
-      if (!items.length) grid.append(el('p', 'Your inventory is empty.'));
+      if (!items.length) grid.append(el('p', 'No owned items in this category yet. Browse the catalog to choose a reward.'));
       return;
     }
 
@@ -442,7 +456,9 @@
   }
 
   async function load(message = '') {
-    const requested = location.hash.slice(1);
+    let requested = location.hash.slice(1);
+    if (requested === 'inventory') { inventory = true; requested = 'rewards'; }
+    else if (requested === 'rewards') inventory = false;
     if (requested === 'rankings') { location.replace('events.html'); return; }
     const view = eventsOnly ? 'staff' :
       panels.some(panel => panel.dataset.panel === requested) ? requested : 'dashboard';
@@ -474,8 +490,10 @@
         if (request !== requestNumber) return;
         showFeed(data);
       } else if (view === 'rewards') {
-        const data = await api('rewards');
+        const [data, session] = await Promise.all([api('rewards'), fetch('/api/members/session')
+          .then(response => response.ok ? response.json() : null).catch(() => null)]);
         if (request !== requestNumber) return;
+        previewProfile = session?.profile || null;
         showRewards(data);
       } else if (view === 'access') {
         await window.EXMMemberOperations.access();
@@ -557,8 +575,15 @@
   rankingForm.addEventListener('submit', event => { event.preventDefault(); rankingPage = 1; load(); });
   byId('rank-previous').addEventListener('click', () => { rankingPage = Math.max(1, rankingPage - 1); load(); });
   byId('rank-next').addEventListener('click', () => { rankingPage += 1; load(); });
-  catalogButton.addEventListener('click', () => { inventory = false; load(); });
-  inventoryButton.addEventListener('click', () => { inventory = true; load(); });
+  rewardKind.addEventListener('change', () => { if (rewardData) showRewards(rewardData); });
+  catalogButton.addEventListener('click', () => {
+    inventory = false;
+    if (location.hash !== '#rewards') location.hash = 'rewards'; else load();
+  });
+  inventoryButton.addEventListener('click', () => {
+    inventory = true;
+    if (location.hash !== '#inventory') location.hash = 'inventory'; else load();
+  });
   addEventListener('hashchange', () => load());
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => load(), { once: true });
   else load();
