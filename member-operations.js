@@ -112,13 +112,13 @@
       email.maxLength = 254;
       if (artistApplication) {
         form.append(el('p', 'Artists need Discord and Instagram. EXM staff verify Discord readiness before approval.'));
-        if (event.discordVoiceChannel) form.append(el('p', 'Required voice channel: ' + event.discordVoiceChannel));
-        appendLink(form, 'https://discord.gg/u8DuaKMZqP', 'Join the EXM Discord');
+        form.append(el('p', 'Join any voice channel you can access and check your microphone and camera. If you need help, DM EXCLUSIVEMEMBRS. Staff confirm readiness before approval.'));
+        appendLink(form, 'https://discord.gg/8dZNXNr62r', 'Join the EXM Discord');
         field(form, 'Discord username', 'discord').maxLength = 37;
         field(form, 'Instagram handle or profile link', 'instagram').maxLength = 500;
         field(form, 'Public music link', 'music', null, 'url').maxLength = 500;
         field(form, 'I joined the EXM Discord server', 'joinedDiscord', null, 'checkbox');
-        field(form, 'I can access the event voice channel', 'voiceReady', null, 'checkbox');
+        field(form, 'I can join a voice channel and have checked my microphone and camera', 'voiceReady', null, 'checkbox');
       }
       if (event.question) field(form, event.question, 'answer').maxLength = 600;
       finish();
