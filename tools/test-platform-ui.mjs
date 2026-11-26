@@ -203,6 +203,7 @@ try {
     assert.ok((await context.cookies()).some(cookie => cookie.name === '__Host-exm_session' && cookie.secure && cookie.httpOnly));
     await page.getByLabel('Display name', { exact: true }).fill('Local browser profile');
     await page.getByLabel('Photographer', { exact: true }).check();
+    await page.getByLabel('Show my profile in the community directory', { exact: true }).check();
     await page.getByRole('button', { name: 'Save profile' }).click();
     await page.getByText('Profile saved.', { exact: true }).waitFor();
     await continueToRewards.click();
