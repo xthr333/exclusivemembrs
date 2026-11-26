@@ -4,12 +4,18 @@
   const hosted = Boolean(window.EXMHostedMode);
   const states = ['draft', 'scheduled', 'registration_open', 'live', 'completed', 'canceled', 'archived'];
   const kinds = ['gaming', 'community', 'stream', 'residency', 'screening', 'in_person', 'other'];
+  const applicationModes = [
+    ['standard', 'Standard EXM application'],
+    ['artist', 'Artist application with Discord readiness'],
+    ['external', 'External official registration'],
+  ];
   const choices = items => items.map(item => [item, pretty(item)]);
   const utc = value => value ? value + 'Z' : null;
 
   function appendLink(parent, href, label) {
     if (!href) return;
-    const parsed = new URL(href);
+    let parsed;
+    try { parsed = new URL(href); } catch { return; }
     if (parsed.protocol !== 'https:' || parsed.username || parsed.password) return;
     const link = el('a', label + ' ↗', 'text-link');
     link.href = parsed.href;
@@ -48,11 +54,11 @@
 
   function resultCard(result) {
     const card = el('article', null, 'platform-card');
-    card.append(el('p', 'LOCAL TEST RESULT · ' + result.stage, 'kicker'));
+    card.append(el('p', (hosted ? '' : 'LOCAL TEST RESULT · ') + result.stage, 'kicker'));
     card.append(el('h3', result.winner === 'left' ? result.left : result.right));
     card.append(el('p', result.left + ' ' + result.leftScore + '–' + result.rightScore + ' ' + result.right));
     if (result.tie) card.append(el('p', 'Tiebreak: ' + result.tie));
-    if (result.championship) card.append(el('p', 'Preview champion', 'champion-mark'));
+    if (result.championship) card.append(el('p', hosted ? 'Champion' : 'Preview champion', 'champion-mark'));
     return card;
   }
 
@@ -63,19 +69,18 @@
     if (event.startsAt) card.append(el('p', 'Starts ' + event.startsAt.replace('T', ' ').replace(/:00(?:\.000)?Z$/, ' UTC')));
     if (event.rules) card.append(el('p', event.rules));
     if (event.format && event.format !== 'open') card.append(el('p', 'Format: ' + event.format));
-    if (!hosted && ['live', 'completed'].includes(event.status)) {
+    if (['live', 'completed'].includes(event.status)) {
       const results = el('div');
       const loadMatches = task(card, null, async () => {
         const { items } = await api('matches?id=' + encodeURIComponent(event.id));
         results.replaceChildren(...items.map(resultCard));
-        return items.length ? 'Published preview results loaded.' : 'No results published yet.';
+        return items.length ? 'Published results loaded.' : 'No results published yet.';
       });
-      card.append(actionButton('Show published test results', loadMatches), results);
+      card.append(actionButton(hosted ? 'Show published results' : 'Show published test results', loadMatches), results);
     }
     appendLink(card, event.link, 'Event website');
     if (['scheduled', 'registration_open'].includes(event.status)) {
       appendLink(card, event.interest, 'Express interest');
-      appendLink(card, event.registration, 'Register externally');
     }
     if (['scheduled', 'registration_open', 'live'].includes(event.status)) {
       appendLink(card, event.rsvp, 'RSVP');
@@ -87,8 +92,16 @@
     const now = Date.now();
     if (event.status === 'registration_open' && (!event.opensAt || Date.parse(event.opensAt) <= now)
         && (!event.closesAt || Date.parse(event.closesAt) > now)) {
+      if (event.applicationMode === 'external' || event.registration) {
+        appendLink(card, event.registration, 'Official application');
+        return card;
+      }
+      const artistApplication = event.applicationMode === 'artist';
       const { form, finish } = task(card, hosted ? 'Submit application' : 'Submit test application', async values => {
-        await api('apply', { event: event.id, ...values });
+        const readiness = artistApplication
+          ? { joinedDiscord: values.joinedDiscord === 'on', voiceReady: values.voiceReady === 'on' }
+          : {};
+        await api('apply', { event: event.id, ...values, ...readiness });
         form.reset();
         return hosted ? 'Application received. EXM staff will review your submission.' :
           'Test interest received. Staff review decides placement.';
@@ -97,6 +110,16 @@
       field(form, hosted ? 'Display name' : 'Test display name', 'name').maxLength = 80;
       const email = field(form, hosted ? 'Contact email' : 'Synthetic contact ending in .test', 'contact', null, 'email');
       email.maxLength = 254;
+      if (artistApplication) {
+        form.append(el('p', 'Artists need Discord and Instagram. EXM staff verify Discord readiness before approval.'));
+        if (event.discordVoiceChannel) form.append(el('p', 'Required voice channel: ' + event.discordVoiceChannel));
+        appendLink(form, 'https://discord.gg/u8DuaKMZqP', 'Join the EXM Discord');
+        field(form, 'Discord username', 'discord').maxLength = 37;
+        field(form, 'Instagram handle or profile link', 'instagram').maxLength = 500;
+        field(form, 'Public music link', 'music', null, 'url').maxLength = 500;
+        field(form, 'I joined the EXM Discord server', 'joinedDiscord', null, 'checkbox');
+        field(form, 'I can access the event voice channel', 'voiceReady', null, 'checkbox');
+      }
       if (event.question) field(form, event.question, 'answer').maxLength = 600;
       finish();
     }
@@ -209,7 +232,8 @@
     const id = item?.id || crypto.randomUUID();
     const eventEditor = type === 'event';
     const card = el('article', null, 'platform-card');
-    card.append(el('h3', item ? old.name : (eventEditor ? (hosted ? 'New event' : 'New test event') : 'New preview announcement')));
+    card.append(el('h3', item ? old.name : (eventEditor ? (hosted ? 'New event' : 'New test event') :
+      (hosted ? 'New announcement' : 'New preview announcement'))));
     if (item) card.append(el('p', item.archived ? 'Archived' : item.published ? (hosted ? 'Published' : 'Published in local preview') : 'Draft'));
     const { form, finish } = task(card, eventEditor ? 'Save event draft' : 'Save announcement draft', async values => {
       const dates = eventEditor ? { startsAt: utc(values.startsAt), opensAt: utc(values.opensAt), closesAt: utc(values.closesAt) }
@@ -226,6 +250,10 @@
       useValue(form, 'Template', 'kind', old.kind || 'community', choices(kinds));
       useValue(form, 'Competition format', 'format', old.format || 'open', choices(['open', 'solo', 'duo']));
       useValue(form, 'Event status', 'status', old.status || 'draft', choices(states));
+      useValue(form, 'Application intake', 'applicationMode',
+        old.applicationMode || (old.registration ? 'external' : 'standard'), applicationModes);
+      useValue(form, 'Discord voice channel (required to open artist applications)',
+        'discordVoiceChannel', old.discordVoiceChannel, null, 'text', false).maxLength = 80;
       const capacity = useValue(form, 'Capacity (optional)', 'capacity', old.capacity, null, 'number', false);
       capacity.min = 1;
       capacity.max = 500;
@@ -254,7 +282,8 @@
       if (eventEditor) details.append(el('p', 'Status: ' + pretty(old.status)));
       card.append(details);
       const publish = task(card, null, async () => { await api(type + '_publish', { id }); await rebuild(); });
-      card.append(actionButton(hosted ? 'Publish saved event' : 'Publish saved draft to preview', publish));
+      card.append(actionButton(hosted ? (eventEditor ? 'Publish saved event' : 'Publish saved announcement') :
+        'Publish saved draft to preview', publish));
       if (!eventEditor && !item.archived) {
         const archive = task(card, null, async () => { await api('notice_archive', { id }); await rebuild(); });
         card.append(actionButton('Archive announcement', archive));
@@ -268,11 +297,23 @@
     const records = items.map(record => {
       const card = el('article', null, 'platform-card');
       card.append(el('h4', record.display_name), el('p', record.contact), el('p', record.answer));
+      if (record.discord_readiness_attested) {
+        card.append(el('p', 'Discord: ' + record.discord_username), el('p', 'Instagram: @' + record.instagram_handle),
+          el('p', 'Applicant confirmed EXM server membership and access to the event voice channel.'));
+        appendLink(card, record.music_url, 'Open music link');
+      }
       const { form, finish } = task(card, 'Save review', async values => {
-        await api('application_review', { event: id, id: record.id, status: values.status });
+        const readiness = record.discord_readiness_attested ? { discordVerified: values.discordVerified === 'on' } : {};
+        await api('application_review', { event: id, id: record.id, status: values.status, ...readiness });
         return 'Review saved.';
       });
       useValue(form, 'Application status', 'status', record.status, choices(['pending', 'approved', 'waitlisted', 'declined']));
+      if (record.discord_readiness_attested) {
+        const verified = field(form, 'I verified EXM Discord membership and access to the event voice channel',
+          'discordVerified', null, 'checkbox');
+        verified.required = false;
+        verified.checked = Boolean(record.discord_verified_at);
+      }
       finish();
       return card;
     });
@@ -286,7 +327,7 @@
       const old = item?.draft || {};
       const id = item?.id || crypto.randomUUID();
       const card = el('section', null, 'platform-card');
-      card.append(el('h4', item ? old.stage : 'Record test match'));
+      card.append(el('h4', item ? old.stage : (hosted ? 'Record match' : 'Record test match')));
       const edit = task(card, 'Save scoring draft', async values => {
         await api('match_save', { ...values, id, event, position: Number(values.position),
           leftScore: Number(values.leftScore), rightScore: Number(values.rightScore),
@@ -294,8 +335,8 @@
         await scoring(panel, event, owner);
       });
       for (const [label, name, value] of [
-        ['Round or stage', 'stage', old.stage], ['Left test entrant or team', 'left', old.left],
-        ['Right test entrant or team', 'right', old.right],
+        ['Round or stage', 'stage', old.stage], [hosted ? 'Left entrant or team' : 'Left test entrant or team', 'left', old.left],
+        [hosted ? 'Right entrant or team' : 'Right test entrant or team', 'right', old.right],
       ]) useValue(edit.form, label, name, value);
       const position = useValue(edit.form, 'Display order', 'position', old.position ?? 1, null, 'number');
       position.min = 1;
@@ -314,8 +355,8 @@
           await api('match_publish', { id, event });
           await scoring(panel, event, owner);
         });
-        if (item.published) card.append(el('p', 'A score is published in the local preview.'));
-        card.append(actionButton('Publish verified test score', publish));
+        if (item.published) card.append(el('p', hosted ? 'Score published.' : 'A score is published in the local preview.'));
+        card.append(actionButton(hosted ? 'Publish verified score' : 'Publish verified test score', publish));
       }
       return card;
     };
@@ -379,7 +420,7 @@
         const review = task(card, null, async () => { await applications(list, event.id); return 'Applications loaded.'; });
         card.append(actionButton(hosted ? 'Review applications' : 'Review test applications', review), list);
       }
-      if (canScore && !hosted) {
+      if (canScore && window.EXMHostedMode !== 'events') {
         const scoringPanel = el('div');
         const openScoring = task(card, null, async () => { await scoring(scoringPanel, event.id, owner); return 'Scoring drafts loaded.'; });
         card.append(actionButton('Open scoring and corrections', openScoring), scoringPanel);
@@ -411,11 +452,12 @@
       finish();
       children.push(claims);
     }
-    if (owner && !hosted) {
-      children.unshift(await campaignStudio(rebuild));
+    if (owner && window.EXMHostedMode !== 'events') {
+      if (!hosted) children.unshift(await campaignStudio(rebuild));
       const notices = el('div', null, 'platform-grid hub-grid');
       notices.append(editorCard(null, 'notice', rebuild), ...data.notices.map(item => editorCard(item, 'notice', rebuild)));
-      children.push(el('h3', 'Announcements'), notices, codesCard(data));
+      children.push(el('h3', 'Announcements'), notices);
+      if (!hosted) children.push(codesCard(data));
     }
     if (owner && (!hosted || window.EXMHostedMode === 'members')) {
       const recovery = el('article', null, 'platform-card');

@@ -17,7 +17,8 @@ const editorialViews = new Set(['featured_content', 'campaign_studio']);
 const editorialActions = new Set(['editorial_save', 'editorial_publish']);
 const hostedOperations = new Set(['events', 'applications', 'studio', 'apply',
   'event_save', 'event_publish', 'event_assign', 'application_review', 'roster_link']);
-const hostedMemberOperations = new Set([...hostedOperations, 'recovery_review']);
+const hostedMemberOperations = new Set([...hostedOperations, 'recovery_review', 'notices',
+  'notice_save', 'notice_publish', 'notice_archive', 'matches', 'match_drafts', 'match_save', 'match_publish']);
 const hostedEventsOnly = new Set(['dashboard', ...hostedOperations]);
 const states = new Set(['draft', 'scheduled', 'registration_open', 'live', 'completed', 'canceled', 'archived']);
 const eventKinds = new Set(['gaming', 'community', 'stream', 'residency', 'screening', 'in_person', 'other']);
@@ -41,6 +42,9 @@ const errors = {
   duplicate: [409, 'This verified activity has already been recorded.'],
   stale: [409, 'Another edit was saved. Reopen the campaign studio before changing the draft.'],
   answer: [400, 'Answer the event’s application question before submitting.'],
+  artist_requirements: [400, 'Enter Discord, Instagram and a music link, then confirm Discord server and voice-channel access.'],
+  readiness: [409, 'Verify Discord server membership and event voice-channel access before approval.'],
+  intake_changed: [409, 'Create a new event to change application requirements after submissions arrive.'],
   capacity: [409, 'This event is at capacity. Keep the applicant on the waitlist.'],
   closed: [409, 'This event or registration is closed. Save an approved status before publishing a draft.'],
   locked: [403, 'The member gate is locked.'],
@@ -147,6 +151,22 @@ const secureLink = value => {
   valid(url.protocol === 'https:' && !url.username && !url.password, 'Enter a public HTTPS link.');
   return url.href;
 };
+const discordPattern = /^(?:[a-z0-9_.]{2,32}|[^#\s][^#]{1,31}#\d{4})$/i;
+const instagramPattern = /^[a-z0-9_.]{1,30}$/i;
+
+function instagramHandle(value) {
+  const name = text(value, 500);
+  if (!name.startsWith('https://')) {
+    const handle = name.replace(/^@/, '');
+    valid(instagramPattern.test(handle), 'Enter an Instagram handle or profile link.');
+    return handle.toLowerCase();
+  }
+  const profile = new URL(secureLink(name));
+  const handle = profile.pathname.replace(/^\/|\/$/g, '');
+  valid(['instagram.com', 'www.instagram.com'].includes(profile.hostname) && !profile.port &&
+    instagramPattern.test(handle), 'Enter an Instagram handle or profile link.');
+  return handle.toLowerCase();
+}
 
 function operationOptions(view, query) {
   if (view === 'protected') {
@@ -200,11 +220,19 @@ function operationPayload(action, body, hosted) {
       const opensAt = timestamp(body.opensAt);
       const closesAt = timestamp(body.closesAt);
       valid(!opensAt || !closesAt || opensAt < closesAt, 'Registration close must come after opening.');
+      const registration = secureLink(body.registration);
+      const applicationMode = body.applicationMode ?? (registration ? 'external' : 'standard');
+      const discordVoiceChannel = applicationMode === 'artist' ? optionalText(body.discordVoiceChannel, 80) : null;
+      valid(['standard', 'artist', 'external'].includes(applicationMode) &&
+        (applicationMode === 'external') === Boolean(registration), 'Use external registration only when an official registration URL is provided.');
+      valid(!registration || registration !== secureLink(body.interest), 'Interest and official registration must use different links.');
+      valid(applicationMode !== 'artist' || status !== 'registration_open' || discordVoiceChannel,
+        'Name the required Discord voice channel before opening artist applications.');
       return {
         id, kind, format, status, name: text(name, 80), description: text(body.description, 600), capacity: capacity ?? null,
-        startsAt: timestamp(body.startsAt), opensAt, closesAt, link: secureLink(body.link),
+        startsAt: timestamp(body.startsAt), opensAt, closesAt, link: secureLink(body.link), applicationMode, discordVoiceChannel,
         stream: secureLink(body.stream), recap: secureLink(body.recap),
-        interest: secureLink(body.interest), registration: secureLink(body.registration),
+        interest: secureLink(body.interest), registration,
         rsvp: secureLink(body.rsvp), tickets: secureLink(body.tickets), replay: secureLink(body.replay),
         rules: optionalText(body.rules, 600), question: optionalText(body.question, 200),
       };
@@ -215,12 +243,22 @@ function operationPayload(action, body, hosted) {
       if (hosted) valid(/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(contact) && !contact.endsWith('.test'),
         'Enter a valid contact email.');
       else valid(/^[^\s@]+@[^\s@]+\.test$/.test(contact), 'Use a synthetic email ending in .test for this preview.');
-      return { event, name: text(name, 80), contact, answer: optionalText(body.answer, 600) || '' };
+      const base = { event, name: text(name, 80), contact, answer: optionalText(body.answer, 600) || '' };
+      const fields = ['discord', 'instagram', 'music', 'joinedDiscord', 'voiceReady'];
+      if (!fields.some(key => Object.hasOwn(body, key))) return base;
+      const discord = text(body.discord, 37);
+      valid(discordPattern.test(discord), 'Enter your Discord username.');
+      const instagram = instagramHandle(body.instagram);
+      const music = secureLink(body.music);
+      valid(music && body.joinedDiscord === true && body.voiceReady === true,
+        'Enter your music link, then confirm Discord server and voice-channel access.');
+      return { ...base, discord, instagram, music, discordReadiness: true };
     }
     case 'application_review':
       valid(matches(event, uuidPattern) && matches(id, uuidPattern) &&
-        ['pending', 'approved', 'waitlisted', 'declined'].includes(status));
-      return { event, id, status };
+        ['pending', 'approved', 'waitlisted', 'declined'].includes(status) &&
+        (!Object.hasOwn(body, 'discordVerified') || typeof body.discordVerified === 'boolean'));
+      return { event, id, status, ...(typeof body.discordVerified === 'boolean' ? { discordVerified: body.discordVerified } : {}) };
     case 'event_assign':
       valid(matches(event, uuidPattern) && matches(username, usernamePattern) && ['event_staff', 'judge'].includes(role));
       return { event, username, role };

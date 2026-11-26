@@ -155,11 +155,19 @@
       "id": "mayo_",
       "name": "Mayo_",
       "link": "mayo.html",
+      "archiveCredits": [
+        "pilot",
+        "s1"
+      ],
       "seasons": [
         {
           "id": "s3",
           "points": 80,
           "wins": 4,
+          "round": {
+            "order": 40,
+            "label": "Final"
+          },
           "bouts": [
             {
               "id": "opening-1",
@@ -186,11 +194,16 @@
       "id": "1ilriskk",
       "name": "LR",
       "link": "1ilriskk.html",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 80,
           "wins": 4,
+          "round": {
+            "order": 40,
+            "label": "Final"
+          },
           "bouts": [
             {
               "id": "opening-1",
@@ -217,11 +230,18 @@
       "id": "bitchyounotayop",
       "name": "BitchYouNotAYop",
       "link": "bitchyounotayop.html",
+      "archiveCredits": [
+        "pre-production"
+      ],
       "seasons": [
         {
           "id": "s3",
           "points": 50,
           "wins": 3,
+          "round": {
+            "order": 40,
+            "label": "Final"
+          },
           "bouts": [
             {
               "id": "opening-6",
@@ -251,11 +271,16 @@
     {
       "id": "wasi",
       "name": "Wasi",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 50,
           "wins": 3,
+          "round": {
+            "order": 40,
+            "label": "Final"
+          },
           "bouts": [
             {
               "id": "opening-6",
@@ -280,11 +305,16 @@
     {
       "id": "oso-ylb",
       "name": "Oso YLB",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 30,
           "wins": 2,
+          "round": {
+            "order": 30,
+            "label": "Semifinal"
+          },
           "bouts": [
             {
               "id": "opening-2",
@@ -305,11 +335,16 @@
     {
       "id": "lil-vet",
       "name": "Lil Vet",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 30,
           "wins": 2,
+          "round": {
+            "order": 30,
+            "label": "Semifinal"
+          },
           "bouts": [
             {
               "id": "opening-2",
@@ -330,11 +365,16 @@
     {
       "id": "fukitdrako",
       "name": "fukitdrako!",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 30,
           "wins": 2,
+          "round": {
+            "order": 30,
+            "label": "Semifinal"
+          },
           "bouts": [
             {
               "id": "opening-4",
@@ -355,11 +395,16 @@
     {
       "id": "konrax",
       "name": "konrax!",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 30,
           "wins": 2,
+          "round": {
+            "order": 30,
+            "label": "Semifinal"
+          },
           "bouts": [
             {
               "id": "opening-4",
@@ -380,11 +425,16 @@
     {
       "id": "1twogg",
       "name": "1twogg",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 20,
           "wins": 1,
+          "round": {
+            "order": 20,
+            "label": "Quarterfinal"
+          },
           "bouts": [
             {
               "id": "opening-3",
@@ -401,11 +451,16 @@
     {
       "id": "mxhara",
       "name": "Mxhara",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 20,
           "wins": 1,
+          "round": {
+            "order": 20,
+            "label": "Quarterfinal"
+          },
           "bouts": [
             {
               "id": "opening-3",
@@ -422,11 +477,16 @@
     {
       "id": "jaykurtt",
       "name": "Jaykurtt",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 10,
           "wins": 0,
+          "round": {
+            "order": 20,
+            "label": "Quarterfinal"
+          },
           "bouts": [
             {
               "id": "opening-5",
@@ -443,11 +503,16 @@
     {
       "id": "bbyhero6",
       "name": "Bbyhero6",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 10,
           "wins": 0,
+          "round": {
+            "order": 20,
+            "label": "Quarterfinal"
+          },
           "bouts": [
             {
               "id": "opening-5",
@@ -464,11 +529,16 @@
     {
       "id": "pg23",
       "name": "PG23",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 10,
           "wins": 0,
+          "round": {
+            "order": 20,
+            "label": "Quarterfinal"
+          },
           "bouts": [
             {
               "id": "opening-6",
@@ -485,11 +555,16 @@
     {
       "id": "jai",
       "name": "Jai",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 10,
           "wins": 0,
+          "round": {
+            "order": 20,
+            "label": "Quarterfinal"
+          },
           "bouts": [
             {
               "id": "opening-6",
@@ -506,11 +581,16 @@
     {
       "id": "bootupkee",
       "name": "bootupkee",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 10,
           "wins": 0,
+          "round": {
+            "order": 10,
+            "label": "Opening"
+          },
           "bouts": [
             {
               "id": "opening-1",
@@ -524,11 +604,16 @@
       "id": "1chrxllo",
       "name": "1chrxllo",
       "link": "1chrxllo.html",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 10,
           "wins": 0,
+          "round": {
+            "order": 10,
+            "label": "Opening"
+          },
           "bouts": [
             {
               "id": "opening-1",
@@ -541,11 +626,16 @@
     {
       "id": "callmeld",
       "name": "callmeLD",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 10,
           "wins": 0,
+          "round": {
+            "order": 10,
+            "label": "Opening"
+          },
           "bouts": [
             {
               "id": "opening-3",
@@ -558,11 +648,16 @@
     {
       "id": "yung-asy",
       "name": "yung asy",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 10,
           "wins": 0,
+          "round": {
+            "order": 10,
+            "label": "Opening"
+          },
           "bouts": [
             {
               "id": "opening-3",
@@ -575,11 +670,16 @@
     {
       "id": "vbii",
       "name": "$$vbii",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 10,
           "wins": 0,
+          "round": {
+            "order": 10,
+            "label": "Opening"
+          },
           "bouts": [
             {
               "id": "opening-4",
@@ -592,11 +692,16 @@
     {
       "id": "ayco",
       "name": "Ayco",
+      "archiveCredits": [],
       "seasons": [
         {
           "id": "s3",
           "points": 10,
           "wins": 0,
+          "round": {
+            "order": 10,
+            "label": "Opening"
+          },
           "bouts": [
             {
               "id": "opening-4",
@@ -607,5 +712,12 @@
       ]
     }
   ],
-  "producers": []
+  "producers": [],
+  "producerDiscovery": [
+    {
+      "id": "vantiva",
+      "name": "Vantiva / Tiva",
+      "link": "vantiva.html"
+    }
+  ]
 }

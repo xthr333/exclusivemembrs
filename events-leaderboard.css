@@ -21,8 +21,7 @@
 .events-empty { padding: 18px 13px; color: #dddde5; }
 .events-rank { width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid #3e3e47; background: #111117; font-variant-numeric: tabular-nums; }
 .events-rank .rank-place { width: 9%; }
-.events-rank .rank-wins { width: 13%; }
-.events-rank .rank-points { width: 22%; }
+.events-rank .rank-wins, .events-rank .rank-titles { width: 13%; }
 .events-rank th, .events-rank td { text-align: right; border-bottom: 1px solid #34343e; padding: 7px 14px; }
 .events-rank th { font: 700 .69rem/1.2 var(--mono, monospace); text-transform: uppercase; color: #c9c9d5; background: #0c0d12; }
 .events-rank th:nth-child(2), .events-rank td:nth-child(2) { text-align: left; }
@@ -58,8 +57,7 @@
   .events-filters { width: 100%; justify-content: space-between; }
   .events-tabs button { padding: 0 10px; }
   .events-rank .rank-place { width: 12%; }
-  .events-rank .rank-wins { width: 14%; }
-  .events-rank .rank-points { width: 21%; }
+  .events-rank .rank-wins, .events-rank .rank-titles { width: 14%; }
   .events-rank td, .events-rank th { padding-inline: 6px; }
   .events-artist { gap: 6px; }
   .events-artist-name { font-size: .88rem; }

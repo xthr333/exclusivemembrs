@@ -262,4 +262,6 @@ body::after{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;ba
 .cosmetic-profile-preview{display:grid;gap:.55rem;padding:.85rem;background:#141724;color:#fff;border-radius:4px;margin-block:.65rem}
 .cosmetic-profile-banner{min-height:2.5rem;background:linear-gradient(115deg,#171922,var(--cosmetic));border-radius:3px}
 .cosmetic-profile-preview .member-avatar{margin-block:.3rem;width:3rem}
+.cosmetic-preview-banner{position:relative;isolation:isolate;overflow:hidden}
+.cosmetic-preview-banner .cosmetic-profile-banner{position:absolute;inset:0;height:100%;border:0;border-radius:0;opacity:.42;z-index:-1}
 #public-profile-banner{margin-bottom:1rem}

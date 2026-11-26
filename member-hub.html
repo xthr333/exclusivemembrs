@@ -44,7 +44,7 @@
       <p id="hub-status" role="status">Loading member tools…</p>
       <div id="hub-signed-out" class="platform-card" hidden>
         <h2>Sign in to EXM</h2>
-        <p>Sign in to use your dashboard, feed, and rewards. Public signup is closed.</p>
+        <p>Sign in to use your dashboard, feed, and rewards. <span id="hub-signup-policy">Public signup is closed.</span></p>
         <a class="btn" id="hub-sign-in" href="account.html">Sign in</a>
       </div>
       <section id="dashboard" data-panel="dashboard" hidden>
@@ -108,8 +108,13 @@
         <p>Spend Rewards Points on profile frames, banners, and collectible badges. Equip what you own from My inventory.</p>
         <details>
           <summary>How to earn points</summary>
-          <p>Start with the <a href="#dashboard">daily check-in</a>. Eligible, verified EXM activity can also earn rewards under the current event rules.</p>
-          <p>SongWars Legacy Points rank verified competition results. They aren't shop currency, and spending Rewards Points doesn't lower your lifetime XP or ranking.</p>
+          <ul>
+            <li>First saved bio and first saved profile photo earn 10 points each.</li>
+            <li><a href="#dashboard">Daily check-in</a> earns 5 points. The day resets at midnight UTC.</li>
+            <li>Verified event participation earns 25 points.</li>
+            <li>Each verified played battle win adds 10 points. A verified championship adds 50.</li>
+          </ul>
+          <p>Rewards Points are your shop balance. Your lifetime XP, SongWars record, and Legacy Points are tracked separately.</p>
         </details>
         <p>Looking for physical merchandise? Visit <a href="shop.html">Shop EXM</a>.</p>
         <p id="rewards-balance"></p>

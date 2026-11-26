@@ -80,7 +80,7 @@ assert.ok(!home.includes(season4));
 const campaign = JSON.parse(fs.readFileSync(path.join(root,'content/featured-campaign.json'),'utf8'));
 assert.equal(campaign.actionUrl, season4);
 assert.equal(campaign.status, 'Interest open');
-assert.ok(eventPage.includes("<title>EXM Events · SongWars Legacy Leaderboard"));
+assert.ok(eventPage.includes("<title>EXM Events · SongWars Competition Leaderboard"));
 assert.ok(eventPage.includes('first-time SongWars judges'));
 assert.ok(eventPage.includes('Winner gets a prize.'));
 assert.equal(eventPage.split(campaign.actionUrl).length, 2);

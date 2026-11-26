@@ -1,3 +1,5 @@
+import { rankCompetition } from './songwars-competition.js';
+
 const el = (tag, text, css) => {
   const node = document.createElement(tag);
   if (text != null) node.textContent = text;
@@ -17,36 +19,37 @@ function leaderboard(target, data) {
   const period = target.querySelector('#legacy-period');
   const tabs = [...target.querySelectorAll('[role="tab"]')];
   const publicProfiles = new Map();
+  const discovery = data.producerDiscovery ?? [];
+  const publicRoutes = new Map([...data.artists, ...data.producers, ...discovery].map(row => [row.id, row.link]));
   const artistHref = id => {
     if (publicProfiles.has(id)) return memberHref(publicProfiles.get(id));
-    const artist = [...data.artists, ...data.producers].find(row => row.id === id);
-    return artist?.link && /^[a-z0-9-]+\.html$/.test(artist.link) ? artist.link : legacyHref(id);
+    const path = publicRoutes.get(id);
+    return path && /^[a-z0-9-]+\.html$/.test(path) ? path : legacyHref(id);
+  };
+  const artistLink = (id, name) => {
+    const anchor = link(name, artistHref(id), 'events-artist-name');
+    anchor.dataset.artistId = id;
+    return anchor;
   };
   let selected = tabs[0];
 
   function render() {
-    const season = period.value;
-    const ranked = data[selected.dataset.category].flatMap(artist => {
-      const records = artist.seasons.filter(record => season === 'all' || record.id === season);
-      if (!records.length) return [];
-      const wins = records.filter(record => Number.isInteger(record.wins));
-      return [{
-        ...artist,
-        points: records.reduce((sum, record) => sum + record.points, 0),
-        wins: wins.length ? wins.reduce((sum, record) => sum + record.wins, 0) : null,
-        champion: records.some(record => record.champion),
-      }];
-    }).sort((a, b) => b.points - a.points || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+    const category = selected.dataset.category;
+    const ranked = rankCompetition(data[category], period.value);
 
     panel.replaceChildren();
     if (!ranked.length) {
-      const category = selected.dataset.category === 'artists' ? 'artist' : 'producer';
-      panel.append(el('p', 'No verified ' + category + ' competition results in this period.', 'events-empty'));
-      if (category === 'producer') {
+      const role = category === 'artists' ? 'artist' : 'producer';
+      panel.append(el('p', 'No verified ' + role + ' competition results in this period.', 'events-empty'));
+      if (category === 'producers') {
         const roster = el('article', null, 'events-result');
-        roster.append(el('h3', 'Meet the producers'),
-          link('Vantiva / Tiva', 'vantiva.html', 'events-artist-name'),
-          el('p', 'EXM Producer · Not ranked'));
+        roster.append(el('h3', 'Meet the producers'));
+        for (const producer of discovery) {
+          const profile = el('p');
+          profile.append(artistLink(producer.id, producer.name), ' · EXM Producer');
+          roster.append(profile);
+        }
+        roster.append(link('Browse the EXM roster', 'artists.html', 'text-link'));
         panel.append(roster);
       }
       return;
@@ -54,37 +57,31 @@ function leaderboard(target, data) {
 
     const table = el('table', null, 'events-rank');
     const columns = el('colgroup');
-    for (const css of ['rank-place', 'rank-artist', 'rank-wins', 'rank-points']) columns.append(el('col', null, css));
+    for (const css of ['rank-place', 'rank-artist', 'rank-titles', 'rank-wins']) columns.append(el('col', null, css));
     table.append(columns);
     const header = table.createTHead().insertRow();
-    for (const label of ['Rank', selected.textContent.trim() === 'Artists' ? 'Artist' : 'Producer', 'Wins', 'Legacy Points']) {
+    for (const label of ['Rank', category === 'artists' ? 'Artist' : 'Producer', 'Titles', 'Wins']) {
       const cell = el('th', label);
       cell.scope = 'col';
       header.append(cell);
     }
     const body = table.createTBody();
-    let lastPoints;
-    let rank = 0;
-    ranked.slice(0, 50).forEach((artist, index) => {
-      if (artist.points !== lastPoints) rank = index + 1;
-      lastPoints = artist.points;
+    for (const artist of ranked) {
       const row = body.insertRow();
-      row.dataset.rank = String(rank);
-      row.insertCell().textContent = String(rank);
-      const name = link(artist.name, artistHref(artist.id), 'events-artist-name');
-      name.dataset.artistId = artist.id;
+      row.dataset.rank = String(artist.rank);
+      row.insertCell().textContent = String(artist.rank);
       const avatar = el('span', artist.name.slice(0, 2).toUpperCase(), 'events-avatar');
       avatar.setAttribute('aria-hidden', 'true');
       const identity = el('span');
-      identity.append(name);
-      if (artist.champion) identity.append(el('small', 'Champion'));
+      identity.append(artistLink(artist.id, artist.name));
+      if (artist.round) identity.append(el('small', 'Best round: ' + artist.round.label));
       const artistCell = row.insertCell();
       const artistLayout = el('div', null, 'events-artist');
       artistLayout.append(avatar, identity);
       artistCell.append(artistLayout);
+      row.insertCell().textContent = String(artist.titles);
       row.insertCell().textContent = artist.wins ?? '—';
-      row.insertCell().textContent = String(artist.points);
-    });
+    }
     panel.append(table);
   }
 
@@ -184,7 +181,7 @@ function events(target, data) {
     standings.hidden = isResults;
     results.hidden = !isResults;
     target.querySelector('#events-title').textContent = isResults ? 'Results' : 'Leaderboard';
-    target.querySelector('#events-eyebrow').textContent = isResults ? 'SongWars' : 'SongWars Legacy';
+    target.querySelector('#events-eyebrow').textContent = isResults ? 'SongWars' : 'SongWars Competition';
     target.querySelector('#events-filters').hidden = isResults;
     target.querySelector('#hall-link').hidden = !isResults;
     standingsLink.toggleAttribute('aria-current', !isResults);
@@ -222,14 +219,15 @@ function profile(target, data, artist) {
     return card;
   };
   stats.append(stat(total, 'Legacy Points'));
+  const titles = artist.seasons.filter(record => record.champion).length;
+  if (titles) stats.append(stat(titles, 'Verified championships'));
   if (knownWins.length) stats.append(stat(knownWins.reduce((sum, record) => sum + record.wins, 0), 'Recorded wins'));
   section.append(stats);
   const recordLink = artist.link && !location.pathname.endsWith('/' + artist.link) &&
     !location.pathname.endsWith('/' + artist.link.replace('.html', ''));
   if (recordLink) section.append(link('Open EXM roster profile', artist.link, 'text-link'));
   // Winner-only archive entries retain credit without inventing bouts or payouts.
-  const winnerOnly = data.results.filter(result => !artist.seasons.some(record => record.id === result.id) &&
-    (result.winner === artist.name || result.artists?.includes(artist.name)));
+  const winnerOnly = data.results.filter(result => artist.archiveCredits?.includes(result.id));
   for (const result of winnerOnly) {
     const credit = el('p', null, 'legacy-winner-credit');
     credit.append(el('strong', result.label), document.createTextNode(' · Winner'));
@@ -238,6 +236,10 @@ function profile(target, data, artist) {
   for (const record of artist.seasons) {
     const result = data.results.find(item => item.id === record.id);
     section.append(el('h3', result.label));
+    if (record.champion && !record.bouts) {
+      section.append(el('p', 'Winner', 'legacy-winner-credit'));
+      continue;
+    }
     if (record.champion) section.append(el('p', 'SongWars Champion', 'champion-mark'));
     section.append(el('p', record.points + ' Legacy Points' + (record.wins == null ? '' : ' · ' + record.wins + ' wins')));
     if (!record.bouts) continue;

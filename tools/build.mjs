@@ -11,7 +11,7 @@ const previewPages = new Set(['account.html', 'member.html', 'member-hub.html'])
 const previewScripts = new Set([
   'editorial-preview.js', 'member-account.js', 'member-community.js', 'member-operations.js', 'member-platform.js',
 ]);
-const hostedPages = new Set(['account.html', 'member.html', 'member-hub.html', 'events.html', 'artists.html']);
+const hostedPages = new Set(['account.html', 'member.html', 'member-hub.html', 'events.html', 'artists.html', 'updates.html']);
 const hostedScripts = [...previewScripts].filter(file => file !== 'editorial-preview.js');
 const publicFiles = new Set(['updates.json', 'songwars-public.json', 'songwars-legacy.json', 'exm-main-logo.png', 'robots.txt', 'sitemap.xml', '_headers']);
 const renderableFiles = (await readdir(root)).filter(file => /\.(html|css|js)$/.test(file) || publicFiles.has(file));

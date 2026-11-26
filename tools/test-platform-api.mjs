@@ -110,8 +110,16 @@ assert.equal(profile.xp, 30);
 assert.equal(profile.points, undefined);
 assert.equal(profile.equipped.frame.name, equipped.name);
 assert.equal((await platform('unequip', artist, { reward: selected })).status, 200);
+assert.equal((await platform('award', owner, {
+  ...officialArtist, activity: 'judging', category: 'judge', source: officialArtist.source.toUpperCase(),
+})).status, 200);
+assert.equal((await read('rewards', artist)).points, inventory.points);
+assert.equal((await platform('award', owner, { ...officialArtist, source: officialArtist.source.toUpperCase() })).status, 409);
+const producerBalance = (await read('rewards', producer)).points;
 assert.equal((await platform('award', owner, { ...officialProd, activity: 'championship', source: 'TEST result ' + runId })).status, 200);
-assert.ok((await read('rewards', producer)).items.find(item => item.slug === 'champion-badge').owned);
+const producerRewards = await read('rewards', producer);
+assert.equal(producerRewards.points - producerBalance, 50);
+assert.ok(producerRewards.items.find(item => item.slug === 'champion-badge').owned);
 
 const post = { id: randomUUID(), body: '<span>Plain text test ' + runId + '</span>' };
 assert.equal((await platform('post', artist, post)).status, 200);

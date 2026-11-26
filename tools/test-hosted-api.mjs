@@ -93,6 +93,84 @@ assert.ok(!(await (await platform('events')).text()).includes(application.contac
 assert.equal((await platform('check_in', { cookie: ordinary, data: {} })).status, 404);
 
 const mode = 'members';
+const artistEvent = {
+  ...event, id: randomUUID(), name: 'Rehearsal artist intake', kind: 'other', applicationMode: 'artist',
+  discordVoiceChannel: 'Isolated test voice channel',
+};
+assert.equal((await platform('event_save', { mode, cookie: owner, data: { ...artistEvent, discordVoiceChannel: '' } })).status, 400);
+assert.equal((await platform('event_save', { mode, cookie: owner, data: {
+  ...artistEvent, applicationMode: 'external', registration: artistEvent.interest,
+} })).status, 400);
+assert.equal((await platform('event_save', { mode, cookie: owner, data: artistEvent })).status, 200);
+const artistApplication = {
+  ...application,
+  event: artistEvent.id,
+  discord: 'rehearsal.artist',
+  instagram: 'https://instagram.com/Rehearsal.Artist/',
+  music: 'https://example.com/private-music-link',
+  joinedDiscord: true,
+  voiceReady: true,
+};
+assert.equal((await platform('apply', { mode, data: artistApplication })).status, 409);
+assert.equal((await platform('event_publish', { mode, cookie: owner, data: { id: artistEvent.id } })).status, 200);
+assert.equal((await platform('apply', { mode, data: { ...application, event: artistEvent.id } })).status, 400);
+assert.equal((await platform('apply', { mode, data: { ...artistApplication, instagram: '' } })).status, 400);
+assert.equal((await platform('apply', { mode, data: { ...artistApplication, voiceReady: false } })).status, 400);
+assert.equal((await platform('apply', { mode, data: { ...artistApplication, music: 'http://example.com/artist' } })).status, 400);
+assert.equal((await platform('apply', { mode, cookie: ordinary, data: artistApplication })).status, 200);
+assert.equal((await platform('apply', { mode, data: artistApplication })).status, 200);
+const artistReview = 'applications?id=' + artistEvent.id;
+assert.equal((await platform(artistReview, { mode, cookie: ordinary })).status, 403);
+const { items: reviewedArtists } = await (await platform(artistReview, { mode, cookie: owner })).json();
+assert.equal(reviewedArtists.length, 1);
+const [reviewedArtist] = reviewedArtists;
+assert.equal(reviewedArtist.discord_username, artistApplication.discord);
+assert.equal(reviewedArtist.instagram_handle, 'rehearsal.artist');
+assert.equal(reviewedArtist.music_url, artistApplication.music);
+assert.equal(reviewedArtist.discord_readiness_attested, true);
+assert.equal(reviewedArtist.discord_verified_at, null);
+const decision = { event: artistEvent.id, id: reviewedArtist.id, status: 'approved' };
+assert.equal((await platform('application_review', { mode, cookie: ordinary, data: { ...decision, discordVerified: true } })).status, 403);
+assert.equal((await platform('application_review', { mode, cookie: owner, data: decision })).status, 409);
+assert.equal((await platform('application_review', { mode, cookie: owner, data: { ...decision, status: 'waitlisted' } })).status, 200);
+assert.equal((await platform('application_review', { mode, cookie: owner, data: { ...decision, discordVerified: true } })).status, 200);
+const [verified] = (await (await platform(artistReview, { mode, cookie: owner })).json()).items;
+assert.equal(verified.status, 'approved');
+assert.ok(verified.discord_verified_at);
+const publicCards = await (await platform('events', { mode })).text();
+for (const privateData of [artistApplication.contact, artistApplication.music, artistApplication.discord]) {
+  assert.ok(!publicCards.includes(privateData));
+}
+assert.equal((await platform('event_save', { mode, cookie: owner, data: { ...artistEvent, applicationMode: 'standard' } })).status, 200);
+assert.equal((await platform('event_publish', { mode, cookie: owner, data: { id: artistEvent.id } })).status, 409);
+const external = { ...event, id: randomUUID(), applicationMode: 'external', registration: 'https://example.com/official-intake' };
+assert.equal((await platform('event_save', { mode, cookie: owner, data: external })).status, 200);
+assert.equal((await platform('event_publish', { mode, cookie: owner, data: { id: external.id } })).status, 200);
+assert.equal((await platform('apply', { mode, data: { ...application, event: external.id } })).status, 409);
+
+const notice = { id: randomUUID(), name: 'Rehearsal notice', description: 'Isolated announcement', pinned: true, event: event.id };
+assert.equal((await platform('notice_save', { mode, cookie: ordinary, data: notice })).status, 403);
+assert.equal((await platform('notice_save', { mode, cookie: owner, data: notice })).status, 200);
+const publicNotices = async () => (await (await platform('notices', { mode })).json()).items;
+assert.ok(!(await publicNotices()).some(item => item.id === notice.id));
+assert.equal((await platform('notice_publish', { mode, cookie: owner, data: { id: notice.id } })).status, 200);
+assert.ok((await publicNotices()).some(item => item.id === notice.id && item.pinned));
+assert.match(await (await send('/updates', { mode })).text(), /id="notice-board"/);
+assert.equal((await platform('notice_archive', { mode, cookie: owner, data: { id: notice.id } })).status, 200);
+assert.ok(!(await publicNotices()).some(item => item.id === notice.id));
+
+const match = { id: randomUUID(), event: event.id, stage: 'Final', position: 1, left: 'Rehearsal A', right: 'Rehearsal B',
+  leftScore: 3, rightScore: 2, winner: 'left', championship: true };
+assert.equal((await platform('match_save', { mode, cookie: ordinary, data: match })).status, 403);
+assert.equal((await platform('match_save', { mode, cookie: owner, data: match })).status, 200);
+assert.equal((await platform('match_publish', { mode, cookie: owner, data: { id: match.id, event: event.id } })).status, 409);
+assert.equal((await platform('event_save', { mode, cookie: owner, data: { ...event, status: 'completed' } })).status, 200);
+assert.equal((await platform('event_publish', { mode, cookie: owner, data: { id: event.id } })).status, 200);
+assert.equal((await platform('match_publish', { mode, cookie: ordinary, data: { id: match.id, event: event.id } })).status, 403);
+assert.equal((await platform('match_publish', { mode, cookie: owner, data: { id: match.id, event: event.id } })).status, 200);
+const publicMatches = (await (await platform('matches?id=' + event.id, { mode })).json()).items;
+assert.ok(publicMatches.some(item => item.id === match.id && item.winner === 'left' && item.leftScore === 3));
+
 const newLogin = await members('login', { mode, data: { email: handles[1] + '@example.com', password } });
 assert.equal(newLogin.status, 200);
 const { recoveryCodes } = await newLogin.json();
@@ -131,21 +209,25 @@ assert.equal((await platform('owner', { mode, cookie: ordinary })).status, 403);
 const standings = await ranking('artist');
 assert.ok(standings.every(row => Array.isArray(row.titles) && typeof row.champion === 'boolean'));
 assert.equal((await members('signup', { mode, data: {} })).status, 403);
-localSql("insert into exm_member.award_rules values ('first_bio',3,4),('first_avatar',5,6) on conflict do nothing;");
+const beforeMilestones = (await (await platform('dashboard', { mode, cookie: ordinary })).json()).points;
 const photo = 'UklGRi4AAABXRUJQVlA4ICIAAABQAQCdASoQABAAAUAmJQBOgCgAAP74I2+pW/XRVki3AAAA';
 const profileEdit = { displayName:'Rehearsal artist', bio:'Profile save fixture.', creativeRoles:['artist'],
   discoverable:false, avatar:'custom' };
 assert.equal((await members('profile', { mode, cookie:ordinary, data:{ ...profileEdit, avatarData:'aW52YWxpZA==' } })).status, 400);
 assert.equal((await members('profile', { mode, cookie:ordinary, data:profileEdit })).status, 400);
-const savedPhoto = await members('profile', { mode, cookie:ordinary, data:{ ...profileEdit, avatarData:photo } });
-assert.equal(savedPhoto.status, 200);
+const savedPhotos = await Promise.all([1,2].map(() =>
+  members('profile', { mode, cookie:ordinary, data:{ ...profileEdit, avatarData:photo } })));
+assert.ok(savedPhotos.every(response => response.status === 200));
 for (const cookie of [undefined, owner, ordinary]) {
   const hiddenCredit = await rosterCredit(legacyHandle, cookie);
   assert.equal(hiddenCredit.linked, true);
   assert.ok(!Object.hasOwn(hiddenCredit, 'publicUsername'));
 }
-const profileResult = await savedPhoto.json();
+const saveResults = await Promise.all(savedPhotos.map(response => response.json()));
+assert.deepEqual(saveResults.map(result => result.awards.length).sort(), [0,2]);
+const profileResult = saveResults.find(result => result.awards.length);
 assert.deepEqual(profileResult.awards, ['first_bio','first_avatar']);
+assert.equal(profileResult.progress.points - beforeMilestones, 20);
 const repeatedEdit = await members('profile', { mode, cookie:ordinary, data:{ ...profileEdit, avatarData:photo } });
 const repeatedResult = await repeatedEdit.json();
 assert.deepEqual(repeatedResult.awards, []);
