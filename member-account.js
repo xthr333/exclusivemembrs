@@ -22,6 +22,39 @@
   let photoVersion = 0;
   let preparingPhoto = false;
 
+  // Canvas can emit extended WebP with a color profile. Keep only the opaque
+  // still-image chunk so the server can enforce its narrow avatar format.
+  function avatarWebp(data) {
+    const prefix = 'data:image/webp;base64,';
+    if (!data.startsWith(prefix)) return '';
+    const bytes = Uint8Array.from(atob(data.slice(prefix.length)), c => c.charCodeAt(0));
+    if (bytes.length < 20) return '';
+    const tag = offset => String.fromCharCode(...bytes.subarray(offset, offset + 4));
+    const view = new DataView(bytes.buffer);
+    if (tag(0) !== 'RIFF' || tag(8) !== 'WEBP' || view.getUint32(4, true) + 8 !== bytes.length) return '';
+    if (tag(12) !== 'VP8X') return data;
+    if (view.getUint32(16, true) !== 10 || bytes.length < 30 || bytes[20] !== 0x20) return '';
+    let still = null;
+    for (let i = 30; i + 8 <= bytes.length;) {
+      const size = view.getUint32(i + 4, true);
+      const end = i + 8 + size + (size % 2);
+      if (end > bytes.length) return '';
+      if (['VP8 ', 'VP8L'].includes(tag(i))) {
+        if (still || end !== bytes.length) return '';
+        still = bytes.subarray(i, end);
+      } else if (tag(i) !== 'ICCP') return '';
+      i = end;
+    }
+    if (!still) return '';
+    const clean = new Uint8Array(12 + still.length);
+    clean.set(bytes.subarray(0, 12));
+    new DataView(clean.buffer).setUint32(4, clean.length - 8, true);
+    clean.set(still, 12);
+    let binary = '';
+    for (const byte of clean) binary += String.fromCharCode(byte);
+    return prefix + btoa(binary);
+  }
+
   photo.addEventListener('change', async () => {
     const version = ++photoVersion;
     pendingPhoto = null;
@@ -56,7 +89,7 @@
       ctx.drawImage(image, (image.naturalWidth - size) / 2, (image.naturalHeight - size) / 2, size, size, 0, 0, 256, 256);
       let optimized;
       for (const quality of [.83, .7, .55, .4]) {
-        optimized = canvas.toDataURL('image/webp', quality);
+        optimized = avatarWebp(canvas.toDataURL('image/webp', quality));
         if (optimized.startsWith('data:image/webp;base64,') && optimized.length <= 65559) break;
       }
       if (!optimized.startsWith('data:image/webp;base64,') || optimized.length > 65559) {
