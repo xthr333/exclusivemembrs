@@ -111,6 +111,7 @@
       if (!items.length) return;
       section.querySelector('.platform-grid').append(...items.map(render));
       section.hidden = false;
+      if (id === 'event-board') openLinkedEvent();
     } catch {
       // The public archive and existing update feed do not depend on member APIs.
     }
@@ -433,11 +434,23 @@
     target.replaceChildren(...children);
   }
 
+  function openLinkedEvent() {
+    const hash = location.hash.slice(1);
+    if (!hash.startsWith('event-')) return;
+    const event = byId(hash);
+    if (event instanceof HTMLDetailsElement) {
+      event.open = true;
+      if (!byId('results').hidden) event.scrollIntoView();
+    }
+  }
+
   window.EXMMemberOperations = { access, studio };
+  window.addEventListener('hashchange', openLinkedEvent);
   showPublicBoard('event-board', 'events', item => {
-    const card = eventCard(item);
-    card.id = 'event-' + item.id;
-    return card;
+    const entry = el('details', null, 'events-result');
+    entry.id = 'event-' + item.id;
+    entry.append(el('summary', item.name + ' · ' + pretty(item.status)), eventCard(item));
+    return entry;
   });
   showPublicBoard('notice-board', 'notices', noticeCard);
   showPublicBoard('preview-champions', 'preview_champions', resultCard);

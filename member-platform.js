@@ -48,18 +48,20 @@
   window.EXMMemberUI = { api, el, actionButton, field, formFor, pretty, date };
   const publicProgress = byId('public-progress');
   if (publicProgress) {
-    const username = new URLSearchParams(location.search).get('username') || '';
-    api('public_progress?username=' + encodeURIComponent(username)).then(data => {
-      const avatar = byId('public-avatar');
-      if (data.equipped?.frame) avatar.classList.add('cosmetic-' + data.equipped.frame.appearance);
-      const banner = byId('public-profile-banner');
-      if (banner && data.equipped?.banner) {
-        banner.classList.add('cosmetic-' + data.equipped.banner.appearance);
-        banner.hidden = false;
-      }
-      publicProgress.append(el('p', data.rank + ' · Level ' + data.level + ' · ' + fmt(data.xp) + ' XP'));
-      cosmetics(publicProgress, data.equipped);
-    }).catch(() => {});
+    document.addEventListener('exm:profile', ({ detail }) => {
+      const path = detail.isSelf ? 'dashboard' : 'public_progress?username=' + encodeURIComponent(detail.username);
+      api(path).then(data => {
+        const avatar = byId('public-avatar');
+        if (data.equipped?.frame) avatar.classList.add('cosmetic-' + data.equipped.frame.appearance);
+        const banner = byId('public-profile-banner');
+        if (banner && data.equipped?.banner) {
+          banner.classList.add('cosmetic-' + data.equipped.banner.appearance);
+          banner.hidden = false;
+        }
+        publicProgress.replaceChildren(el('p', data.rank + ' · Level ' + data.level + ' · ' + fmt(data.xp) + ' XP'));
+        cosmetics(publicProgress, data.equipped);
+      }).catch(() => {});
+    });
     return;
   }
 
@@ -170,7 +172,7 @@
     catalogButton.setAttribute('aria-pressed', String(!inventory));
     inventoryButton.setAttribute('aria-pressed', String(inventory));
     const items = data.items.filter(item => inventory ? item.owned : item.active);
-    const cards = items.map(item => {
+    function renderItem(item) {
       const card = el('article', null, 'platform-card');
       card.append(el('h3', item.name), cosmeticProfilePreview(item));
       card.append(el('p', item.kind + ' · ' + (item.cost == null ? 'Earned only' : item.cost + ' points')));
@@ -186,15 +188,30 @@
         card.append(el('p', button.disabled ? 'Earn ' + (item.cost - data.points) + ' more points' : 'Available'), button);
       }
       return card;
-    });
-    if (!inventory) {
-      const next = el('article', null, 'platform-card');
-      next.append(el('h3', 'Banner preview'), cosmeticProfilePreview({ kind: 'banner', appearance: 'chrome' }),
-        el('p', 'Coming Soon · Preview only'));
-      cards.push(next);
     }
-    byId('reward-items').replaceChildren(...cards);
-    if (!items.length) byId('reward-items').append(el('p', 'Your inventory is empty.'));
+    const grid = byId('reward-items');
+    const earned = byId('earned-rewards');
+    earned.hidden = inventory;
+    if (inventory) {
+      byId('more-rewards').hidden = true;
+      grid.replaceChildren(...items.map(renderItem));
+      if (!items.length) grid.append(el('p', 'Your inventory is empty.'));
+      return;
+    }
+
+    const rewards = items.filter(item => item.cost != null);
+    const featured = ['frame', 'banner', 'badge'].flatMap(kind =>
+      rewards.filter(item => item.kind === kind).slice(0, kind === 'badge' ? 1 : 2));
+    grid.replaceChildren(...featured.map(renderItem));
+    if (!featured.length) grid.append(el('p', 'No cosmetics are currently available to redeem.'));
+    const moreItems = rewards.filter(item => !featured.includes(item));
+    const more = byId('more-rewards');
+    more.hidden = moreItems.length === 0;
+    more.querySelector('.platform-grid').replaceChildren(...moreItems.map(renderItem));
+
+    const badges = items.filter(item => item.cost == null);
+    earned.hidden = badges.length === 0;
+    earned.querySelector('.platform-grid').replaceChildren(...badges.map(renderItem));
   }
 
   function field(form, label, name, options, type = 'text') {
@@ -458,12 +475,16 @@
         if (canOperate) await window.EXMMemberOperations.studio(isOwner,
           isOwner || (!window.EXMHostedMode && roles.includes('event_staff')), isOwner || roles.includes('judge'));
       }
-      if (request === requestNumber) status.textContent = message;
+      if (request === requestNumber) {
+        status.textContent = message;
+        byId('hub-my-profile').hidden = false;
+      }
     } catch (error) {
       if (request !== requestNumber) return;
       panels.forEach(panel => { panel.hidden = true; });
       status.textContent = error.status === 401 ? '' : error.message;
       signedOut.hidden = error.status !== 401;
+      if (error.status === 401) byId('hub-my-profile').hidden = true;
     } finally {
       if (request === requestNumber) {
         document.querySelector('[data-view="staff"]').hidden = !roles.some(role => ['owner', 'moderator', 'event_staff', 'judge'].includes(role));

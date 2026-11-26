@@ -1,0 +1,324 @@
+{
+  "seasons": [
+    {
+      "id": "pre-production",
+      "label": "Pre-production",
+      "credits": [
+        "BitchYouNotAYop"
+      ],
+      "status": "archive"
+    },
+    {
+      "id": "pilot",
+      "label": "Pilot",
+      "credits": [
+        "Mayo_"
+      ],
+      "status": "archive"
+    },
+    {
+      "id": "s1",
+      "label": "Season I",
+      "credits": [
+        "Mayo_"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "s2",
+      "label": "Season II",
+      "date": "2026-08-22",
+      "credits": [
+        "BitchYouNotAYop"
+      ],
+      "status": "verified",
+      "source": "EXM Hall of Fame"
+    },
+    {
+      "id": "s3",
+      "label": "Season III · Double Impact",
+      "date": "2026-11-21",
+      "credits": [
+        "Mayo_",
+        "LR"
+      ],
+      "status": "verified",
+      "source": "EXM official results"
+    }
+  ],
+  "teams": [
+    {
+      "id": "ballhogs",
+      "name": "BallHogs",
+      "artists": [
+        [
+          "mayo_",
+          "Mayo_",
+          "mayo.html"
+        ],
+        [
+          "1ilriskk",
+          "LR",
+          "1ilriskk.html"
+        ]
+      ]
+    },
+    {
+      "id": "yopz",
+      "name": "Yopz",
+      "artists": [
+        [
+          "bitchyounotayop",
+          "BitchYouNotAYop",
+          "bitchyounotayop.html"
+        ],
+        [
+          "wasi",
+          "Wasi"
+        ]
+      ]
+    },
+    {
+      "id": "oso-lil",
+      "name": "Oso YLB & Lil Vet",
+      "artists": [
+        [
+          "oso-ylb",
+          "Oso YLB"
+        ],
+        [
+          "lil-vet",
+          "Lil Vet"
+        ]
+      ]
+    },
+    {
+      "id": "melt",
+      "name": "The Melt vs Da World",
+      "artists": [
+        [
+          "fukitdrako",
+          "fukitdrako!"
+        ],
+        [
+          "konrax",
+          "konrax!"
+        ]
+      ]
+    },
+    {
+      "id": "twogg-mxhara",
+      "name": "Twogg & Mxhara",
+      "artists": [
+        [
+          "1twogg",
+          "1twogg"
+        ],
+        [
+          "mxhara",
+          "Mxhara"
+        ]
+      ]
+    },
+    {
+      "id": "howtoact",
+      "name": "Howtoact",
+      "artists": []
+    },
+    {
+      "id": "as5",
+      "name": "As5",
+      "artists": [
+        [
+          "jaykurtt",
+          "Jaykurtt"
+        ],
+        [
+          "bbyhero6",
+          "Bbyhero6"
+        ]
+      ]
+    },
+    {
+      "id": "00",
+      "name": "##00",
+      "artists": [
+        [
+          "pg23",
+          "PG23"
+        ],
+        [
+          "jai",
+          "Jai"
+        ]
+      ]
+    },
+    {
+      "id": "jaexj",
+      "name": "JaexJ",
+      "artists": [
+        [
+          "bootupkee",
+          "bootupkee"
+        ],
+        [
+          "1chrxllo",
+          "1chrxllo",
+          "1chrxllo.html"
+        ]
+      ]
+    },
+    {
+      "id": "forever-young",
+      "name": "Forever Young",
+      "artists": [
+        [
+          "callmeld",
+          "callmeLD"
+        ],
+        [
+          "yung-asy",
+          "yung asy"
+        ]
+      ]
+    },
+    {
+      "id": "wesoso",
+      "name": "WeSoso$lime",
+      "artists": [
+        [
+          "vbii",
+          "$$vbii"
+        ],
+        [
+          "ayco",
+          "Ayco"
+        ]
+      ]
+    },
+    {
+      "id": "hgw",
+      "name": "HGW",
+      "artists": []
+    }
+  ],
+  "matches": [
+    [
+      "opening-1",
+      "Opening",
+      "ballhogs",
+      "jaexj",
+      44.6,
+      29.8,
+      60
+    ],
+    [
+      "opening-2",
+      "Opening",
+      "oso-lil",
+      "hgw",
+      39.5,
+      26,
+      60
+    ],
+    [
+      "opening-3",
+      "Opening",
+      "twogg-mxhara",
+      "forever-young",
+      41.5,
+      25,
+      60
+    ],
+    [
+      "opening-4",
+      "Opening",
+      "melt",
+      "wesoso",
+      null,
+      null,
+      null
+    ],
+    [
+      "opening-5",
+      "Opening",
+      "howtoact",
+      "as5",
+      30,
+      24,
+      50
+    ],
+    [
+      "opening-6",
+      "Opening",
+      "yopz",
+      "00",
+      37,
+      22.5,
+      50
+    ],
+    [
+      "quarter-1",
+      "Quarterfinal",
+      "ballhogs",
+      "as5",
+      33.5,
+      22.5,
+      50
+    ],
+    [
+      "quarter-2",
+      "Quarterfinal",
+      "oso-lil",
+      "00",
+      26,
+      17,
+      50
+    ],
+    [
+      "quarter-3",
+      "Quarterfinal",
+      "melt",
+      "twogg-mxhara",
+      27.5,
+      25,
+      50
+    ],
+    [
+      "quarter-4",
+      "Quarterfinal",
+      "yopz",
+      "howtoact",
+      36.5,
+      31,
+      50
+    ],
+    [
+      "semi-1",
+      "Semifinal",
+      "ballhogs",
+      "oso-lil",
+      36.5,
+      23.6,
+      50
+    ],
+    [
+      "semi-2",
+      "Semifinal",
+      "yopz",
+      "melt",
+      37.5,
+      27.5,
+      50
+    ],
+    [
+      "final",
+      "Final",
+      "ballhogs",
+      "yopz",
+      46,
+      39.5,
+      50
+    ]
+  ]
+}

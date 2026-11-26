@@ -210,6 +210,7 @@ body::after{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;ba
 .rank-rows li strong:last-child{margin-inline-start:auto}
 .member-avatar{width:4.5rem;aspect-ratio:1;display:grid;place-items:center;border:2px solid var(--platform-border);border-radius:50%;font-weight:800;background:#20222b}
 .champion-mark{display:inline-block;border:1px solid #d8c38d;color:#f4e4b0;padding:.35rem .55rem;margin-block:.4rem;font-weight:700}
+.champion-mark.founder-mark{border-color:#aeb7c7;color:#f4f6fb;background:linear-gradient(145deg,#373d49,#191c24 65%,#303540)}
 .cosmetic-signal{--cosmetic:#a1f0be}
 .cosmetic-chrome{--cosmetic:#e0e6f2}
 .cosmetic-ember{--cosmetic:#ff727b}

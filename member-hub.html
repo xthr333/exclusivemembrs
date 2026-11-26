@@ -37,6 +37,7 @@
         <a href="#access" data-view="access">Access</a>
         <a href="#privacy" data-view="privacy">Privacy</a>
         <a href="#staff" data-view="staff" hidden>Staff tools</a>
+        <a href="member.html?view=self" id="hub-my-profile" hidden>My Profile</a>
         <a href="account.html">Member account</a>
       </nav>
       <noscript><p>Enable JavaScript for the member tools. <a href="artists.html">The public creator roster</a> is available.</p></noscript>
@@ -61,7 +62,7 @@
           <progress id="member-progress" aria-label="Progress to the next level"></progress>
           <p id="member-next-level"></p>
           <p id="member-balance"></p>
-          <p><span id="member-completion"></span> <a href="account.html">Edit profile</a></p>
+          <p><span id="member-completion"></span> <a href="member.html?view=self">View Profile</a> · <a href="account.html#edit-profile">Edit Profile</a></p>
           <p id="member-streak"></p>
           <button class="btn" id="daily-check-in" type="button">Check in today</button>
           <p>Check-ins reset at midnight UTC.</p>
@@ -111,6 +112,14 @@
           <button class="btn btn-dark" id="inventory-switch" type="button" aria-pressed="false">My inventory</button>
         </div>
         <div id="reward-items" class="platform-grid hub-grid"></div>
+        <details id="more-rewards" class="platform-section" hidden>
+          <summary>Browse all rewards</summary>
+          <div class="platform-grid hub-grid"></div>
+        </details>
+        <section id="earned-rewards" class="platform-section" hidden>
+          <h3>Earned Badges</h3>
+          <div class="platform-grid hub-grid"></div>
+        </section>
       </section>
       <section id="access" data-panel="access" hidden>
         <h2>Member access</h2>

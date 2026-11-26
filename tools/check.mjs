@@ -20,21 +20,27 @@ for(const file of pages){
     const local=decodeURIComponent(pathname.split('?')[0]);
     const target=local?path.resolve(root,local.replace(/^\//,'')):path.join(root,file);
     assert.ok(fs.existsSync(target),`${file}: missing ${url}`);
-    if(anchor&&target.endsWith('.html'))assert.ok(fs.readFileSync(target,'utf8').includes(`id="${anchor}"`),`${file}: missing anchor ${url}`);
+    if(anchor&&target.endsWith('.html')) {
+      const markup = fs.readFileSync(target,'utf8');
+      const dynamic = markup.match(/data-deep-links="([^"]+)"/)?.[1].split(' ') ?? [];
+      assert.ok(markup.includes(`id="${anchor}"`) || dynamic.includes(anchor),`${file}: missing anchor ${url}`);
+    }
     links++;
   }
   for(const m of html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)){new vm.Script(m[1],{filename:file});scripts++;}
 }
 for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.js'))){execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'inherit'});scripts++;}
 for(const file of ['updates.json','songwars-public.json','wrangler.jsonc'])JSON.parse(fs.readFileSync(path.join(root,file),'utf8'));
-const data=JSON.parse(fs.readFileSync(path.join(root,'songwars-public.json'),'utf8'));
-assert.equal(data.approved.length,12);assert.equal(data.waitlist.length,0);assert.equal(data.approved[11].duo,'As5');
-const event=fs.readFileSync(path.join(root,'events.html'),'utf8');
-assert.equal((event.match(/class="matchup-card"/g)||[]).length,13);
-assert.match(event,/BallHogs.*46–39\.5/);
-assert.match(event,/As5 advanced at 48%/);
-assert.match(event,/First alternate ##00 took the open spot/);
-assert.ok(!event.includes('COUNTDOWN') && !event.includes('WAITLIST OPEN'));
-const publicData=fs.readFileSync(path.join(root,'songwars-public.json'),'utf8');
-assert.ok(!/contact_email|artist_one_discord|artist_two_discord|attendance_at|sb_secret_|service_role/.test(publicData),'Public snapshot contains no private fields');
-console.log(`PASS: ${pages.length} pages, ${links} local links/assets, ${scripts} script syntax checks, 13 archived matchups and public-field privacy check.`);
+const publicData = JSON.parse(fs.readFileSync(path.join(root, 'songwars-legacy.json'), 'utf8'));
+assert.deepEqual(Object.keys(publicData), ['results', 'brackets', 'artists', 'producers']);
+assert.equal(publicData.brackets.length, 13);
+assert.equal(publicData.artists.length, 20);
+assert.deepEqual(publicData.results.find(result => result.id === 's3').finalScore, [46, 39.5]);
+assert.deepEqual(Object.keys(publicData.results.find(result => result.id === 's1')), ['id', 'label', 'winner']);
+assert.deepEqual(Object.keys(publicData.brackets.find(result => result.id === 'opening-4')), ['id', 'stage', 'winner', 'opponent']);
+assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'songwars-public.json'),'utf8')), { results: publicData.results });
+const research = /contact_email|artist_one_discord|artist_two_discord|attendance_at|s2Disputed|crossSeasonAliases|s3ApprovalOnly|WILDCARD RECAP|rounds unverified|pending verification|later reported dropped|lineup conflict/i;
+for (const name of ['events.html','standings.html','legacy.html','hall-of-fame.html','songwars-legacy.json','songwars-public.json','songwars-legacy.js']) {
+  assert.doesNotMatch(fs.readFileSync(path.join(root,name),'utf8'), research, name);
+}
+console.log(`PASS: ${pages.length} pages, ${links} local links/assets, ${scripts} script syntax checks and SongWars display-field privacy checks.`);

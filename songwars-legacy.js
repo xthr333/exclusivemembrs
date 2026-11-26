@@ -1,189 +1,230 @@
-import { legacyArchive, legacyRanking } from './songwars-legacy-data.js';
-
 const el = (tag, text, css) => {
   const node = document.createElement(tag);
   if (text != null) node.textContent = text;
   if (css) node.className = css;
   return node;
 };
-const link = (label, href) => {
-  const node = el('a', label, 'text-link');
+const link = (label, href, css) => {
+  const node = el('a', label, css);
   node.href = href;
   return node;
 };
-const profileLink = person => link(person.name, 'legacy.html?artist=' + encodeURIComponent(person.id));
-const score = (match, team) => match?.outOf ? (match.winner === team ? match.score : match.opponentScore) + ' / ' + match.outOf : '—';
-const statements = {
-  unresolved: 'Howtoact and HGW have verified results. Their artist identities are pending.',
-  points: 'Legacy Points track verified competition history separately from lifetime XP and spendable rewards points.',
-  s2: 'Season II placement data is incomplete. The confirmed champion receives 40 verified-minimum Legacy Points.',
-};
+const artistHref = artist => 'legacy.html?artist=' + encodeURIComponent(artist.id);
 
-function list(parent, heading, rows) {
-  const section = el('section', null, 'platform-card');
-  section.append(el('h3', heading));
-  const items = el('ul', null, 'legacy-list');
-  for (const row of rows) items.append(el('li', row));
-  section.append(items);
-  parent.append(section);
-}
+function leaderboard(target, data) {
+  const panel = target.querySelector('#legacy-scores');
+  const period = target.querySelector('#legacy-period');
+  const tabs = [...target.querySelectorAll('[role="tab"]')];
+  let selected = tabs[0];
 
-function archivePage(target, archive) {
-  const { source, teams, matches } = archive;
-  const sections = el('div', null, 'platform-grid hub-grid');
-  list(sections, 'Season credits', source.seasons.map(season =>
-    season.label + ' · ' + season.credits.join(' & ') +
-    (season.status === 'archive' ? ' · Archive credit' : season.status === 'pending' ? ' · Verification pending' : ' · Verified title')));
-  list(sections, 'Season II · Announced opening matchups', source.s2Announced.map(pair => pair.join(' vs. ')));
-  list(sections, 'Season II · Recap credits', source.s2Credits);
-  list(sections, 'Season II · Lineup conflict', [...source.s2Disputed, 'Runner-up and round results pending final bracket or VOD.']);
-  list(sections, 'Cross-season aliases', source.crossSeasonAliases.map(pair => [...new Set(pair)].join(' / ')));
-  list(sections, 'Season III · Approved roster only', source.s3ApprovalOnly.map(([team, ...names]) => team + ' · ' + names.join(', ')));
-  list(sections, 'Season III · Lineup notes only', source.s3LineupOnly.map(([team, ...names]) => team + ' · ' + names.join(', ')));
-  target.prepend(el('p', statements.s2), sections);
-  const bracket = el('section', null, 'platform-section');
-  bracket.append(el('h2', 'Season III bracket'));
-  const bouts = el('ol', null, 'legacy-list');
-  for (const match of matches) {
-    const result = match.outOf ? match.score + '–' + match.opponentScore + ' / ' + match.outOf : 'Score unpublished';
-    bouts.append(el('li', match.stage + ' · ' + match.winner.name + ' defeated ' + match.opponent.name + ' · ' + result));
-  }
-  bracket.append(bouts);
-  target.querySelector('#legacy-bracket').append(bracket);
-  const participants = el('section', null, 'platform-section');
-  participants.append(el('h2', 'Season III participants'), el('p', statements.unresolved));
-  const groups = el('div', null, 'platform-grid hub-grid');
-  const final = matches.find(match => match.stage === 'Final');
-  for (const team of teams.values()) {
-    const card = el('article', null, 'platform-card');
-    const placement = team === final.winner ? ' · Champion' : team === final.opponent ? ' · Finalist' : '';
-    card.append(el('h3', team.name), el('p', team.wins + '–' + team.losses + ' played' + placement));
-    for (const [id, name] of team.artists) {
-      const credit = el('p');
-      credit.append(profileLink({ id, name }));
-      card.append(credit);
-    }
-    if (!team.artists.length) card.append(el('p', 'Artist attribution pending.'));
-    groups.append(card);
-  }
-  participants.append(groups);
-  list(participants, 'Wildcard', source.wildcard.map(([id, detail, value, outOf]) =>
-    teams.get(id).name + ' · ' + detail + ' · ' + (100 * value / outOf).toFixed(2).replace(/\.00$/, '') + '% (' + value + '/' + outOf + ')'));
-  target.querySelector('#legacy-participants').append(participants);
-  const judging = el('section', null, 'platform-section');
-  judging.append(el('h2', 'Judging credits'), el('p', 'Published Season III results document panel size. Individual scoring shifts are pending verification.'));
-  for (const [key, label] of [['s2','Season II'],['s3','Season III']]) {
-    list(judging, label, source.judges.filter(row => row[0] === key).map(([, name, status]) => name + ' · ' + status));
-  }
-  target.querySelector('#legacy-judging').append(judging);
-}
-
-function profile(target, archive, person) {
-  const total = archive.awards.filter(row => row.person === person.id).reduce((sum,row) => sum + row.points,0);
-  target.append(el('h2', person.name + ' · SongWars record'), el('p', total + ' verified Legacy Points'));
-  if (person.link) target.append(link('Open EXM profile', person.link));
-  const champion = archive.awards.filter(row => row.person === person.id && row.event === 'championship');
-  for (const row of champion) {
-    target.append(el('p', 'SongWars Champion · ' + archive.source.seasons.find(season => season.id === row.season).label, 'champion-mark'));
-  }
-  if (person.s2) target.append(el('p', statements.s2));
-  if (person.s3) {
-    target.append(el('p', 'Season III · ' + person.team.name + ' · ' + person.team.wins + '–' + person.team.losses + ' played'));
-    list(target, 'Verified Season III bouts', person.team.bouts.map(match =>
-      match.stage + ' · ' + (match.winner === person.team ? 'Win vs. ' + match.opponent.name : 'Loss vs. ' + match.winner.name) +
-      ' · Judge Score ' + score(match, person.team)));
-  }
-}
-
-function standings(target, archive) {
-  const form = target.querySelector('form');
-  const results = target.querySelector('[data-legacy-scores]');
-  const tabs = [...form.querySelectorAll('[role="tab"]')];
-  let category = 'artist';
   function render() {
-    results.replaceChildren();
-    const period = form.elements.season.value;
-    if (category === 'producer') {
-      results.append(el('p', 'No verified producer competition results qualify for these standings.'));
-      results.append(link('Vantiva · verified EXM producer roster credit', 'vantiva.html'));
+    const season = period.value;
+    const ranked = data[selected.dataset.category].flatMap(artist => {
+      const records = artist.seasons.filter(record => season === 'all' || record.id === season);
+      if (!records.length) return [];
+      const wins = records.filter(record => Number.isInteger(record.wins));
+      return [{
+        ...artist,
+        points: records.reduce((sum, record) => sum + record.points, 0),
+        wins: wins.length ? wins.reduce((sum, record) => sum + record.wins, 0) : null,
+        champion: records.some(record => record.champion),
+      }];
+    }).sort((a, b) => b.points - a.points || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+
+    panel.replaceChildren();
+    if (!ranked.length) {
+      const category = selected.dataset.category === 'artists' ? 'artist' : 'producer';
+      panel.append(el('p', 'No verified ' + category + ' competition results in this period.', 'events-empty'));
       return;
     }
-    const table = el('table', null, 'legacy-table');
-    const head = table.createTHead().insertRow();
-    for (const label of ['Rank','Artist','EXM tag','Legacy Points','Verified wins','Judge Score¹']) {
+
+    const table = el('table', null, 'events-rank');
+    const columns = el('colgroup');
+    for (const css of ['rank-place', 'rank-artist', 'rank-wins', 'rank-points']) columns.append(el('col', null, css));
+    table.append(columns);
+    const header = table.createTHead().insertRow();
+    for (const label of ['Rank', selected.textContent.trim() === 'Artists' ? 'Artist' : 'Producer', 'Wins', 'Legacy Points']) {
       const cell = el('th', label);
       cell.scope = 'col';
-      head.append(cell);
+      header.append(cell);
     }
     const body = table.createTBody();
-    for (const person of legacyRanking(archive,period).slice(0,50)) {
+    let lastPoints;
+    let rank = 0;
+    ranked.slice(0, 50).forEach((artist, index) => {
+      if (artist.points !== lastPoints) rank = index + 1;
+      lastPoints = artist.points;
       const row = body.insertRow();
-      row.insertCell().textContent = String(person.rank);
-      const artist = row.insertCell();
-      const emblem = el('span', person.name.slice(0, 2).toUpperCase(), 'legacy-emblem');
-      emblem.setAttribute('aria-hidden', 'true');
-      artist.append(emblem, profileLink(person));
-      const earnedTitle = archive.awards.some(award => award.person === person.id && award.event === 'championship' &&
-        (period === 'all' || award.season === period));
-      if (earnedTitle) artist.append(el('small', 'SongWars Champion'));
-      row.insertCell().textContent = person.link ? '@' + person.id : '—';
-      row.insertCell().textContent = String(person.points);
-      row.insertCell().textContent = period === 's2' ? '—' : String(person.team.wins);
-      row.insertCell().textContent = period === 's2' ? '—' :
-        score([...person.team.bouts].reverse().find(match => match.outOf), person.team);
-    }
-    const wrap = el('div', null, 'legacy-table-wrap');
-    wrap.tabIndex = 0;
-    wrap.setAttribute('aria-label','Scrollable Legacy standings table');
-    wrap.append(table);
-    results.append(wrap, el('p','¹ Most recent published score within the selected period. Unpublished scores use a dash. Older results are incomplete.'));
+      row.dataset.rank = String(rank);
+      row.insertCell().textContent = String(rank);
+      const name = link(artist.name, artistHref(artist), 'events-artist-name');
+      const avatar = el('span', artist.name.slice(0, 2).toUpperCase(), 'events-avatar');
+      avatar.setAttribute('aria-hidden', 'true');
+      const identity = el('span');
+      identity.append(name);
+      if (artist.champion) identity.append(el('small', 'Champion'));
+      const artistCell = row.insertCell();
+      const artistLayout = el('div', null, 'events-artist');
+      artistLayout.append(avatar, identity);
+      artistCell.append(artistLayout);
+      row.insertCell().textContent = artist.wins ?? '—';
+      row.insertCell().textContent = String(artist.points);
+    });
+    panel.append(table);
   }
-  function selectTab(tab) {
-    category = tab.dataset.category;
-    results.setAttribute('aria-labelledby',tab.id);
+
+  function activate(tab) {
+    selected = tab;
     for (const choice of tabs) {
-      choice.setAttribute('aria-selected',String(choice === tab));
+      choice.setAttribute('aria-selected', String(choice === tab));
       choice.tabIndex = choice === tab ? 0 : -1;
     }
+    panel.setAttribute('aria-labelledby', tab.id);
     render();
   }
+
   for (const tab of tabs) {
-    tab.addEventListener('click', () => selectTab(tab));
+    tab.addEventListener('click', () => activate(tab));
     tab.addEventListener('keydown', event => {
-      const positions = { ArrowLeft:1-tabs.indexOf(tab), ArrowRight:1-tabs.indexOf(tab), Home:0, End:1 };
-      if (!Object.hasOwn(positions,event.key)) return;
+      const positions = { ArrowLeft: 1 - tabs.indexOf(tab), ArrowRight: 1 - tabs.indexOf(tab), Home: 0, End: 1 };
+      if (!Object.hasOwn(positions, event.key)) return;
       event.preventDefault();
       const next = tabs[positions[event.key]];
-      selectTab(next);
+      activate(next);
       next.focus();
     });
   }
-  form.addEventListener('change', render);
-  render();
+  period.addEventListener('change', render);
+  activate(selected);
+}
+
+const roundIds = { Opening: 'bracket', Quarterfinal: 'round-quarters', Semifinal: 'round-semis', Final: 'round-final' };
+const resultLinks = new Map([
+  ['songwars-history', 'results'], ['calendar-past', 'results'], ['calendar-live', 'event-board'],
+  ['legacy-bracket', 'bracket'], ['legacy-participants', 'bracket'], ['legacy-judging', 'results'],
+  ['calendar-event-songwars-iii', 'double-impact'],
+  ['calendar-upcoming', 'featured-event'], ['calendar-event-songwars-iv', 'featured-event'],
+]);
+
+const publishedScore = match => match.outOf == null ? null : match.score + '–' + match.opponentScore + ' / ' + match.outOf;
+
+function renderResults(target, data) {
+  target.replaceChildren();
+  for (const result of data.results) {
+    const row = el('article', null, 'events-result');
+    row.append(el('h3', result.label));
+    if (result.finalScore) {
+      row.id = 'double-impact';
+      row.append(el('p', [result.winner, result.artists.join(' + '), result.finalScore.join('–')].join(' • ')));
+      const bracket = el('details', null, 'events-bracket');
+      bracket.append(el('summary', 'View bracket'));
+      for (const [stage, id] of Object.entries(roundIds)) {
+        const round = el('section');
+        round.id = id;
+        round.append(el('h4', stage));
+        const matches = el('ul', null, 'events-matches');
+        for (const match of data.brackets.filter(bout => bout.stage === stage)) {
+          const score = publishedScore(match);
+          const item = el('li');
+          item.append(el('span', match.winner + ' defeated ' + match.opponent));
+          if (score) item.append(el('span', 'Judge Score ' + score, 'events-score'));
+          matches.append(item);
+        }
+        round.append(matches);
+        bracket.append(round);
+      }
+      row.append(bracket);
+    } else {
+      row.append(el('p', 'Winner — ' + result.winner));
+    }
+    target.append(row);
+  }
+}
+
+function events(target, data) {
+  leaderboard(target, data);
+  renderResults(target.querySelector('#recent-results'), data);
+  const standings = target.querySelector('#leaderboard');
+  const results = target.querySelector('#results');
+  const [standingsLink, resultsLink] = target.querySelectorAll('.events-nav a');
+  function selectView() {
+    const hash = location.hash.slice(1);
+    const anchor = resultLinks.get(hash) || hash;
+    const isResults = Boolean(anchor && anchor !== 'leaderboard' && anchor !== 'featured-event' && anchor !== 'main');
+    standings.hidden = isResults;
+    results.hidden = !isResults;
+    target.querySelector('#events-title').textContent = isResults ? 'Results' : 'Leaderboard';
+    target.querySelector('#events-eyebrow').textContent = isResults ? 'SongWars' : 'SongWars Legacy';
+    target.querySelector('#events-filters').hidden = isResults;
+    target.querySelector('#hall-link').hidden = !isResults;
+    standingsLink.toggleAttribute('aria-current', !isResults);
+    resultsLink.toggleAttribute('aria-current', isResults);
+    (isResults ? resultsLink : standingsLink).setAttribute('aria-current', 'location');
+    if (Object.values(roundIds).includes(anchor)) target.querySelector('.events-bracket').open = true;
+    if (anchor && anchor !== 'leaderboard' && anchor !== 'results') {
+      const destination = document.getElementById(anchor);
+      if (destination instanceof HTMLDetailsElement) destination.open = true;
+      destination?.scrollIntoView();
+    }
+  }
+  window.addEventListener('hashchange', selectView);
+  selectView();
+}
+
+function profile(target, data, artist) {
+  const section = el('section', null, 'events-history');
+  const total = artist.seasons.reduce((sum, record) => sum + record.points, 0);
+  section.append(el('h2', artist.name + ' · SongWars record'), el('p', total + ' Legacy Points'));
+  const recordLink = artist.link && !location.pathname.endsWith('/' + artist.link) &&
+    !location.pathname.endsWith('/' + artist.link.replace('.html', ''));
+  if (recordLink) section.append(link('Open EXM roster profile', artist.link, 'text-link'));
+  for (const record of artist.seasons) {
+    const result = data.results.find(item => item.id === record.id);
+    section.append(el('h3', result.label));
+    if (record.champion) section.append(el('p', 'SongWars Champion', 'champion-mark'));
+    section.append(el('p', record.points + ' Legacy Points' + (record.wins == null ? '' : ' · ' + record.wins + ' wins')));
+    if (!record.bouts) continue;
+    const bouts = el('ul', null, 'events-matches');
+    for (const bout of record.bouts) {
+      const match = data.brackets.find(item => item.id === bout.id);
+      const item = el('li', match.stage + ' · ' + (bout.won ? 'Win vs. ' + match.opponent : 'Loss vs. ' + match.winner));
+      if (match.outOf != null) item.append(el('span', 'Judge Score ' + (bout.won ? match.score : match.opponentScore) + ' / ' + match.outOf, 'events-score'));
+      bouts.append(item);
+    }
+    section.append(bouts);
+  }
+  target.append(section);
 }
 
 const views = [...document.querySelectorAll('[data-legacy-view]')];
-if (views.length) {
+const params = new URLSearchParams(location.search);
+const archive = views.find(target => target.dataset.legacyView === 'archive');
+if (archive && !params.get('artist')) location.replace('events.html' + (location.hash || '#results'));
+if (document.getElementById('standings-filter')) {
+  const redirectLegacy = () => {
+    if (location.hash === '#legacy') location.replace('events.html');
+  };
+  window.addEventListener('hashchange', redirectLegacy);
+  redirectLegacy();
+}
+if (views.length && !(archive && !params.get('artist'))) {
   fetch(new URL('./songwars-legacy.json', import.meta.url)).then(async response => {
-    if (!response.ok) throw new Error('Legacy archive unavailable.');
-    const archive = legacyArchive(await response.json());
+    if (!response.ok) throw new Error('Archive unavailable');
+    const data = await response.json();
     for (const target of views) {
-      const type = target.dataset.legacyView;
-      if (type === 'standings') standings(target, archive);
-      if (type === 'archive') {
-        const id = new URLSearchParams(location.search).get('artist');
-        const person = archive.people.get(id);
-        if (person) profile(target, archive, person);
-        else if (id) target.append(el('p', 'This historical artist record was not found.'));
-        else archivePage(target, archive);
-        if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+      if (target.dataset.legacyView === 'events') {
+        events(target, data);
+        continue;
       }
-      if (type === 'profile') {
-        const person = archive.people.get(target.dataset.person || new URLSearchParams(location.search).get('username'));
-        if (person) profile(target,archive,person);
-      }
+      const id = target.dataset.person || params.get(archive ? 'artist' : 'username');
+      const artist = data.artists.find(row => row.id === id);
+      if (artist) profile(target, data, artist);
+      else if (archive) target.querySelector('#artist-legacy').textContent = 'Artist record not found.';
     }
   }).catch(() => {
-    for (const target of views) target.append(el('p','The Legacy archive is temporarily unavailable.'));
+    const status = document.querySelector('#legacy-scores > p');
+    if (status) status.textContent = 'Standings are temporarily unavailable.';
+    const target = archive?.querySelector('#artist-legacy');
+    if (target) target.textContent = 'This record is temporarily unavailable.';
   });
 }

@@ -18,6 +18,8 @@ const renderableFiles = (await readdir(root)).filter(file => /\.(html|css|js)$/.
 
 execFileSync(process.execPath, [resolve(root, 'tools/sync-layout.mjs'), '--check'], { stdio: 'inherit' });
 await mkdir(out, { recursive: true });
+// Retire the old browser scoring module, including when rebuilding into an existing directory.
+await unlink(resolve(out, 'songwars-legacy-data.js')).catch(error => { if (error.code !== 'ENOENT') throw error; });
 
 // Clean up only the named generated preview files from pre-split builds.
 if (!preview) {

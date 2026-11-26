@@ -86,18 +86,39 @@ try {
   assert.equal(await logo.evaluate(node => getComputedStyle(node).animationName), 'exm-logo-glitch');
   assert.equal(await logo.evaluate(node => getComputedStyle(node).animationIterationCount), '1');
   await page.goto(origin + '/standings.html#legacy');
-  const legacySection = page.locator('#legacy');
+  await page.waitForURL(origin + '/events.html');
+  const legacySection = page.locator('#leaderboard');
   await legacySection.getByRole('row').filter({ hasText: 'BitchYouNotAYop' }).getByText('90', { exact: true }).waitFor();
-  await legacySection.getByLabel('Legacy period').selectOption('s3');
+  assert.equal(await legacySection.getByRole('row').count(), 21);
+  assert.equal(await legacySection.locator('tr[data-rank="2"]').count(), 2);
+  assert.equal(await legacySection.getByRole('columnheader', { name: 'Judge Score' }).count(), 0);
+  assert.equal(await page.locator('#results').isVisible(), false);
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 844 });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth === innerWidth));
+    assert.ok(await legacySection.getByRole('row').nth(1).isVisible());
+    if (process.env.EXM_SCREENSHOTS && width !== 320) {
+      await page.screenshot({ path: resolve(process.env.EXM_SCREENSHOTS, 'exm-events-' + width + '.png') });
+    }
+  }
+  await page.getByLabel('Legacy period').selectOption('s2');
+  assert.equal(await legacySection.getByRole('row').nth(1).getByRole('cell').nth(2).textContent(), '—');
+  await page.getByLabel('Legacy period').selectOption('s3');
   await legacySection.getByRole('row').filter({ hasText: 'Mayo_' }).getByText('80', { exact: true }).waitFor();
-  const artistTab = legacySection.getByRole('tab', { name: 'Artists' });
+  const artistTab = page.getByRole('tab', { name: 'Artists' });
   await artistTab.focus();
   await page.keyboard.press('ArrowRight');
-  assert.equal(await legacySection.getByRole('tab', { name: 'Producers' }).getAttribute('aria-selected'), 'true');
-  await legacySection.getByText('No verified producer competition results qualify for these standings.').waitFor();
+  assert.equal(await page.getByRole('tab', { name: 'Producers' }).getAttribute('aria-selected'), 'true');
+  await legacySection.getByText('No verified producer competition results in this period.').waitFor();
   await page.goto(origin + '/legacy.html#legacy-bracket');
-  await page.getByText('Final · BallHogs defeated Yopz · 46–39.5 / 50').waitFor();
-  assert.equal(await page.locator('#legacy-bracket li').count(), 13);
+  await page.getByText('Judge Score 46–39.5 / 50', { exact: true }).waitFor();
+  assert.equal(await page.locator('.events-bracket li').count(), 13);
+  assert.equal(await page.getByText('BallHogs • Mayo_ + LR • 46–39.5').count(), 1);
+  assert.equal(await page.getByText('Winner — Mayo_', { exact: true }).count(), 2);
+  await page.getByRole('link', { name: 'Standings', exact: true }).click();
+  await page.getByRole('heading', { name: 'Leaderboard' }).waitFor();
+  await page.goBack();
+  await page.getByRole('heading', { name: 'Results', exact: true }).waitFor();
   await page.goto(origin + '/index.html#songwars');
   await page.waitForURL(origin + '/events.html#featured-event');
 
@@ -118,8 +139,9 @@ try {
   assert.ok(await fallback.locator('.nav-mark').evaluate(image => image.naturalWidth > 0));
   await fallbackNav.getByRole('link', { name: 'Events', exact: true }).click();
   await fallback.waitForURL(legacy + projectPrefix + '/events.html');
-  await fallback.getByRole('link', { name: 'Season III results', exact: true }).click();
-  await fallback.waitForURL(legacy + projectPrefix + '/events.html#double-impact');
+  await fallback.getByRole('link', { name: 'SongWars winners', exact: true }).click();
+  await fallback.waitForURL(legacy + projectPrefix + '/hall-of-fame.html');
+  await fallback.getByRole('heading', { name: 'BallHogs', exact: true }).waitFor();
   const orderHelp = fallback.locator('footer').getByRole('link', { name: 'Shipping, returns & order help' });
   await orderHelp.focus();
   await fallback.keyboard.press('Enter');

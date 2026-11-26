@@ -287,7 +287,10 @@ export async function handleMemberRequest(request, env) {
       return respond({ profiles, nextAfter: rows.length > 20 ? profiles.at(-1).username : null });
     }
     if (path === '/api/members/public-profile') {
-      const p_username = normalizeUsername(url.searchParams.get('username'));
+      const self = url.searchParams.get('view') === 'self';
+      const account = self && p_token ? await db.rpc('session', { p_token }) : null;
+      if (self && !account) throw new RequestError(401, 'Sign in to view your profile.');
+      const p_username = self ? account.username : normalizeUsername(url.searchParams.get('username'));
       if (!usernamePattern.test(p_username)) throw new RequestError(404, 'Profile unavailable.');
       const profile = await db.rpc('public_profile', { p_username, p_viewer: p_token });
       if (!profile) throw new RequestError(404, 'Profile unavailable.');

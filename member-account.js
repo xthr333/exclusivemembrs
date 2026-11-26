@@ -103,7 +103,7 @@
     ];
     for (const label of labels) {
       const badge = document.createElement('span');
-      badge.className = 'champion-mark';
+      badge.className = label === 'Founder' ? 'champion-mark founder-mark' : 'champion-mark';
       badge.textContent = label;
       rosterBadges.append(badge, ' ');
     }
@@ -121,9 +121,10 @@
     profile.elements.displayName.value = account.displayName;
     profile.elements.bio.value = account.bio;
     profile.elements.avatar.value = account.avatar;
-    if (account.avatar === 'custom' && !pendingPhoto) {
-      photoPreview.src = '/api/members/avatar?username=' + encodeURIComponent(account.username);
-      photoPreview.hidden = false;
+    if (!pendingPhoto) {
+      photoPreview.hidden = account.avatar !== 'custom';
+      if (!photoPreview.hidden) photoPreview.src = '/api/members/avatar?username=' + encodeURIComponent(account.username);
+      else photoPreview.removeAttribute('src');
     }
     profile.querySelectorAll('[name="links"]').forEach((input, position) => {
       input.value = account.links[position] || '';
@@ -138,6 +139,9 @@
     status.textContent = '';
     access.hidden = true;
     dashboard.hidden = false;
+    if (['#edit-profile', '#profile-visibility'].includes(location.hash)) {
+      byId(location.hash.slice(1)).scrollIntoView();
+    }
     showRosterBadges(account.username).catch(() => {});
     return true;
   }

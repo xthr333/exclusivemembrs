@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="fonts.css?v=20261108-browser">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="rollout.css">
+  <link rel="stylesheet" href="events-leaderboard.css">
   <link rel="stylesheet" href="browser.css?v=exm2">
 </head>
 <body>
@@ -28,21 +29,12 @@
   <a class="account-utility" href="https://exclusivemembrs.com/account">Account</a>
 </nav>
 <!-- /exm:navigation -->
-  <main id="main"><section class="section platform-section">
-<h1 class="section-title">SongWars Legacy Archive</h1>
-<p>Verified results and separately labeled lineup, judging and archive credits through November 25, 2026.</p>
-<nav class="event-links" aria-label="SongWars Legacy">
-  <a href="events.html#bracket">Official Season III results</a>
-  <a href="standings.html#legacy">Legacy standings</a>
-  <a href="hall-of-fame.html">Hall of Fame</a>
-</nav>
-<div data-legacy-view="archive">
-  <div id="legacy-bracket"></div>
-  <div id="legacy-participants"></div>
-  <div id="legacy-judging"></div>
-</div>
-<noscript><p><a href="events.html#bracket">Read the official bracket without JavaScript</a></p></noscript>
-</section></main>
+  <main id="main" class="events-shell" data-legacy-view="archive">
+  <nav class="events-nav" aria-label="EXM Events"><a href="events.html">Standings</a><a href="events.html#results">Results</a></nav>
+  <header class="events-titlebar"><div><p class="events-eyebrow">SongWars</p><h1>Legacy Record</h1></div></header>
+  <div id="artist-legacy"></div>
+  <p><a class="text-link" href="events.html#bracket">SongWars III bracket</a></p>
+</main>
   <!-- exm:footer -->
 <footer>
   <div class="footer-logo">IT’S EXCLUSIVE.</div>

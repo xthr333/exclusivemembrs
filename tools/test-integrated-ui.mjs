@@ -113,16 +113,17 @@ try {
   await editorial.getByText('Editorial preview is up to date.').waitFor();
   await guest.reload();
   await guest.locator('#preview-featured-creator').getByRole('link', { name: 'Vantiva' }).waitFor();
-  await guest.goto(base + '/events');
+  await guest.goto(base + '/events#results');
   await guest.locator('#preview-featured-event').getByRole('heading', { name: eventName, exact: true }).waitFor();
-  await guest.locator('#featured-event').getByRole('link', { name: 'SongWars IV interest form' }).waitFor();
+  await guest.getByRole('link', { name: 'SongWars IV interest' }).waitFor();
   await editorial.getByLabel('Featured campaign').selectOption('');
   await editorial.getByLabel('Creator spotlight').selectOption('');
   await editorial.getByRole('button', { name: 'Save editorial draft' }).click();
   await publishHomepage.click();
   await editorial.getByText('Editorial preview is up to date.').waitFor();
 
-  await guest.goto(base + '/events');
+  await guest.goto(base + '/events#results');
+  await guest.locator('#event-board summary').filter({ hasText: eventName }).click();
   const publicEvent = card(guest, eventName);
   await publicEvent.getByLabel('Test display name').fill('TEST · Browser guest ' + run);
   await publicEvent.getByLabel('Synthetic contact ending in .test').fill('browser-' + run + '@example.test');
@@ -145,7 +146,7 @@ try {
   await guest.goto(base + '/hall-of-fame');
   await guest.getByRole('heading', { name: 'BallHogs' }).waitFor();
   await guest.getByRole('link', { name: 'BitchYouNotAYop' }).waitFor();
-  assert.equal(await guest.getByText('Past champion badge', { exact: true }).count(), 2);
+  assert.equal(await guest.getByText('SongWars Champion', { exact: true }).count(), 2);
   console.log('PASS: shared Worker preview across mobile and desktop, signed-in roles, check-in, redemption/equip, rankings/profile, text-only moderation, event publishing, guest intake/review, campaign/spotlight approval, blocks and verified champions.');
 } finally {
   await browser.close();

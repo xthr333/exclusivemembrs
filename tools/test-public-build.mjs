@@ -34,14 +34,11 @@ for (const page of pages) {
 }
 assert.match(readFileSync(resolve(out, 'index.html'), 'utf8'), /href="events.html">Explore Events/);
 const eventsPage = readFileSync(resolve(out, 'events.html'), 'utf8');
-assert.match(eventsPage, /46–39\.5/);
-for (const view of ['upcoming', 'live', 'past']) {
-  assert.ok(eventsPage.includes('href="#calendar-' + view + '"'));
-  assert.ok(eventsPage.includes('id="calendar-' + view + '"'));
-}
-assert.match(eventsPage, /id="featured-event"[\s\S]*?<a[^>]*href="https:\/\/songwars-s3-registration\.b26xkz4v97\.chatgpt\.site\/season-4"/);
-assert.match(eventsPage, /id="calendar-event-songwars-iv"[\s\S]*?<a[^>]*href="#featured-event"/);
-assert.match(eventsPage, /id="calendar-event-songwars-iii"[\s\S]*?<a[^>]*href="#double-impact"/);
+assert.match(eventsPage, /<h1 id="events-title">Leaderboard/);
+assert.match(eventsPage, /<section id="results" aria-labelledby="events-title" hidden>/);
+assert.match(eventsPage, /id="featured-event" href="https:\/\/songwars-s3-registration\.b26xkz4v97\.chatgpt\.site\/season-4"/);
+assert.ok(!existsSync(resolve(out, 'songwars-legacy-data.js')));
+assert.ok(!existsSync(resolve(out, 'content')));
 const event = {
   id: 'fixture', title: '<Title>', status: 'upcoming', summary: 'A & B', date: '2024-02-29',
   links: Object.fromEntries(['interest', 'registration', 'rsvp', 'tickets', 'stream', 'replay', 'recap']
@@ -75,7 +72,8 @@ assert.match(ybdd, /champion-mark">Founder<.*champion-mark">EXM Artist</);
 assert.doesNotMatch(o3, />Founder</);
 assert.match(hall, /href="1ilriskk.html">LR<\/a> and <a href="mayo.html">Mayo_<\/a>/);
 assert.match(readFileSync(resolve(out, '1ilriskk.html'), 'utf8'), /SongWars champion · Season III · Double Impact/);
-assert.match(hall, /id="season-i"[\s\S]*?original results are pending verification/);
+assert.match(hall, /id="season-i"[\s\S]*?Mayo_<\/a>[\s\S]*?<p>Winner<\/p>/);
+assert.doesNotMatch(hall, /pending verification/i);
 assert.match(readFileSync(resolve(out, 'artists.html'), 'utf8'), /href="mayo\.html"/);
 assert.match(readFileSync(resolve(out, 'admin.html'), 'utf8'), /supabase/i);
 assert.match(readFileSync(resolve(out, 'shop.html'), 'utf8'), /exclusivemembrs\.printify\.me\/product/);

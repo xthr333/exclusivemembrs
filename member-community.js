@@ -89,12 +89,19 @@
     const status = byId('public-profile-status');
     const button = byId('public-profile-follow');
     const block = byId('public-profile-block');
-    const username = new URLSearchParams(location.search).get('username') || '';
+    const params = new URLSearchParams(location.search);
+    const self = params.get('view') === 'self';
+    let username = params.get('username') || '';
     let following = false;
     let blocked = false;
 
     async function load() {
-      const response = await fetch(api('public-profile?username=' + encodeURIComponent(username)));
+      const response = await fetch(api(self ? 'public-profile?view=self' : 'public-profile?username=' + encodeURIComponent(username)));
+      if (response.status === 401 && self) {
+        status.textContent = 'Sign in to view your profile.';
+        byId('profile-signin').hidden = false;
+        return false;
+      }
       if (response.status === 404) {
         details.hidden = true;
         status.textContent = 'This profile is unavailable.';
@@ -102,6 +109,18 @@
       }
       if (!response.ok) throw new Error('Profile unavailable');
       const { profile } = await response.json();
+      username = profile.username;
+      if (profile.isSelf) {
+        byId('profile-self-actions').hidden = false;
+        byId('profile-visibility').textContent = profile.publiclyVisible
+          ? 'Your profile is visible in the public roster.'
+          : 'Private profile · visible only to you.';
+      }
+      byId('profile-founder').hidden = !profile.founder;
+      const rosterRole = byId('profile-roster-role');
+      rosterRole.hidden = !['artist', 'producer'].includes(profile.rosterCategory);
+      rosterRole.textContent = profile.rosterCategory === 'artist' ? 'EXM Artist' : 'EXM Producer';
+      document.dispatchEvent(new CustomEvent('exm:profile', { detail: { username, isSelf: profile.isSelf, publiclyVisible: profile.publiclyVisible } }));
       byId('member-name').textContent = profile.displayName;
       byId('public-profile-handle').textContent = '@' + profile.username;
       byId('public-profile-roles').textContent = rolesText(profile.creativeRoles);

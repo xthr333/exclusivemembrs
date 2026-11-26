@@ -64,3 +64,9 @@ The public standings at `/standings` show ranking XP by period and category. Mem
 Switching hosted mode off preserves events, applications and member history. Review access and export needs through authorized Supabase tools. Existing SongWars forms and gates remain with their current provider.
 
 The public roster can display verified credits for an unclaimed profile. In production, the anchored Founder account is the only one that can publish events or review private applications. To link a roster profile, first verify ownership via EXM’s approved contact and have the person complete a private provider invitation. The Founder can then use **Verified roster claims** in the Events dashboard. Linking preserves existing accounts and ledgers. It grants no staff role and awards the earned-only champion badge only where the verified roster already records a championship.
+
+## Events leaderboard correction
+
+The canonical SongWars leaderboard is `/events`. Results open at `/events#results` and the legacy round links open the bracket. The community XP leaderboard remains at `/standings`. Run `npm run sync-layout` after updating approved history to regenerate the display payloads. The approval snapshot and private reconciliation are excluded from deployable content. Before release, run `node tools/songwars-legacy-import.mjs` and compare the generated stable award keys with the private ledger.
+
+Signed-in members can open **My Profile** from Account and the Member Hub even when directory visibility is off. The additive `member_profile_self_view` migration preserves service-only function grants. A site rollback does not change profiles or balances. Restore the previous database function definitions separately if the self-view needs to be rolled back. The release issues no wallet credits and does not enable public signup or Discord OAuth.

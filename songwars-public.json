@@ -1,139 +1,37 @@
 {
-  "syncedAt": "2026-11-10T03:38:32.639Z",
-  "source": "SongWars III registration database",
-  "approved": [
+  "results": [
     {
-      "duo": "BallHogs",
+      "id": "s3",
+      "label": "Season III · Double Impact",
+      "winner": "BallHogs",
       "artists": [
-        "LR",
-        "Mayo"
+        "Mayo_",
+        "LR"
       ],
-      "handles": [
-        "Riskianoo",
-        "Mayoshere"
+      "finalScore": [
+        46,
+        39.5
       ]
     },
     {
-      "duo": "KTK",
-      "artists": [
-        "r3",
-        "ktk.tobi"
-      ],
-      "handles": [
-        "r3hz.p",
-        "ktk.tobi"
-      ]
+      "id": "s2",
+      "label": "Season II",
+      "winner": "BitchYouNotAYop"
     },
     {
-      "duo": "JaexJ",
-      "artists": [
-        "bootupkee",
-        "1chrxllo"
-      ],
-      "handles": [
-        "@jaexkee",
-        "@1chrxllo"
-      ]
+      "id": "s1",
+      "label": "Season I",
+      "winner": "Mayo_"
     },
     {
-      "duo": "##00",
-      "artists": [
-        "PG23",
-        "Jai"
-      ],
-      "handles": [
-        "@sshortterm",
-        "dontfeelliketalking00"
-      ]
+      "id": "pilot",
+      "label": "Pilot",
+      "winner": "Mayo_"
     },
     {
-      "duo": "Yopz",
-      "artists": [
-        "Bitchyounotayop",
-        "Wasi"
-      ],
-      "handles": [
-        "@swampygooler",
-        "@yabxtchfavoritedreadhead"
-      ]
-    },
-    {
-      "duo": "1twoggx1mxhara",
-      "artists": [
-        "1twogg",
-        "mxhara"
-      ],
-      "handles": [
-        "1twogg",
-        "1mxhara"
-      ]
-    },
-    {
-      "duo": "Forever Young",
-      "artists": [
-        "callmeLD",
-        "yung asy"
-      ],
-      "handles": [
-        "callmeld_",
-        "yungasy"
-      ]
-    },
-    {
-      "duo": "the melt vs da world",
-      "artists": [
-        "fukitdrako!",
-        "konrax!"
-      ],
-      "handles": [
-        "innaclubwiddadub",
-        "k0nrax"
-      ]
-    },
-    {
-      "duo": "Oneinfinite",
-      "artists": [
-        "Phxntum",
-        "Warisovr"
-      ],
-      "handles": [
-        "@phxntum_",
-        "@warisovr"
-      ]
-    },
-    {
-      "duo": "WeSoso$lime",
-      "artists": [
-        "$$vbii",
-        "Ayco"
-      ],
-      "handles": [
-        "Praisemxrrr",
-        "1.ayco"
-      ]
-    },
-    {
-      "duo": "STAYUP!&WIN",
-      "artists": [
-        "projectsyth",
-        "akumasblood"
-      ],
-      "handles": [
-        "@projectsyth",
-        "@akumasblood"
-      ]
-    },
-    {
-      "duo": "As5",
-      "artists": [
-        "Jaykurtt",
-        "Bbyhero6"
-      ],
-      "handles": [
-        "Jaykurtt5",
-        "Jaahero1"
-      ]
+      "id": "pre-production",
+      "label": "Pre-production",
+      "winner": "BitchYouNotAYop"
     }
-  ],
-  "waitlist": []
+  ]
 }

@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="fonts.css?v=20261108-browser">
   <link rel="stylesheet" href="style.css?v=20261107-vibe">
   <link rel="stylesheet" href="rollout.css?v=20261108-browser">
+  <link rel="stylesheet" href="events-leaderboard.css">
   <link rel="stylesheet" href="browser.css?v=exm2">
 </head>
 <body>
@@ -31,11 +32,18 @@
       <h1 id="member-name" class="section-title">Member profile</h1>
       <noscript><p>Enable JavaScript to view member profiles.</p></noscript>
       <p id="public-profile-status" role="status"></p>
+      <p id="profile-signin" hidden><a class="btn" href="account.html">Open member account</a></p>
       <div class="platform-card" id="public-profile" hidden>
         <div id="public-profile-banner" class="cosmetic-profile-banner" hidden></div><div id="public-avatar" class="member-avatar" aria-hidden="true"></div><div id="public-progress"></div>
         <p id="public-profile-handle"></p>
         <p id="public-profile-roles"></p>
         <p id="public-profile-bio"></p>
+        <div id="profile-self-actions" hidden>
+          <p id="profile-visibility"></p>
+          <a class="btn btn-dark" href="account.html#edit-profile">Edit Profile</a>
+          <a class="text-link" href="account.html#profile-visibility">Change visibility</a>
+        </div>
+        <p><span class="champion-mark founder-mark" id="profile-founder" hidden>Founder</span> <span class="champion-mark" id="profile-roster-role" hidden></span></p>
         <p id="public-profile-counts"></p>
         <p id="public-profile-team"></p>
         <p id="public-champion" hidden><span class="champion-mark">SongWars champion</span></p>

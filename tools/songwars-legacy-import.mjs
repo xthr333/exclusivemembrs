@@ -1,17 +1,14 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { legacyArchive, legacyRanking } from '../songwars-legacy-data.js';
+import { legacyArchive, legacyRanking } from './songwars-legacy-data.mjs';
 
-const source = JSON.parse(readFileSync(new URL('../songwars-legacy.json', import.meta.url)));
+const source = JSON.parse(readFileSync(new URL('../content/songwars-legacy.json', import.meta.url)));
 const archive = legacyArchive(source);
 assert.equal(archive.matches.length, 13);
 assert.equal(new Set(archive.matches.map(row => row.id)).size, 13);
 assert.equal(archive.teams.size, 12);
 assert.equal(archive.people.size, 20);
 assert.deepEqual([...archive.teams.values()].filter(team => !team.artists.length).map(team => team.id), ['howtoact','hgw']);
-assert.equal(source.s2Credits.length, 19);
-assert.equal(source.s2Disputed.length, 2);
-assert.equal(source.judges.filter(row => row[0] === 's2').length, 7);
 assert.equal(new Set(archive.awards.map(row => [row.season,row.person,row.event].join('/'))).size, archive.awards.length);
 assert.equal(archive.awards.length, 53);
 assert.ok(archive.awards.every(row => archive.people.has(row.person)));
@@ -24,7 +21,9 @@ assert.ok(!archive.awards.some(row => /judge|wildcard|bye|approval/.test(row.eve
 assert.equal(archive.matches.find(row => row.id === 'final').outOf, 50);
 assert.equal(archive.matches.filter(row => row.outOf == null).length, 1);
 
-if (!process.argv.includes('--sql')) {
+if (process.argv.includes('--award-json')) {
+  console.log(JSON.stringify(archive.awards.map(row => [row.season, row.person, row.event, row.points])));
+} else if (!process.argv.includes('--sql')) {
   console.log('PASS: 13 matches, 12 teams, 20 attributed artists, 2 unresolved teams, 1 verified S2 title, 53 non-spendable award rows.');
 } else {
   const val = value => value == null ? 'null' : typeof value === 'number' ? String(value) : "'" + value.replaceAll("'","''") + "'";
@@ -44,7 +43,4 @@ if (!process.argv.includes('--sql')) {
   insert('songwars_legacy_matches','season,match_key,stage,winner,opponent,winner_score,opponent_score,denominator,source,verification',
     archive.matches.map(row => ['s3',row.id,row.stage,row.winner.id,row.opponent.id,row.score,row.opponentScore,row.outOf,'EXM official results','verified']));
   insert('songwars_legacy_awards','season,person,source_key,legacy_points',archive.awards.map(row => [row.season,row.person,row.event,row.points]));
-  insert('songwars_legacy_evidence','evidence_key,records',
-    ['wildcard','s3ApprovalOnly','s3LineupOnly','s2Announced','s2Credits','s2Disputed','crossSeasonAliases','judges']
-      .map(key => [key,JSON.stringify(source[key])]));
 }

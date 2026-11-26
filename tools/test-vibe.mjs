@@ -55,9 +55,9 @@ for(const slug of profiles){
  assert.ok(!profile.includes('stkn=')&&!profile.includes('?si='));
 }
 const eventPage=fs.readFileSync(path.join(root,'events.html'),'utf8');
-for(const id of ['bracket','round-quarters','round-semis','round-final']) assert.ok(eventPage.includes(`id="${id}"`));
-assert.equal((eventPage.match(/class="matchup-card"/g)||[]).length,13);
-assert.ok(eventPage.includes('WILDCARD RECAP'));
+assert.ok(eventPage.includes('<h1 id="events-title">Leaderboard</h1>'));
+assert.ok(eventPage.includes('<summary>How rankings work</summary>'));
+assert.ok(!eventPage.includes('WILDCARD RECAP'));
 const w3=fs.readFileSync(path.join(root,'studios.html'),'utf8');
 assert.ok(w3.includes('https://photogw3.merlin.site/'));
 assert.ok(w3.includes('href="https://w3-studios.square.site/"') && w3.includes('W3 services on Square'));
@@ -80,14 +80,14 @@ assert.ok(!home.includes(season4));
 const campaign = JSON.parse(fs.readFileSync(path.join(root,'content/featured-campaign.json'),'utf8'));
 assert.equal(campaign.actionUrl, season4);
 assert.equal(campaign.status, 'Interest open');
-assert.ok(eventPage.includes("<title>" + campaign.name + ": " + campaign.headline));
+assert.ok(eventPage.includes("<title>EXM Events · SongWars Legacy Leaderboard"));
 assert.ok(eventPage.includes('first-time SongWars judges'));
 assert.ok(eventPage.includes('Winner gets a prize.'));
 assert.equal(eventPage.split(campaign.actionUrl).length, 2);
 assert.ok(eventPage.includes('does not reserve a bracket spot'));
 assert.ok(eventPage.includes('Audience votes do not affect the outcome.'));
 assert.ok(eventPage.includes('Moderators and spectators'));
-assert.ok(eventPage.includes('OFFICIAL SEASON 2</span><h3>BitchYouNotAYop</h3>'));
+assert.ok(eventPage.includes('id="recent-results"'));
 const sections=[...home.split('<main id="main">')[1].split('</main>')[0].matchAll(/<section\b([^>]*)>/g)].map(m=>m[1]);
 assert.deepEqual(sections.map(section => section.match(/ id="([^"]+)"/)?.[1]), [
  undefined, 'shop-exm', undefined,
@@ -111,7 +111,7 @@ assert.ok(home.includes('assets/brand/exm-logo.webp'));
 assert.ok(!home.includes('assets/w3/'));
 assert.ok(!home.includes('world-panel residency-panel'));
 assert.ok(!home.includes('quiet-residency'));
-console.log('PASS: 10 shareable artist hubs and the OXXX roster entry; completed bracket and wildcard recap; 8 real W3 portfolio photos with provenance; Merlin and Square handoffs; current campaign; legacy-safe links; low-key Residency.');
+console.log('PASS: 10 shareable artist hubs and the OXXX roster entry; standings-first Events shell; 8 real W3 portfolio photos with provenance; Merlin and Square handoffs; current campaign; legacy-safe links; low-key Residency.');
 const orderHelp=fs.readFileSync(path.join(root,'order-help.html'),'utf8');
 assert.ok(orderHelp.includes('30 calendar days of delivery'));
 assert.ok(orderHelp.includes('wrong size or color'));
