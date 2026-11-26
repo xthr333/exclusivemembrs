@@ -89,7 +89,7 @@ try {
   await page.waitForURL(origin + '/events.html');
   const legacySection = page.locator('#leaderboard');
   await legacySection.getByRole('row').filter({ hasText: 'BitchYouNotAYop' }).getByText('90', { exact: true }).waitFor();
-  assert.equal(await legacySection.getByRole('link', { name: 'BitchYouNotAYop', exact: true }).getAttribute('href'), 'legacy.html?artist=bitchyounotayop');
+  assert.equal(await legacySection.getByRole('link', { name: 'BitchYouNotAYop', exact: true }).getAttribute('href'), 'bitchyounotayop.html');
   assert.equal(await legacySection.getByRole('row').count(), 21);
   assert.equal(await legacySection.locator('tr[data-rank="2"]').count(), 2);
   assert.equal(await legacySection.getByRole('columnheader', { name: 'Judge Score' }).count(), 0);
@@ -111,6 +111,7 @@ try {
   await page.keyboard.press('ArrowRight');
   assert.equal(await page.getByRole('tab', { name: 'Producers' }).getAttribute('aria-selected'), 'true');
   await legacySection.getByText('No verified producer competition results in this period.').waitFor();
+  assert.equal(await legacySection.getByRole('link', { name: 'Vantiva / Tiva' }).getAttribute('href'), 'vantiva.html');
   await page.goto(origin + '/legacy.html#legacy-bracket');
   await page.getByText('Judge Score 46–39.5 / 50', { exact: true }).waitFor();
   assert.equal(await page.locator('.events-bracket li').count(), 13);
@@ -133,8 +134,15 @@ try {
   await linkedStandings.goto(origin + '/events.html');
   const linkedPanel = linkedStandings.locator('#leaderboard');
   await linkedPanel.locator('a[href="member.html?username=verified-rehearsal"]').waitFor();
-  assert.equal(await linkedPanel.getByRole('link', { name: 'Mayo_', exact: true }).getAttribute('href'), 'legacy.html?artist=mayo_');
-  assert.equal(await linkedPanel.getByRole('link', { name: 'LR', exact: true }).getAttribute('href'), 'legacy.html?artist=1ilriskk');
+  assert.equal(await linkedPanel.getByRole('link', { name: 'Mayo_', exact: true }).getAttribute('href'), 'mayo.html');
+  assert.equal(await linkedPanel.getByRole('link', { name: 'LR', exact: true }).getAttribute('href'), '1ilriskk.html');
+  await linkedStandings.goto(origin + '/legacy.html?artist=mayo_');
+  await linkedStandings.getByRole('heading', { name: 'Mayo_', exact: true }).waitFor();
+  await linkedStandings.getByText('Pilot · Winner', { exact: true }).waitFor();
+  await linkedStandings.getByText('Season I · Winner', { exact: true }).waitFor();
+  assert.equal(await linkedStandings.locator('.legacy-player-stats strong').first().textContent(), '80');
+  await linkedStandings.goto(origin + '/events.html');
+  await linkedPanel.locator('a[href="member.html?username=verified-rehearsal"]').waitFor();
   await linkedStandings.getByLabel('Legacy period').selectOption('s2');
   assert.equal(await linkedPanel.getByRole('link', { name: 'BitchYouNotAYop', exact: true }).getAttribute('href'), 'member.html?username=verified-rehearsal');
   await linkedStandings.close();
