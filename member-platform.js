@@ -23,16 +23,33 @@
     return link;
   }
 
-  async function api(path, data) {
-    const response = await fetch('/api/platform/' + path, data === undefined ? {} : {
+  async function requestJSON(url, data) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+    const response = await fetch(url, { signal: controller.signal, ...(data === undefined ? {} : {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
+    }) });
+    const result = await response.json().catch(error => {
+      if (controller.signal.aborted || response.ok) throw error;
+      return {};
     });
-    const result = await response.json().catch(() => ({}));
     if (!response.ok) throw Object.assign(new Error(result.error || 'This tool is temporarily unavailable.'), { status: response.status });
     return result;
+    } catch (error) {
+      if (error.name === 'AbortError') throw new Error(data === undefined
+        ? 'Loading timed out. Check your connection and try again.'
+        : 'The response timed out. Refresh this view to check whether your action completed before trying again.');
+      if (error instanceof TypeError) throw new Error('Could not reach EXM. Check your connection and try again.');
+      if (error instanceof SyntaxError) throw new Error('EXM returned an incomplete response. Refresh this view before trying again.');
+      throw error;
+    } finally {
+      clearTimeout(timer);
+    }
   }
+  const api = (path, data) => requestJSON('/api/platform/' + path, data);
 
   function sample(item, kind) {
     const node = el('span', item.name, 'cosmetic-sample cosmetic-' + item.appearance);
@@ -79,6 +96,11 @@
 
   const status = byId('hub-status');
   if (!status) return;
+  const retry = el('button', 'Try loading again', 'btn btn-dark');
+  retry.type = 'button';
+  retry.hidden = true;
+  retry.addEventListener('click', () => load());
+  status.after(retry);
   const panels = [...document.querySelectorAll('[data-panel]')];
   const viewLinks = [...document.querySelectorAll('[data-view]')];
   const signedOut = byId('hub-signed-out');
@@ -464,7 +486,7 @@
       panels.some(panel => panel.dataset.panel === requested) ? requested : 'dashboard';
     const request = ++requestNumber;
     const signInLink = byId('hub-sign-in');
-    signInLink.href = view === 'rewards' ? 'account.html?next=rewards' : 'account.html';
+    signInLink.href = view === 'rewards' ? 'account.html?next=' + (inventory ? 'inventory' : 'rewards') : 'account.html';
     signInLink.textContent = view === 'rewards' ? 'Sign in to Rewards Shop' : 'Sign in';
     signedOut.hidden = true;
     panels.forEach(panel => { panel.hidden = panel.dataset.panel !== view; });
@@ -473,6 +495,7 @@
       else link.removeAttribute('aria-current');
     });
     status.textContent = 'Loading…';
+    retry.hidden = true;
     try {
       if (view === 'dashboard') {
         const data = await api('dashboard');
@@ -490,8 +513,7 @@
         if (request !== requestNumber) return;
         showFeed(data);
       } else if (view === 'rewards') {
-        const [data, session] = await Promise.all([api('rewards'), fetch('/api/members/session')
-          .then(response => response.ok ? response.json() : null).catch(() => null)]);
+        const [data, session] = await Promise.all([api('rewards'), requestJSON('/api/members/session').catch(() => null)]);
         if (request !== requestNumber) return;
         previewProfile = session?.profile || null;
         showRewards(data);
@@ -526,6 +548,7 @@
       if (request !== requestNumber) return;
       panels.forEach(panel => { panel.hidden = true; });
       status.textContent = error.status === 401 ? '' : error.message;
+      retry.hidden = error.status === 401;
       signedOut.hidden = error.status !== 401;
       if (error.status === 401) byId('hub-my-profile').hidden = true;
     } finally {

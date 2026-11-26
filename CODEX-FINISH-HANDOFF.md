@@ -10,6 +10,8 @@ Continue from latest `origin/main`, not an old worktree or checkpoint. This file
 - Updated Discord destination to https://discord.gg/8dZNXNr62r and removed the requirement for a named voice channel. Members must be able to join an accessible EXM VC and use mic/camera; staff verification remains separate from self-attestation.
 - Account editor has separate library/camera inputs, a 144px preview, bounded image decoding and actionable timeout feedback. This is not proof of real-device Safari/HEIC support.
 - Inventory has its own deep link, cosmetics have category filters, shop previews use the signed-in member's name/photo, and the tour describes the current leaderboard-first flow.
+- Member requests now time out instead of leaving controls stuck. Profile edits remain in the form on failure; expired sessions receive explicit instructions. Hub reads offer a retry control; mutations are never automatically replayed. Invalid JSON cannot masquerade as a successful save. Inventory sign-in returns to inventory.
+- `node tools/test-member-network.mjs` covers timeout cleanup, invalid responses, expired sessions and no automatic mutation retries; included in `npm run check`. Live signed-out Rewards Shop showed the correct sign-in entry and closed-signup notice during this follow-up. An authenticated live session was not available.
 - Build and repository checks passed. These checks do not substitute for live signed-in verification.
 
 ## Required remaining work, in order
