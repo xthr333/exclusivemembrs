@@ -78,17 +78,18 @@
           <h2>Save your recovery codes</h2>
           <p>These codes are shown once. Save them somewhere private. Each code works once.</p>
           <ul id="member-codes-list"></ul>
+          <a id="account-continue-rewards" class="btn" href="member-hub.html#rewards" hidden>Continue to Rewards Shop</a>
         </section>
         <section class="platform-card">
           <h2>Your profile</h2>
           <p id="account-handle"></p><p id="account-roster-badges" hidden></p><p><a class="text-link" href="member.html?view=self">My Profile</a> · <a class="text-link" href="member-hub.html">Open your member hub</a></p>
-          <p><a href="artists.html#members">Browse the member directory</a></p>
+          <p><a href="member-hub.html#rewards">Rewards Shop</a> · <a href="artists.html#members">Browse the member directory</a></p>
           <div id="edit-profile"></div>
           <form class="form-shell" id="member-profile" method="post">
             <div class="field"><label for="profile-name">Display name</label><input id="profile-name" name="displayName" maxlength="60" required></div>
             <div class="field"><label for="profile-bio">Bio</label><textarea id="profile-bio" name="bio" maxlength="600"></textarea></div>
             <div class="field"><label for="profile-avatar">Avatar</label><select id="profile-avatar" name="avatar"><option value="initials">Profile initials</option><option value="chrome">EXM chrome mark</option><option value="custom">My photo</option></select></div>
-            <div class="field"><label for="profile-photo">Upload a profile photo</label><input id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="profile-photo-note"><p id="profile-photo-note">JPEG, PNG or WebP up to 4 MiB. EXM makes a small square WebP. The photo follows your profile visibility setting.</p></div>
+            <div class="field"><label for="profile-photo">Upload a profile photo</label><input id="profile-photo" type="file" accept="image/*" aria-describedby="profile-photo-note profile-photo-status"><p id="profile-photo-note">Choose a photo up to 4 MiB, then tap Save profile after the preview appears. The photo follows your profile visibility setting.</p></div>
             <img id="profile-photo-preview" src="assets/brand/exm-logo.webp" width="96" height="96" alt="Avatar preview" hidden>
             <p id="profile-photo-status" role="status"></p>
             <p id="profile-save-progress" role="status"></p>
@@ -118,6 +119,7 @@
             </fieldset>
             <div class="field"><label for="profile-visibility"><input id="profile-visibility" name="discoverable" type="checkbox"> Show my profile in the community directory</label></div>
             <button class="btn" type="submit">Save profile</button>
+            <p id="profile-save-status" role="status"></p>
           </form>
           <button class="btn btn-dark" id="member-logout" type="button">Sign out</button>
         </section>

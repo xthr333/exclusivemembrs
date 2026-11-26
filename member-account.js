@@ -9,27 +9,79 @@
   const recoveryReference = byId('member-recovery-reference');
   const rosterBadges = byId('account-roster-badges');
   const hosted = Boolean(window.EXMHostedMode);
+  const rewardsDestination = 'member-hub.html#rewards';
+  const returnToRewards = window.EXMHostedMode !== 'events' &&
+    new URLSearchParams(location.search).get('next') === 'rewards';
+  const continueRewards = byId('account-continue-rewards');
   const photo = byId('profile-photo');
   const photoPreview = byId('profile-photo-preview');
   const photoStatus = byId('profile-photo-status');
+  const saveStatus = byId('profile-save-status');
+  const saveButton = profile.querySelector('button[type="submit"]');
   let pendingPhoto = null;
   let photoVersion = 0;
+  let preparingPhoto = false;
+
+  // Canvas can emit extended WebP with a color profile. Keep only the opaque
+  // still-image chunk so the server can enforce its narrow avatar format.
+  function avatarWebp(data) {
+    const prefix = 'data:image/webp;base64,';
+    if (!data.startsWith(prefix)) return '';
+    const bytes = Uint8Array.from(atob(data.slice(prefix.length)), c => c.charCodeAt(0));
+    if (bytes.length < 20) return '';
+    const tag = offset => String.fromCharCode(...bytes.subarray(offset, offset + 4));
+    const view = new DataView(bytes.buffer);
+    if (tag(0) !== 'RIFF' || tag(8) !== 'WEBP' || view.getUint32(4, true) + 8 !== bytes.length) return '';
+    if (tag(12) !== 'VP8X') return data;
+    if (view.getUint32(16, true) !== 10 || bytes.length < 30 || bytes[20] !== 0x20) return '';
+    let still = null;
+    for (let i = 30; i + 8 <= bytes.length;) {
+      const size = view.getUint32(i + 4, true);
+      const end = i + 8 + size + (size % 2);
+      if (end > bytes.length) return '';
+      if (['VP8 ', 'VP8L'].includes(tag(i))) {
+        if (still || end !== bytes.length) return '';
+        still = bytes.subarray(i, end);
+      } else if (tag(i) !== 'ICCP') return '';
+      i = end;
+    }
+    if (!still) return '';
+    const clean = new Uint8Array(12 + still.length);
+    clean.set(bytes.subarray(0, 12));
+    new DataView(clean.buffer).setUint32(4, clean.length - 8, true);
+    clean.set(still, 12);
+    let binary = '';
+    for (const byte of clean) binary += String.fromCharCode(byte);
+    return prefix + btoa(binary);
+  }
 
   photo.addEventListener('change', async () => {
     const version = ++photoVersion;
     pendingPhoto = null;
     photoPreview.hidden = true;
     const file = photo.files[0];
-    if (!file) return;
+    if (!file) {
+      preparingPhoto = false;
+      saveButton.disabled = false;
+      photoStatus.textContent = '';
+      restoreAvatarPreview();
+      return;
+    }
+    preparingPhoto = true;
+    saveButton.disabled = true;
+    saveStatus.textContent = '';
     photoStatus.textContent = 'Preparing your preview…';
     const url = URL.createObjectURL(file);
     try {
-      if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 4194304) {
-        throw new Error('Choose a JPEG, PNG or WebP file up to 4 MiB.');
+      if (file.size > 4194304) {
+        throw new Error('This photo is over 4 MiB. Choose a smaller photo or screenshot.');
       }
       const image = new Image();
-      image.src = url;
-      await image.decode();
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error('This browser could not open the photo. On iPhone, try a screenshot or export it as JPEG.'));
+        image.src = url;
+      });
       if (!image.naturalWidth || !image.naturalHeight || Math.max(image.naturalWidth, image.naturalHeight) > 4096) {
         throw new Error('Choose an image up to 4096 pixels wide or tall.');
       }
@@ -43,7 +95,7 @@
       ctx.drawImage(image, (image.naturalWidth - size) / 2, (image.naturalHeight - size) / 2, size, size, 0, 0, 256, 256);
       let optimized;
       for (const quality of [.83, .7, .55, .4]) {
-        optimized = canvas.toDataURL('image/webp', quality);
+        optimized = avatarWebp(canvas.toDataURL('image/webp', quality));
         if (optimized.startsWith('data:image/webp;base64,') && optimized.length <= 65559) break;
       }
       if (!optimized.startsWith('data:image/webp;base64,') || optimized.length > 65559) {
@@ -54,13 +106,29 @@
       photoPreview.src = optimized;
       photoPreview.hidden = false;
       profile.elements.avatar.value = 'custom';
-      photoStatus.textContent = 'Preview ready. Save your profile to apply the photo.';
+      photoStatus.textContent = 'Photo ready. Tap Save profile below to apply it.';
     } catch (error) {
-      if (version === photoVersion) photoStatus.textContent = error.message;
+      if (version === photoVersion) {
+        photoStatus.textContent = error.message;
+        photo.value = '';
+        restoreAvatarPreview();
+      }
     } finally {
       URL.revokeObjectURL(url);
+      if (version === photoVersion) {
+        preparingPhoto = false;
+        saveButton.disabled = false;
+      }
     }
   });
+
+  let savedAvatar = 'initials';
+  let savedAvatarURL = '';
+  function restoreAvatarPreview() {
+    profile.elements.avatar.value = savedAvatar;
+    photoPreview.hidden = savedAvatar !== 'custom' || !savedAvatarURL;
+    if (!photoPreview.hidden) photoPreview.src = savedAvatarURL;
+  }
 
   async function request(action, payload) {
     const response = await fetch('/api/members/' + action, payload === undefined ? {} : {
@@ -78,7 +146,11 @@
     dashboard.hidden = true;
     codesList.replaceChildren();
     codes.hidden = true;
+    continueRewards.hidden = true;
     ++photoVersion;
+    preparingPhoto = false;
+    saveButton.disabled = false;
+    saveStatus.textContent = '';
     pendingPhoto = null;
     photo.value = '';
     photoPreview.removeAttribute('src');
@@ -120,11 +192,10 @@
     const account = data.profile;
     profile.elements.displayName.value = account.displayName;
     profile.elements.bio.value = account.bio;
-    profile.elements.avatar.value = account.avatar;
+    savedAvatar = account.avatar;
+    savedAvatarURL = '/api/members/avatar?username=' + encodeURIComponent(account.username);
     if (!pendingPhoto) {
-      photoPreview.hidden = account.avatar !== 'custom';
-      if (!photoPreview.hidden) photoPreview.src = '/api/members/avatar?username=' + encodeURIComponent(account.username);
-      else photoPreview.removeAttribute('src');
+      restoreAvatarPreview();
     }
     profile.querySelectorAll('[name="links"]').forEach((input, position) => {
       input.value = account.links[position] || '';
@@ -150,14 +221,19 @@
     form.addEventListener('submit', async event => {
       event.preventDefault();
       const button = form.querySelector('button[type="submit"]');
+      const isProfile = form === profile;
+      if (button.disabled) return;
       button.disabled = true;
-      status.textContent = 'Working…';
+      if (isProfile) photo.disabled = true;
+      const feedback = isProfile ? saveStatus : status;
+      feedback.textContent = isProfile ? 'Saving profile…' : 'Working…';
       try {
         await handle(Object.fromEntries(new FormData(form)), form);
       } catch {
-        status.textContent = 'Member accounts are temporarily unavailable. Please try again.';
+        feedback.textContent = 'Member accounts are temporarily unavailable. Please try again.';
       } finally {
-        button.disabled = false;
+        if (isProfile) photo.disabled = false;
+        button.disabled = isProfile && preparingPhoto;
       }
     });
   }
@@ -193,7 +269,10 @@
       return item;
     });
     codesList.replaceChildren(...items);
-    await showSession();
+    if (await showSession() && returnToRewards) {
+      if (items.length) continueRewards.hidden = false;
+      else location.replace(rewardsDestination);
+    }
   });
 
   if (window.EXMHostedMode === 'events') {
@@ -223,11 +302,13 @@
       discoverable: profile.elements.discoverable.checked,
       avatarData: formData.avatar === 'custom' ? pendingPhoto : null,
     });
-    status.textContent = code === 200 ? 'Profile saved.' : data.error || 'Could not save your profile.';
+    saveStatus.textContent = code === 200 ? 'Profile saved.' : data.error || 'Could not save your profile.';
     if (code === 200) {
+      savedAvatar = formData.avatar;
       pendingPhoto = null;
       photo.value = '';
       photoStatus.textContent = '';
+      restoreAvatarPreview();
       const awards = (data.awards || []).map(award => award === 'first_bio' ? 'First bio earned.' : 'First custom avatar earned.').join(' ');
       const wallet = data.progress;
       if (wallet) progress.textContent = [awards, wallet.points + ' spendable points.',
@@ -284,5 +365,7 @@
     byId('fixture-signup').hidden = false;
   }
   /* /exm:fixture */
-  showSession().catch(() => { status.textContent = 'Member accounts are temporarily unavailable.'; });
+  showSession().then(signedIn => {
+    if (signedIn && returnToRewards && codes.hidden) location.replace(rewardsDestination);
+  }).catch(() => { status.textContent = 'Member accounts are temporarily unavailable.'; });
 })();

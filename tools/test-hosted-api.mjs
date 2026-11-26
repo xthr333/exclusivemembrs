@@ -51,9 +51,15 @@ const accounts = await Promise.all(handles.map(username =>
 for (const account of accounts) assert.match(account.id, /^[a-f0-9-]{36}$/);
 const localSql = sql => execFileSync('docker', ['exec', '-i', env.EXM_PREVIEW_DB_CONTAINER, 'psql',
   '-U', 'postgres', '-d', env.EXM_PREVIEW_DB_NAME, '-v', 'ON_ERROR_STOP=1', '-q'], { input: sql });
+const legacyHandle = 'legacy-' + suffix;
+const unclaimedHandle = 'unclaimed-' + suffix;
 localSql(`insert into exm_member.profiles(id,username,display_name) values
   ('${accounts[0].id}','${handles[0]}','Rehearsal owner'), ('${accounts[1].id}','${handles[1]}','Rehearsal artist');
-  insert into exm_member.staff(profile_id,role) values ('${accounts[0].id}','owner');`);
+  insert into exm_member.staff(profile_id,role) values ('${accounts[0].id}','owner');
+  insert into exm_member.reserved_handles(username) values ('${legacyHandle}'), ('${unclaimedHandle}');
+  insert into exm_member.roster_credits(handle,credit,category,route,profile_id) values
+    ('${legacyHandle}','Rehearsal verified credit','artist','/legacy?artist=${legacyHandle}','${accounts[1].id}'),
+    ('${unclaimedHandle}','Rehearsal unclaimed credit','artist','/legacy?artist=${unclaimedHandle}',null);`);
 async function login(username) {
   const response = await members('login', { data: { email: username + '@example.com', password } });
   assert.equal(response.status, 200, await response.clone().text());
@@ -97,6 +103,18 @@ assert.deepEqual([firstRecovery.status, usedCode.status].sort(), [200, 401]);
 assert.equal((await members('profile', { mode, cookie: ordinary, data: {
   displayName: 'Rehearsal artist', bio: '', discoverable: true, creativeRoles: ['artist'],
 } })).status, 200);
+const rosterCredit = async (handle, cookie) => {
+  const response = await members('roster-credits', { mode, cookie });
+  assert.equal(response.status, 200);
+  const { entries } = await response.json();
+  return entries.find(entry => entry.handle === handle);
+};
+const linkedCredit = await rosterCredit(legacyHandle);
+assert.equal(linkedCredit.linked, true);
+assert.equal(linkedCredit.publicUsername, handles[1]);
+const unclaimedCredit = await rosterCredit(unclaimedHandle);
+assert.equal(unclaimedCredit.linked, false);
+assert.ok(!Object.hasOwn(unclaimedCredit, 'publicUsername'));
 assert.equal((await platform('check_in', { mode, cookie: ordinary, data: {} })).status, 200);
 assert.equal((await platform('award', { mode, cookie: owner, data: {
   username: handles[1], activity: 'event_participation', category: 'artist', source: event.id,
@@ -121,6 +139,11 @@ assert.equal((await members('profile', { mode, cookie:ordinary, data:{ ...profil
 assert.equal((await members('profile', { mode, cookie:ordinary, data:profileEdit })).status, 400);
 const savedPhoto = await members('profile', { mode, cookie:ordinary, data:{ ...profileEdit, avatarData:photo } });
 assert.equal(savedPhoto.status, 200);
+for (const cookie of [undefined, owner, ordinary]) {
+  const hiddenCredit = await rosterCredit(legacyHandle, cookie);
+  assert.equal(hiddenCredit.linked, true);
+  assert.ok(!Object.hasOwn(hiddenCredit, 'publicUsername'));
+}
 const profileResult = await savedPhoto.json();
 assert.deepEqual(profileResult.awards, ['first_bio','first_avatar']);
 const repeatedEdit = await members('profile', { mode, cookie:ordinary, data:{ ...profileEdit, avatarData:photo } });
@@ -141,6 +164,7 @@ for (const path of [selfPath, profilePath]) {
   assert.equal(profile.publiclyVisible, false);
   assert.equal(profile.username, handles[1]);
   assert.equal(profile.bio, profileEdit.bio);
+  assert.equal(profile.rosterHandle, legacyHandle);
   assert.equal(profile.founder, false);
   assert.ok(!Object.hasOwn(profile, 'email'));
 }
@@ -154,6 +178,7 @@ assert.equal((await members('profile', { mode, cookie:ordinary, data:{ ...profil
 assert.equal((await members(avatarPath, { mode })).status, 200);
 const publicProfile = (await (await members(profilePath, { mode })).json()).profile;
 assert.equal(publicProfile.isSelf, false);
+assert.equal(publicProfile.rosterHandle, legacyHandle);
 assert.ok(!Object.hasOwn(publicProfile, 'publiclyVisible'));
 const freshSignIn = await members('login', { mode, data:{ email:handles[1] + '@example.com', password } });
 assert.equal(freshSignIn.status, 200);

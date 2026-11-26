@@ -9,12 +9,15 @@ const link = (label, href, css) => {
   node.href = href;
   return node;
 };
-const artistHref = artist => 'legacy.html?artist=' + encodeURIComponent(artist.id);
+const legacyHref = id => 'legacy.html?artist=' + encodeURIComponent(id);
+const memberHref = username => 'member.html?username=' + encodeURIComponent(username);
 
 function leaderboard(target, data) {
   const panel = target.querySelector('#legacy-scores');
   const period = target.querySelector('#legacy-period');
   const tabs = [...target.querySelectorAll('[role="tab"]')];
+  const publicProfiles = new Map();
+  const artistHref = id => publicProfiles.has(id) ? memberHref(publicProfiles.get(id)) : legacyHref(id);
   let selected = tabs[0];
 
   function render() {
@@ -57,7 +60,8 @@ function leaderboard(target, data) {
       const row = body.insertRow();
       row.dataset.rank = String(rank);
       row.insertCell().textContent = String(rank);
-      const name = link(artist.name, artistHref(artist), 'events-artist-name');
+      const name = link(artist.name, artistHref(artist.id), 'events-artist-name');
+      name.dataset.artistId = artist.id;
       const avatar = el('span', artist.name.slice(0, 2).toUpperCase(), 'events-avatar');
       avatar.setAttribute('aria-hidden', 'true');
       const identity = el('span');
@@ -96,6 +100,21 @@ function leaderboard(target, data) {
   }
   period.addEventListener('change', render);
   activate(selected);
+
+  if (window.EXMHostedMode === 'members') {
+    fetch('/api/members/roster-credits', { credentials: 'omit' }).then(async response => {
+      if (!response.ok) return;
+      const { entries } = await response.json();
+      for (const entry of entries ?? []) {
+        if (entry.linked && /^[a-z0-9][a-z0-9_-]{2,23}$/.test(entry.publicUsername ?? '')) {
+          publicProfiles.set(entry.handle, entry.publicUsername);
+        }
+      }
+      for (const name of panel.querySelectorAll('[data-artist-id]')) {
+        name.href = artistHref(name.dataset.artistId);
+      }
+    }).catch(() => {});
+  }
 }
 
 const roundIds = { Opening: 'bracket', Quarterfinal: 'round-quarters', Semifinal: 'round-semis', Final: 'round-final' };
@@ -216,7 +235,16 @@ if (views.length && !(archive && !params.get('artist'))) {
         events(target, data);
         continue;
       }
-      const id = target.dataset.person || params.get(archive ? 'artist' : 'username');
+      if (target.closest('#public-profile')) {
+        const showVerifiedHistory = () => {
+          const artist = data.artists.find(row => row.id === target.dataset.person);
+          if (artist && !target.firstElementChild) profile(target, data, artist);
+        };
+        document.addEventListener('exm:profile', showVerifiedHistory);
+        showVerifiedHistory();
+        continue;
+      }
+      const id = target.dataset.person || params.get('artist');
       const artist = data.artists.find(row => row.id === id);
       if (artist) profile(target, data, artist);
       else if (archive) target.querySelector('#artist-legacy').textContent = 'Artist record not found.';

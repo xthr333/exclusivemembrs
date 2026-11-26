@@ -15,7 +15,7 @@ export default {
     const headers = new Headers(response.headers);
     headers.set('Content-Security-Policy',
       "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; " +
-      "img-src 'self' data:; connect-src 'self'; form-action 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'");
+      "img-src 'self' data: blob:; connect-src 'self'; form-action 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'");
     headers.set('Cache-Control', 'no-store');
     return new Response(response.body, { status: response.status, headers });
   },

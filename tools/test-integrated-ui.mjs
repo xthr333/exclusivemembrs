@@ -26,12 +26,42 @@ function card(page, heading) {
 }
 
 try {
+  const shopGuest = await pageFor();
+  await shopGuest.goto(base + '/member-hub#rewards');
+  const shopSignIn = shopGuest.getByRole('link', { name: 'Sign in to Rewards Shop' });
+  await shopSignIn.waitFor();
+  assert.equal(await shopSignIn.getAttribute('href'), 'account.html?next=rewards');
+  await shopGuest.context().close();
+
   const artist = await pageFor('artist');
+  await artist.goto(base + '/account');
+  const photoInput = artist.getByLabel('Upload a profile photo');
+  await photoInput.waitFor();
+  await photoInput.setInputFiles({
+    name: 'avatar.webp', mimeType: 'image/webp',
+    buffer: Buffer.from('UklGRi4AAABXRUJQVlA4ICIAAABQAQCdASoQABAAAUAmJQBOgCgAAP74I2+pW/XRVki3AAAA', 'base64'),
+  });
+  await artist.getByText('Photo ready. Tap Save profile below to apply it.', { exact: true }).waitFor();
+  await artist.getByRole('button', { name: 'Save profile' }).click();
+  await artist.locator('#profile-save-status').getByText('Profile saved.', { exact: true }).waitFor();
+  await artist.reload();
+  await artist.locator('#profile-photo-preview').waitFor();
+  assert.equal(await artist.locator('#profile-avatar').inputValue(), 'custom');
+  await photoInput.setInputFiles({ name: 'invalid.png', mimeType: 'image/png', buffer: Buffer.from('Invalid image') });
+  await artist.locator('#profile-photo-status').getByText('This browser could not open the photo.', { exact: false }).waitFor();
+  await artist.locator('#profile-photo-preview').waitFor();
+  assert.equal(await artist.locator('#profile-avatar').inputValue(), 'custom');
+  assert.equal(await artist.getByRole('button', { name: 'Save profile' }).isEnabled(), true);
+  await artist.goto(base + '/account?next=rewards');
+  await artist.waitForURL(/member-hub(?:\.html)?#rewards$/);
+  await artist.getByRole('heading', { name: 'EXM Rewards Shop' }).waitFor();
+  await go(artist, 'Dashboard');
+  await artist.getByRole('heading', { name: 'Welcome, @preview-artist' }).waitFor();
   const check = artist.getByRole('button', { name: 'Check in today' });
   if (await check.isVisible()) await check.click();
   await artist.getByRole('button', { name: 'Checked in today' }).waitFor();
   const rank = await artist.locator('#member-rank').textContent();
-  await go(artist, 'Digital rewards');
+  await go(artist, 'Rewards Shop');
   const reward = card(artist, 'Opening Night');
   await reward.waitFor();
   const redeem = reward.getByRole('button', { name: 'Redeem for 10 points' });

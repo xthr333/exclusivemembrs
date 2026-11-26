@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="rollout.css?v=20261108-browser">
   <link rel="stylesheet" href="events-leaderboard.css">
   <link rel="stylesheet" href="browser.css?v=exm2">
+  <link rel="stylesheet" href="artist-profile.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -27,30 +28,40 @@
 </nav>
 <!-- /exm:navigation -->
   <main id="main">
-    <section class="section platform-section" aria-labelledby="member-name">
+    <section class="section platform-section artist-profile-shell" aria-label="EXM member profile">
       <p><a class="text-link" href="artists.html#members">Back to the member directory</a></p>
-      <h1 id="member-name" class="section-title">Member profile</h1>
+      <div id="profile-heading"><h1 id="member-name" class="section-title">Member profile</h1></div>
       <noscript><p>Enable JavaScript to view member profiles.</p></noscript>
       <p id="public-profile-status" role="status"></p>
       <p id="profile-signin" hidden><a class="btn" href="account.html">Open member account</a></p>
-      <div class="platform-card" id="public-profile" hidden>
-        <div id="public-profile-banner" class="cosmetic-profile-banner" hidden></div><div id="public-avatar" class="member-avatar" aria-hidden="true"></div><div id="public-progress"></div>
-        <p id="public-profile-handle"></p>
-        <p id="public-profile-roles"></p>
+      <div class="artist-profile-card" id="public-profile" hidden>
+        <header class="artist-profile-hero">
+          <div id="public-profile-banner" class="cosmetic-profile-banner" hidden></div>
+          <p class="artist-profile-kicker">EXM // THE MEMBRS</p>
+          <div id="public-avatar" class="member-avatar" aria-hidden="true"></div>
+          <p id="public-profile-handle"></p>
+          <p id="public-profile-roles"></p>
+          <div id="public-progress" hidden></div>
+          <div class="artist-profile-badges">
+            <span class="champion-mark founder-mark" id="profile-founder" hidden>Founder</span>
+            <span class="champion-mark" id="profile-roster-role" hidden></span>
+            <span id="public-champion" hidden><span class="champion-mark">SongWars champion</span></span>
+          </div>
+        </header>
+        <div class="artist-profile-body">
         <p id="public-profile-bio"></p>
         <div id="profile-self-actions" hidden>
           <p id="profile-visibility"></p>
           <a class="btn btn-dark" href="account.html#edit-profile">Edit Profile</a>
           <a class="text-link" href="account.html#profile-visibility">Change visibility</a>
         </div>
-        <p><span class="champion-mark founder-mark" id="profile-founder" hidden>Founder</span> <span class="champion-mark" id="profile-roster-role" hidden></span></p>
         <p id="public-profile-counts"></p>
         <p id="public-profile-team"></p>
-        <p id="public-champion" hidden><span class="champion-mark">SongWars champion</span></p>
-        <ul id="public-profile-links" class="hub-links" aria-label="Public profile links"></ul>
+        <ul id="public-profile-links" aria-label="Public profile links"></ul>
         <div data-legacy-view="profile"></div>
         <section id="public-profile-history" hidden><h2>Verified activity</h2><ul></ul></section>
         <div class="hub-actions"><button class="btn" id="public-profile-follow" type="button" hidden>Follow</button><button class="btn btn-dark" id="public-profile-block" type="button" hidden>Block member</button></div>
+        </div>
       </div>
     </section>
   </main>

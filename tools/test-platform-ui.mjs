@@ -89,6 +89,7 @@ try {
   await page.waitForURL(origin + '/events.html');
   const legacySection = page.locator('#leaderboard');
   await legacySection.getByRole('row').filter({ hasText: 'BitchYouNotAYop' }).getByText('90', { exact: true }).waitFor();
+  assert.equal(await legacySection.getByRole('link', { name: 'BitchYouNotAYop', exact: true }).getAttribute('href'), 'legacy.html?artist=bitchyounotayop');
   assert.equal(await legacySection.getByRole('row').count(), 21);
   assert.equal(await legacySection.locator('tr[data-rank="2"]').count(), 2);
   assert.equal(await legacySection.getByRole('columnheader', { name: 'Judge Score' }).count(), 0);
@@ -121,6 +122,22 @@ try {
   await page.getByRole('heading', { name: 'Results', exact: true }).waitFor();
   await page.goto(origin + '/index.html#songwars');
   await page.waitForURL(origin + '/events.html#featured-event');
+
+  const linkedStandings = await context.newPage();
+  await linkedStandings.addInitScript(() => { window.EXMHostedMode = 'members'; });
+  await linkedStandings.route('**/api/members/roster-credits', route => route.fulfill({ json: { entries: [
+    { handle: 'bitchyounotayop', linked: true, publicUsername: 'verified-rehearsal' },
+    { handle: 'mayo_', linked: true },
+    { handle: '1ilriskk', linked: false },
+  ] } }));
+  await linkedStandings.goto(origin + '/events.html');
+  const linkedPanel = linkedStandings.locator('#leaderboard');
+  await linkedPanel.locator('a[href="member.html?username=verified-rehearsal"]').waitFor();
+  assert.equal(await linkedPanel.getByRole('link', { name: 'Mayo_', exact: true }).getAttribute('href'), 'legacy.html?artist=mayo_');
+  assert.equal(await linkedPanel.getByRole('link', { name: 'LR', exact: true }).getAttribute('href'), 'legacy.html?artist=1ilriskk');
+  await linkedStandings.getByLabel('Legacy period').selectOption('s2');
+  assert.equal(await linkedPanel.getByRole('link', { name: 'BitchYouNotAYop', exact: true }).getAttribute('href'), 'member.html?username=verified-rehearsal');
+  await linkedStandings.close();
 
   const noScript = await browser.newContext({
     javaScriptEnabled: false, reducedMotion: 'reduce', viewport: { width: 320, height: 640 },
@@ -163,7 +180,7 @@ try {
       });
     });
 
-    await page.goto(origin + '/account.html?test-fixture=1');
+    await page.goto(origin + '/account.html?test-fixture=1&next=rewards');
     const runId = randomBytes(5).toString('hex');
     const email = 'browser-' + runId + '@example.test';
     const username = 'browser-' + runId;
@@ -179,13 +196,19 @@ try {
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
     await page.getByText('@' + username, { exact: true }).waitFor();
     assert.equal(await page.locator('#member-codes-list li').count(), 8);
+    const continueToRewards = page.getByRole('link', { name: 'Continue to Rewards Shop' });
+    await continueToRewards.waitFor();
+    assert.equal(await continueToRewards.getAttribute('href'), 'member-hub.html#rewards');
     const code = await page.locator('#member-codes-list code').first().textContent();
     assert.ok((await context.cookies()).some(cookie => cookie.name === '__Host-exm_session' && cookie.secure && cookie.httpOnly));
     await page.getByLabel('Display name', { exact: true }).fill('Local browser profile');
     await page.getByLabel('Photographer', { exact: true }).check();
+    await page.getByLabel('Show my profile in the community directory', { exact: true }).check();
     await page.getByRole('button', { name: 'Save profile' }).click();
     await page.getByText('Profile saved.', { exact: true }).waitFor();
-    await page.reload();
+    await continueToRewards.click();
+    await page.waitForURL(origin + '/member-hub.html#rewards');
+    await page.goto(origin + '/account.html?test-fixture=1');
     await page.getByText('@' + username, { exact: true }).waitFor();
     assert.equal(await page.getByLabel('Display name', { exact: true }).inputValue(), 'Local browser profile');
     assert.equal(await page.locator('#member-codes').isVisible(), false);
@@ -227,9 +250,10 @@ try {
     await page.getByText('@' + secondUsername, { exact: true }).waitFor();
     await page.goto(origin + '/member.html?username=' + username);
     await page.getByRole('button', { name: 'Follow', exact: true }).click();
-    await page.getByText('1 follower · 0 following', { exact: true }).waitFor();
-    await page.getByRole('button', { name: 'Unfollow', exact: true }).click();
+    await page.getByRole('button', { name: 'Unfollow', exact: true }).waitFor();
     await page.getByText('0 followers · 0 following', { exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Unfollow', exact: true }).click();
+    await page.getByRole('button', { name: 'Follow', exact: true }).waitFor();
     console.log('PASS: Chromium signup, recovery-code display, secure session, profile edit, reload, logout, recovery, directory filtering, follow and unfollow with local data.');
   }
   console.log('PASS: ' + pages.length * widthsToTest.length + ' Chromium layout checks, keyboard/back navigation, reduced motion, legacy subpath, and offline/no-script fallbacks.');

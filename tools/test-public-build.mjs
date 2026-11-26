@@ -7,7 +7,7 @@ const out = resolve(import.meta.dirname, '../dist');
 const root = resolve(out, '..');
 const pages = readdirSync(out).filter(file => file.endsWith('.html'));
 const privatePages = ['account.html', 'member.html', 'member-hub.html'];
-const unavailable = [...privatePages, 'server', 'supabase', 'tools', '.dev.vars',
+const unavailable = [...privatePages, 'RECOVERY-HANDOFF.md', 'server', 'supabase', 'tools', '.dev.vars',
   'member-account.js', 'member-community.js', 'member-platform.js', 'member-operations.js', 'editorial-preview.js'];
 for (const name of unavailable) assert.ok(!existsSync(resolve(out, name)), name + ' must stay out of public assets');
 const legacyExclusions = readFileSync(resolve(root, '_config.yml'), 'utf8').split('\n')

@@ -89,23 +89,30 @@
     const status = byId('public-profile-status');
     const button = byId('public-profile-follow');
     const block = byId('public-profile-block');
+    const name = byId('member-name');
+    const handle = byId('public-profile-handle');
     const params = new URLSearchParams(location.search);
     const self = params.get('view') === 'self';
     let username = params.get('username') || '';
     let following = false;
     let blocked = false;
 
+    function unavailable(message, signIn = false) {
+      details.hidden = true;
+      name.textContent = 'Member profile';
+      byId('profile-heading').append(name);
+      status.textContent = message;
+      byId('profile-signin').hidden = !signIn;
+      return false;
+    }
+
     async function load() {
       const response = await fetch(api(self ? 'public-profile?view=self' : 'public-profile?username=' + encodeURIComponent(username)));
       if (response.status === 401 && self) {
-        status.textContent = 'Sign in to view your profile.';
-        byId('profile-signin').hidden = false;
-        return false;
+        return unavailable('Sign in to view your profile.', true);
       }
       if (response.status === 404) {
-        details.hidden = true;
-        status.textContent = 'This profile is unavailable.';
-        return false;
+        return unavailable('This profile is unavailable.');
       }
       if (!response.ok) throw new Error('Profile unavailable');
       const { profile } = await response.json();
@@ -120,9 +127,12 @@
       const rosterRole = byId('profile-roster-role');
       rosterRole.hidden = !['artist', 'producer'].includes(profile.rosterCategory);
       rosterRole.textContent = profile.rosterCategory === 'artist' ? 'EXM Artist' : 'EXM Producer';
+      const historyPanel = details.querySelector('[data-legacy-view="profile"]');
+      historyPanel.dataset.person = profile.rosterHandle || '';
       document.dispatchEvent(new CustomEvent('exm:profile', { detail: { username, isSelf: profile.isSelf, publiclyVisible: profile.publiclyVisible } }));
-      byId('member-name').textContent = profile.displayName;
-      byId('public-profile-handle').textContent = '@' + profile.username;
+      name.textContent = profile.displayName;
+      handle.before(name);
+      handle.textContent = '@' + profile.username;
       byId('public-profile-roles').textContent = rolesText(profile.creativeRoles);
       byId('public-profile-bio').textContent = profile.bio;
       renderAvatar(byId('public-avatar'), profile);
@@ -137,7 +147,14 @@
           link.href = url.href;
           link.target = '_blank';
           link.rel = 'noopener noreferrer';
-          link.textContent = url.hostname.replace(/^www\./, '') + ' ↗';
+          const host = url.hostname.replace(/^www\./, '');
+          const platforms = [
+            ['spotify.com', 'Spotify'], ['soundcloud.com', 'SoundCloud'], ['bandcamp.com', 'Bandcamp'],
+            ['youtube.com', 'YouTube'], ['youtu.be', 'YouTube'], ['instagram.com', 'Instagram'],
+            ['tiktok.com', 'TikTok'], ['twitch.tv', 'Twitch'], ['vimeo.com', 'Vimeo'],
+            ['behance.net', 'Behance'], ['github.com', 'GitHub'],
+          ];
+          link.textContent = platforms.find(([domain]) => host === domain || host.endsWith('.' + domain))?.[1] || host;
           item.append(link);
         }
         return item;
@@ -158,6 +175,7 @@
       following = profile.isFollowing;
       button.textContent = following ? 'Unfollow' : 'Follow';
       details.hidden = false;
+      byId('profile-signin').hidden = true;
       status.textContent = '';
       return true;
     }
