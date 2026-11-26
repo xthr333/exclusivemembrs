@@ -74,7 +74,6 @@ function leaderboard(target, data) {
       avatar.setAttribute('aria-hidden', 'true');
       const identity = el('span');
       identity.append(artistLink(artist.id, artist.name));
-      identity.append(el('small', artist.appearances + ' recorded event' + (artist.appearances === 1 ? '' : 's')));
       const artistCell = row.insertCell();
       const artistLayout = el('div', null, 'events-artist');
       artistLayout.append(avatar, identity);
