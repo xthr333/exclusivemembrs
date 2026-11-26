@@ -9,9 +9,10 @@
   const recoveryReference = byId('member-recovery-reference');
   const rosterBadges = byId('account-roster-badges');
   const hosted = Boolean(window.EXMHostedMode);
-  const rewardsDestination = 'member-hub.html#rewards';
+  const nextView = new URLSearchParams(location.search).get('next');
+  const rewardsDestination = 'member-hub.html#' + (nextView === 'inventory' ? 'inventory' : 'rewards');
   const returnToRewards = window.EXMHostedMode !== 'events' &&
-    new URLSearchParams(location.search).get('next') === 'rewards';
+    ['rewards', 'inventory'].includes(nextView);
   const continueRewards = byId('account-continue-rewards');
   const photo = byId('profile-photo');
   const camera = byId('profile-camera');
@@ -143,13 +144,26 @@
   }
 
   async function request(action, payload) {
-    const response = await fetch('/api/members/' + action, payload === undefined ? {} : {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+    const response = await fetch('/api/members/' + action, { signal: controller.signal, ...(payload === undefined ? {} : {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+    }) });
+    const data = await response.json().catch(error => {
+      if (controller.signal.aborted || response.ok) throw error;
+      return {};
     });
-    const data = await response.json().catch(() => ({}));
     return { code: response.status, data };
+    } catch (error) {
+      throw new Error(error.name === 'AbortError'
+        ? 'The connection timed out. Your edits are still here. Reconnect, then check whether your change saved before trying again.'
+        : 'Could not reach EXM. Your edits are still here. Check your connection and try again.');
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   function showAccess() {
@@ -242,8 +256,8 @@
       feedback.textContent = isProfile ? 'Saving profile…' : 'Working…';
       try {
         await handle(Object.fromEntries(new FormData(form)), form);
-      } catch {
-        feedback.textContent = 'Member accounts are temporarily unavailable. Please try again.';
+      } catch (error) {
+        feedback.textContent = error.message || 'Member accounts are temporarily unavailable. Please try again.';
       } finally {
         if (isProfile) photo.disabled = camera.disabled = false;
         button.disabled = isProfile && preparingPhoto;
@@ -371,7 +385,9 @@
       discoverable: profile.elements.discoverable.checked,
       avatarData: formData.avatar === 'custom' ? pendingPhoto : null,
     });
-    saveStatus.textContent = code === 200 ? 'Profile saved.' : data.error || 'Could not save your profile.';
+    saveStatus.textContent = code === 200 ? 'Profile saved.' : code === 401
+      ? 'Your sign-in expired. Keep this page open, sign in to EXM in another tab, then save again. Your edits are still here.'
+      : data.error || 'Could not save your profile.';
     if (code === 200) {
       savedAvatar = formData.avatar;
       pendingPhoto = null;
