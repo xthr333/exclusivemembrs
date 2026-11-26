@@ -7,7 +7,7 @@ const out = resolve(import.meta.dirname, '../dist');
 const root = resolve(out, '..');
 const pages = readdirSync(out).filter(file => file.endsWith('.html'));
 const privatePages = ['account.html', 'member.html', 'member-hub.html'];
-const unavailable = [...privatePages, 'RECOVERY-HANDOFF.md', 'server', 'supabase', 'tools', '.dev.vars',
+const unavailable = [...privatePages, 'CONNECTED-FIX-HANDOFF.md', 'RECOVERY-HANDOFF.md', 'server', 'supabase', 'tools', '.dev.vars',
   'member-account.js', 'member-community.js', 'member-platform.js', 'member-operations.js', 'editorial-preview.js'];
 for (const name of unavailable) assert.ok(!existsSync(resolve(out, name)), name + ' must stay out of public assets');
 const legacyExclusions = readFileSync(resolve(root, '_config.yml'), 'utf8').split('\n')
@@ -61,6 +61,7 @@ assert.throws(() => renderEventCalendar([{ ...event, links: { tickets: 'javascri
 assert.match(readFileSync(resolve(out, 'hall-of-fame.html'), 'utf8'), /BitchYouNotAYop/);
 const hall = readFileSync(resolve(out, 'hall-of-fame.html'), 'utf8');
 const roster = readFileSync(resolve(out, 'artists.html'), 'utf8');
+assert.match(roster, /href="https:\/\/www\.instagram\.com\/exclusivemembrs\/">Need help claiming your artist profile\?/);
 assert.equal([...roster.matchAll(/data-roster-status="([^"]+)"/g)].length, 11);
 assert.match(roster, /data-roster-status="ybdd">Verified account/);
 for (const handle of ['03wayne', 'oxxx', '1ilriskk', 'mayo_', 'bitchyounotayop']) {

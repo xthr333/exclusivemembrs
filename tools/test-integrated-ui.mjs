@@ -133,6 +133,8 @@ try {
   await editor.getByLabel('Name', { exact: true }).fill(eventName);
   await editor.getByLabel('Description', { exact: true }).fill('Synthetic community workshop.');
   await editor.getByLabel('Event status').selectOption('registration_open');
+  await editor.getByLabel('Application intake').selectOption('artist');
+  await editor.getByLabel('Discord voice channel', { exact: false }).fill('Isolated test voice channel');
   await editor.getByRole('button', { name: 'Save event draft' }).click();
   const eventEditor = card(owner, eventName);
   await eventEditor.getByRole('button', { name: 'Publish saved draft to preview' }).click();
@@ -167,11 +169,19 @@ try {
   const publicEvent = card(guest, eventName);
   await publicEvent.getByLabel('Test display name').fill('TEST · Browser guest ' + run);
   await publicEvent.getByLabel('Synthetic contact ending in .test').fill('browser-' + run + '@example.test');
+  await publicEvent.getByLabel('Discord username').fill('browser.' + run);
+  await publicEvent.getByLabel('Instagram handle or profile link').fill('@browser.' + run);
+  await publicEvent.getByLabel('Public music link').fill('https://example.com/music');
+  await publicEvent.getByLabel('I joined the EXM Discord server').check();
+  await publicEvent.getByLabel('I can access the event voice channel').check();
   await publicEvent.getByRole('button', { name: 'Submit test application' }).click();
   await publicEvent.getByText('Test interest received.', { exact: false }).waitFor();
   await eventEditor.getByRole('button', { name: 'Review test applications' }).click();
   const guestRecord = card(owner, 'TEST · Browser guest ' + run);
   await guestRecord.getByLabel('Application status').selectOption('approved');
+  await guestRecord.getByRole('button', { name: 'Save review' }).click();
+  await guestRecord.getByText('Verify Discord server membership and event voice-channel access before approval.', { exact: true }).waitFor();
+  await guestRecord.getByLabel('I verified EXM Discord membership and access to the event voice channel').check();
   await guestRecord.getByRole('button', { name: 'Save review' }).click();
   await guestRecord.getByText('Review saved.', { exact: true }).waitFor();
 

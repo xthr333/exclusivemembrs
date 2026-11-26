@@ -26,6 +26,7 @@
 
   const filters = byId('directory-filters');
   if (filters) {
+    if (window.EXMPublicSignup) byId('member-directory-account').textContent = 'Sign in or create an account';
     const status = byId('directory-status');
     const results = byId('directory-results');
     const more = byId('directory-more');

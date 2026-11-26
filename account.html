@@ -47,6 +47,29 @@
             <button class="btn" type="submit">Sign in</button>
           </form>
         </section>
+        <section class="platform-card" id="public-signup" hidden>
+          <h2>Create an EXM account</h2>
+          <p>Members must be 13 or older. EXM uses your date of birth for this age check and does not save it. Supabase Auth uses your private email for sign-in and verification. Your profile starts private, and you choose whether to publish it. There are no direct messages.</p>
+          <form class="form-shell" id="public-signup-start" method="post">
+            <div class="field"><label for="public-signup-birth-date">Date of birth</label><input id="public-signup-birth-date" name="birthDate" type="date" min="1900-01-01" autocomplete="bday" required></div>
+            <div class="field"><label for="public-signup-email">Email for verification</label><input id="public-signup-email" name="email" type="email" maxlength="254" autocomplete="email" required></div>
+            <p><label><input name="privacyAccepted" type="checkbox" required> I understand how EXM uses this information and that public profiles are optional.</label></p>
+            <button class="btn" type="submit">Email my signup code</button>
+          </form>
+          <form class="form-shell" id="public-signup-verify" method="post" hidden>
+            <div class="field"><label for="public-signup-code">Code from your email</label><input id="public-signup-code" name="code" type="text" inputmode="numeric" pattern="[0-9]{6,10}" autocomplete="one-time-code" maxlength="10" required></div>
+            <button class="btn" type="submit">Verify email</button> <button class="btn btn-dark" id="public-signup-restart" type="button">Use a different email or resend</button>
+          </form>
+          <form class="form-shell" id="public-signup-finish" method="post" hidden>
+            <div class="field"><label for="public-signup-handle">Unique username</label><input id="public-signup-handle" name="username" pattern="[A-Za-z0-9][A-Za-z0-9_\-]{2,23}" minlength="3" maxlength="24" autocomplete="username" aria-describedby="public-username-hint" required></div>
+            <p id="public-username-hint">Use 3–24 letters, digits, hyphens or underscores. Start with a letter or digit.</p>
+            <div class="field"><label for="public-signup-name">Display or stage name</label><input id="public-signup-name" name="displayName" maxlength="60" autocomplete="nickname" required></div>
+            <div class="field"><label for="public-signup-password">New password</label><input id="public-signup-password" name="password" type="password" minlength="12" maxlength="72" autocomplete="new-password" required></div>
+            <div class="field"><label for="public-signup-confirm">Confirm new password</label><input id="public-signup-confirm" name="confirmPassword" type="password" minlength="12" maxlength="72" autocomplete="new-password" required></div>
+            <button class="btn" type="submit">Finish creating account</button>
+          </form>
+        </section>
+        <p><a class="text-link" href="https://www.instagram.com/exclusivemembrs/" rel="noopener noreferrer">Need help claiming your artist profile? DM @exclusivemembrs for assistance.</a></p>
         <!-- exm:fixture -->
         <section class="platform-card" id="fixture-signup" hidden>
           <h2>Create a test account</h2>

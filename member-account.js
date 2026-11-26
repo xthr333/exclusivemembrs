@@ -250,6 +250,62 @@
   });
   /* /exm:fixture */
 
+  if (window.EXMPublicSignup === true) {
+    const signupPanel = byId('public-signup');
+    const start = byId('public-signup-start');
+    const verify = byId('public-signup-verify');
+    const finish = byId('public-signup-finish');
+    let signupEmail = '';
+    const showSignupStep = step => {
+      for (const form of [start, verify, finish]) form.hidden = form !== step;
+      step.querySelector('input').focus();
+    };
+
+    signupPanel.hidden = false;
+    onSubmit(start, async formData => {
+      const { code, data } = await request('signup', {
+        email: formData.email, birthDate: formData.birthDate, privacyAccepted: formData.privacyAccepted === 'on',
+      });
+      status.textContent = data.message || data.error || 'Signup is temporarily unavailable.';
+      if (code !== 202) return;
+      signupEmail = formData.email;
+      start.reset();
+      showSignupStep(verify);
+    });
+    onSubmit(verify, async formData => {
+      const { code, data } = await request('signup-verify', { email: signupEmail, code: formData.code });
+      if (code !== 200) {
+        status.textContent = data.error || 'Email verification is temporarily unavailable.';
+        return;
+      }
+      status.textContent = 'Email verified. Choose your username and password.';
+      verify.reset();
+      showSignupStep(finish);
+    });
+    onSubmit(finish, async formData => {
+      const { code, data } = await request('signup-complete', formData);
+      status.textContent = data.message || data.error || 'Signup is temporarily unavailable.';
+      if (code === 401) {
+        finish.reset();
+        byId('public-signup-email').value = signupEmail;
+        showSignupStep(start);
+      } else if (code === 201) {
+        finish.reset();
+        byId('login-email').value = signupEmail;
+        signupEmail = '';
+        start.hidden = false;
+        finish.hidden = true;
+        byId('login-password').focus();
+      }
+    });
+    byId('public-signup-restart').addEventListener('click', () => {
+      verify.reset();
+      status.textContent = '';
+      byId('public-signup-email').value = signupEmail;
+      showSignupStep(start);
+    });
+  }
+
   onSubmit(byId('member-login'), async (formData, form) => {
     const { code, data } = await request('login', formData);
     if (code !== 200) {

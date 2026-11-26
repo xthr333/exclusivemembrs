@@ -30,17 +30,18 @@ export default {
       return Response.redirect(url.href, 308);
     }
     const enabled = mode && url.hostname === canonical && url.protocol === 'https:';
+    const signup = mode === 'members' && env.EXM_PUBLIC_SIGNUP === 'verified-email';
     if (url.pathname.startsWith('/api/')) {
       if (url.pathname.startsWith('/api/preview/')) return respond({ error: 'Page not found.' }, 404);
       if (request.method === 'GET' && url.pathname === '/api/exm-mode.js' && enabled) {
-        return new Response('window.EXMHostedMode = ' + JSON.stringify(mode) + ';', {
+        return new Response('window.EXMHostedMode = ' + JSON.stringify(mode) + '; window.EXMPublicSignup = ' + signup + ';', {
           headers: { 'Content-Type': 'application/javascript; charset=utf-8', 'Cache-Control': 'no-store',
             'X-Content-Type-Options': 'nosniff' },
         });
       }
       if (!enabled) return respond({ error: 'Page not found.' }, 404);
       const hosted = {
-        EXM_HOSTED: true, EXM_MEMBER_MODE: mode,
+        EXM_HOSTED: true, EXM_MEMBER_MODE: mode, EXM_PUBLIC_SIGNUP: env.EXM_PUBLIC_SIGNUP,
         EXM_MEMBER_AUTH_URL: env.EXM_MEMBER_AUTH_URL, EXM_MEMBER_DATA_URL: env.EXM_MEMBER_DATA_URL,
         EXM_MEMBER_SERVICE_ROLE_KEY: env.EXM_MEMBER_SERVICE_ROLE_KEY,
         EXM_MEMBER_ANON_KEY: env.EXM_MEMBER_ANON_KEY, EXM_MEMBER_PEPPER: env.EXM_MEMBER_PEPPER,
@@ -51,7 +52,7 @@ export default {
     }
     if (enabled && ['GET', 'HEAD'].includes(request.method) &&
         (eventPages.has(path) || memberScripts.has(path) ||
-          (mode === 'members' && ['/artists', '/member'].includes(path)))) {
+          (mode === 'members' && ['/artists', '/member', '/updates'].includes(path)))) {
       const asset = new URL(hostedAssets + path.slice(1), url);
       const response = await env.ASSETS.fetch(new Request(asset, request));
       const headers = new Headers(response.headers);

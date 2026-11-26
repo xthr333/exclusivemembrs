@@ -1,5 +1,6 @@
 # The legacy GitHub Pages site builds from the repository root.
 exclude:
+  - CONNECTED-FIX-HANDOFF.md
   - RECOVERY-HANDOFF.md
   - account.html
   - member.html

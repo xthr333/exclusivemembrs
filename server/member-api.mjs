@@ -1,6 +1,9 @@
 import { parseAvatar } from './avatar.mjs';
 
 const cookieName = '__Host-exm_session';
+const signupCookie = '__Host-exm_signup';
+const signupCookieSeconds = 600;
+const signupPaths = new Set(['/api/members/signup', '/api/members/signup-verify', '/api/members/signup-complete']);
 const usernamePattern = /^[a-z0-9][a-z0-9_-]{2,23}$/;
 const creativeRoles = new Set([
   'artist', 'producer', 'songwriter', 'photographer', 'filmmaker', 'animator',
@@ -34,10 +37,10 @@ const sha256 = async value => toHex(await crypto.subtle.digest('SHA-256', byteEn
 const normalizeEmail = email => typeof email === 'string' ? email.trim().toLowerCase() : '';
 const normalizeUsername = username => typeof username === 'string' ? username.trim().toLowerCase() : '';
 
-function readCookie(request) {
+function readCookie(request, name = cookieName) {
   const cookies = request.headers.get('Cookie')?.split(';') ?? [];
   return cookies.map(cookie => cookie.trim())
-    .find(cookie => cookie.startsWith(cookieName + '='))?.slice(cookieName.length + 1) ?? '';
+    .find(cookie => cookie.startsWith(name + '='))?.slice(name.length + 1) ?? '';
 }
 
 async function readBody(request, maxBytes = 4096) {
@@ -68,11 +71,20 @@ async function readBody(request, maxBytes = 4096) {
   throw new RequestError(400, 'Invalid request body.');
 }
 
-function credentials(body, signup) {
-  const email = normalizeEmail(body.email);
+function validEmail(value) {
+  const email = normalizeEmail(value);
   if (email.length > 254 || !/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(email)) {
     throw new RequestError(400, 'Enter an email address.');
   }
+  return email;
+}
+
+function credentials(body, signup) {
+  const email = validEmail(body.email);
+  return { email, ...accountCredentials(body, signup) };
+}
+
+function accountCredentials(body, signup) {
   const password = typeof body.password === 'string' ? body.password : '';
   const bytes = byteEncoder.encode(password).length;
   if (bytes > 72 || (signup ? [...password].length < 12 : !password)) {
@@ -85,7 +97,7 @@ function credentials(body, signup) {
       throw new RequestError(400, 'Use 3–24 letters, digits, hyphens or underscores for the username.');
     }
   }
-  return { email, password, username };
+  return { password, username };
 }
 
 // Profiles link out to approved platforms. No remote image or media loads on view.
@@ -123,11 +135,11 @@ function provider(env) {
   const digest = async (purpose, value) =>
     toHex(await crypto.subtle.sign('HMAC', await signingKey, byteEncoder.encode(purpose + ':' + value)));
 
-  const request = async (base, path, key, payload) => {
+  const request = async (base, path, key, payload, method = 'POST') => {
     const headers = { apikey: key, 'Content-Type': 'application/json' };
     if (key.startsWith('eyJ')) headers.Authorization = 'Bearer ' + key;
     const result = await fetch(base.replace(/\/$/, '') + path, {
-      method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(8000),
+      method, redirect: 'manual', signal: AbortSignal.timeout(8000),
       headers,
       body: JSON.stringify(payload),
     });
@@ -141,6 +153,11 @@ function provider(env) {
     alias: async email => (await digest('login', email)) + '@members.exclusivemembrs.com',
     digest,
     createAccount: payload => request(authURL, '/admin/users', service, payload),
+    updateSignupAccount: (id, payload) => request(authURL, '/admin/users/' + id, service, payload, 'PUT'),
+    sendSignupCode: (email, confirmed) => confirmed
+      ? request(authURL, '/otp', anon, { email, create_user: false })
+      : request(authURL, '/resend', anon, { email, type: 'signup' }),
+    verifySignupCode: (email, token) => request(authURL, '/verify', anon, { email, token, type: 'email' }),
     signIn: payload => request(authURL, '/token?grant_type=password', anon, payload),
   };
 }
@@ -174,6 +191,104 @@ async function signup(db, request, body) {
     if (!(error instanceof ProviderError) || ![400, 409, 422, 500].includes(error.status)) throw error;
   }
   return respond({ message: 'If your account was created, you can sign in to save your one-time recovery codes.' }, 202);
+}
+
+function checkSignupAge(birthDate) {
+  if (typeof birthDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
+    throw new RequestError(400, 'Enter a valid date of birth.');
+  }
+  const date = new Date(birthDate + 'T00:00:00Z');
+  const today = new Date().toISOString().slice(0, 10);
+  if (!Number.isFinite(date.getTime()) || !date.toISOString().startsWith(birthDate) || birthDate < '1900-01-01' || birthDate > today) {
+    throw new RequestError(400, 'Enter a valid date of birth.');
+  }
+  const minimumBirthday = String(date.getUTCFullYear() + 13).padStart(4, '0') + birthDate.slice(4);
+  if (minimumBirthday > today) throw new RequestError(403, 'You must be at least 13 to create an EXM account.');
+}
+
+async function beginPublicSignup(db, request, body) {
+  checkSignupAge(body.birthDate);
+  if (body.privacyAccepted !== true) throw new RequestError(400, 'Acknowledge the account privacy information to continue.');
+  const email = validEmail(body.email);
+  await throttle(db, request, 'public_signup', email, [8, 4]);
+  const state = () => db.rpc('public_signup_state', { p_email: email });
+  let existing = await state();
+  if (existing === 'missing') {
+    try {
+      await db.createAccount({
+        email, password: randomHex(30), email_confirm: false, app_metadata: { exm_registration_pending: true },
+      });
+    } catch (error) {
+      // Handle races and existing addresses without changing their credentials.
+      if (!(error instanceof ProviderError) || ![400, 409, 422].includes(error.status)) throw error;
+    }
+    existing = await state();
+  }
+  if (existing === 'unconfirmed' || existing === 'confirmed') {
+    await db.sendSignupCode(email, existing === 'confirmed');
+  }
+  return respond({ message: 'Check your inbox for the EXM signup code if your address can be registered. If you already have an account, sign in or use account recovery.' }, 202);
+}
+
+async function verifyPublicSignup(db, request, body) {
+  const email = validEmail(body.email);
+  const code = typeof body.code === 'string' ? body.code.trim() : '';
+  if (!/^\d{6,10}$/.test(code)) throw new RequestError(400, 'Enter the code from your email.');
+  await throttle(db, request, 'public_signup_verify', email, [24, 6]);
+  if (!['unconfirmed', 'confirmed'].includes(await db.rpc('public_signup_state', { p_email: email }))) {
+    throw new RequestError(401, 'This signup code is invalid or expired.');
+  }
+  let result;
+  try {
+    result = await db.verifySignupCode(email, code);
+  } catch (error) {
+    if (error instanceof ProviderError && [400, 401, 403, 422].includes(error.status)) {
+      throw new RequestError(401, 'This signup code is invalid or expired.');
+    }
+    throw error;
+  }
+  const id = result?.user?.id;
+  if (!/^[a-f0-9-]{36}$/.test(id ?? '') || result.user.app_metadata?.exm_registration_pending !== true ||
+      result.user.email !== email || !result.user.email_confirmed_at) {
+    throw new RequestError(401, 'This signup code is invalid or expired.');
+  }
+  const key = id + '.' + (Math.floor(Date.now() / 1000) + signupCookieSeconds);
+  const token = key + '.' + await db.digest('public_signup_verified', key);
+  return respond({ verified: true }, 200, {
+    'Set-Cookie': signupCookie + '=' + token + '; ' + cookieAttributes + '; Max-Age=' + signupCookieSeconds,
+  });
+}
+
+async function finishPublicSignup(db, request, body) {
+  const token = readCookie(request, signupCookie);
+  const parts = token.match(/^([a-f0-9-]{36})\.(\d{10})\.([a-f0-9]{64})$/);
+  if (!parts || Number(parts[2]) < Math.floor(Date.now() / 1000)) {
+    throw new RequestError(401, 'Verify your email again to finish signup.');
+  }
+  const [, id, expires, signature] = parts;
+  const expected = await db.digest('public_signup_verified', id + '.' + expires);
+  let mismatch = 0;
+  for (let i = 0; i < expected.length; i++) mismatch |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
+  if (mismatch) throw new RequestError(401, 'Verify your email again to finish signup.');
+  await throttle(db, request, 'public_signup_finish', id, [24, 8]);
+  const { username, password } = accountCredentials(body, true);
+  const displayName = typeof body.displayName === 'string' ? body.displayName.trim() : '';
+  if (!displayName || [...displayName].length > 60 || /[\u0000-\u001f\u007f]/.test(displayName)) {
+    throw new RequestError(400, 'Enter a display name up to 60 characters.');
+  }
+  try {
+    await db.updateSignupAccount(id, {
+      password, app_metadata: { exm_registration_pending: false, exm_signup_handle: username, exm_signup_name: displayName },
+    });
+  } catch (error) {
+    if (error instanceof ProviderError && [400, 409, 422, 500].includes(error.status)) {
+      throw new RequestError(409, 'The account could not be set up with that username. Try another username, or verify your email again if your session expired.');
+    }
+    throw error;
+  }
+  return respond({ message: 'Account created. Sign in to save your one-time recovery codes.' }, 201, {
+    'Set-Cookie': signupCookie + '=; ' + cookieAttributes + '; Max-Age=0',
+  });
 }
 
 async function login(db, request, body, hosted, backupCodes) {
@@ -223,7 +338,8 @@ async function recover(db, request, body) {
 export async function handleMemberRequest(request, env) {
   const url = new URL(request.url);
   const available = {
-    '/api/members/signup': 'POST', '/api/members/login': 'POST',
+    '/api/members/signup': 'POST', '/api/members/signup-verify': 'POST', '/api/members/signup-complete': 'POST',
+    '/api/members/login': 'POST',
     '/api/members/session': 'GET', '/api/members/logout': 'POST',
     '/api/members/profile': 'POST', '/api/members/recover': 'POST',
     '/api/members/directory': 'GET', '/api/members/public-profile': 'GET', '/api/members/follow': 'POST',
@@ -238,9 +354,13 @@ export async function handleMemberRequest(request, env) {
   }
   const hosted = env.EXM_HOSTED === true;
   const backupCodes = !hosted || env.EXM_MEMBER_MODE === 'members';
-  if (hosted && (url.pathname === '/api/members/signup' || (!backupCodes && url.pathname === '/api/members/recover'))) {
-    return respond({ error: url.pathname.endsWith('/signup') ? 'Public signup is closed.' :
-      'Use the EXM support contact for account assistance.' }, 403);
+  const fixtureSignup = !hosted && env.EXM_MEMBER_PREVIEW_SIGNUP === 'fixture' && isLoopback(request.url);
+  const publicSignup = hosted && env.EXM_MEMBER_MODE === 'members' && env.EXM_PUBLIC_SIGNUP === 'verified-email';
+  if (signupPaths.has(url.pathname) && !publicSignup && !(fixtureSignup && url.pathname === '/api/members/signup')) {
+    return respond({ error: 'Public signup is closed.' }, 403);
+  }
+  if (hosted && !backupCodes && url.pathname === '/api/members/recover') {
+    return respond({ error: 'Use the EXM support contact for account assistance.' }, 403);
   }
 
   try {
@@ -251,11 +371,11 @@ export async function handleMemberRequest(request, env) {
       return respond({ entries: await db.rpc('roster_credits') });
     }
     if (path === '/api/members/signup') {
-      if (env.EXM_MEMBER_PREVIEW_SIGNUP !== 'fixture' || !isLoopback(request.url)) {
-        return respond({ error: 'Public signup is closed.' }, 403);
-      }
-      return await signup(db, request, await readBody(request));
+      const body = await readBody(request);
+      return await (fixtureSignup ? signup(db, request, body) : beginPublicSignup(db, request, body));
     }
+    if (path === '/api/members/signup-verify') return await verifyPublicSignup(db, request, await readBody(request));
+    if (path === '/api/members/signup-complete') return await finishPublicSignup(db, request, await readBody(request));
     if (path === '/api/members/login') return await login(db, request, await readBody(request), hosted, backupCodes);
     if (path === '/api/members/recover') return await recover(db, request, await readBody(request));
 

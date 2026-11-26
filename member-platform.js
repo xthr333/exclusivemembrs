@@ -1,6 +1,7 @@
 (() => {
   const byId = id => document.getElementById(id);
   const labels = {
+    first_bio: 'First bio', first_avatar: 'First profile photo',
     profile_complete: 'Profile completed', check_in: 'Daily check-in', event_participation: 'Event participation',
     songwars_participation: 'SongWars participation', battle_win: 'SongWars battle win', finals: 'Finals appearance',
     championship: 'Championship', judging: 'Verified judging', redeem: 'Reward redeemed', reverse: 'Points correction',
@@ -81,6 +82,9 @@
   const panels = [...document.querySelectorAll('[data-panel]')];
   const viewLinks = [...document.querySelectorAll('[data-view]')];
   const signedOut = byId('hub-signed-out');
+  if (window.EXMPublicSignup === true) {
+    byId('hub-signup-policy').textContent = 'New members age 13 or older can create an EXM account.';
+  }
   const rankingForm = byId('rankings-filter');
   const catalogButton = byId('catalog-switch');
   const inventoryButton = byId('inventory-switch');
@@ -169,8 +173,13 @@
 
   function cosmeticProfilePreview(item) {
     const preview = el('div', null, 'cosmetic-profile-preview');
-    preview.setAttribute('aria-label', 'Profile preview');
-    if (item.kind === 'banner') preview.append(el('div', null, 'cosmetic-profile-banner cosmetic-' + item.appearance));
+    preview.setAttribute('aria-label', item.name + ' profile preview');
+    if (item.kind === 'banner') {
+      const banner = el('div', null, 'cosmetic-profile-banner cosmetic-' + item.appearance);
+      banner.setAttribute('aria-hidden', 'true');
+      preview.classList.add('cosmetic-preview-banner');
+      preview.append(banner);
+    }
     const avatar = el('span', 'EX', 'member-avatar');
     if (item.kind === 'frame') avatar.classList.add('cosmetic-' + item.appearance);
     preview.append(avatar, el('strong', 'EXM profile'));
@@ -179,7 +188,7 @@
   }
 
   function showRewards(data) {
-    byId('rewards-balance').textContent = fmt(data.points) + ' points available';
+    byId('rewards-balance').textContent = fmt(data.points) + ' Rewards Points available';
     catalogButton.setAttribute('aria-pressed', String(!inventory));
     inventoryButton.setAttribute('aria-pressed', String(inventory));
     const items = data.items.filter(item => inventory ? item.owned : item.active);
@@ -362,7 +371,8 @@
   }
 
   function showOwner(data) {
-    const rules = data.rules.map(rule => [rule.activity, pretty(rule.activity)]);
+    const rules = data.rules.filter(rule => !['first_bio', 'first_avatar'].includes(rule.activity))
+      .map(rule => [rule.activity, pretty(rule.activity)]);
     const verification = rules.filter(([rule]) => !['profile_complete', 'check_in'].includes(rule));
     const awards = ownerCard('Record verified activity', [
       ['Member handle', 'username'], ['Activity', 'activity', verification],

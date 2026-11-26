@@ -88,10 +88,11 @@ try {
   await page.goto(origin + '/standings.html#legacy');
   await page.waitForURL(origin + '/events.html');
   const legacySection = page.locator('#leaderboard');
-  await legacySection.getByRole('row').filter({ hasText: 'BitchYouNotAYop' }).getByText('90', { exact: true }).waitFor();
+  await legacySection.getByRole('row').filter({ hasText: 'BitchYouNotAYop' }).waitFor();
   assert.equal(await legacySection.getByRole('link', { name: 'BitchYouNotAYop', exact: true }).getAttribute('href'), 'bitchyounotayop.html');
   assert.equal(await legacySection.getByRole('row').count(), 21);
-  assert.equal(await legacySection.locator('tr[data-rank="2"]').count(), 2);
+  assert.equal(await legacySection.locator('tr[data-rank="1"]').count(), 2);
+  assert.match(await legacySection.locator('tr[data-rank="3"]').innerText(), /BitchYouNotAYop/);
   assert.equal(await legacySection.getByRole('columnheader', { name: 'Judge Score' }).count(), 0);
   assert.equal(await page.locator('#results').isVisible(), false);
   for (const width of [320, 390, 1280]) {
@@ -102,16 +103,18 @@ try {
       await page.screenshot({ path: resolve(process.env.EXM_SCREENSHOTS, 'exm-events-' + width + '.png') });
     }
   }
-  await page.getByLabel('Legacy period').selectOption('s2');
-  assert.equal(await legacySection.getByRole('row').nth(1).getByRole('cell').nth(2).textContent(), '—');
-  await page.getByLabel('Legacy period').selectOption('s3');
-  await legacySection.getByRole('row').filter({ hasText: 'Mayo_' }).getByText('80', { exact: true }).waitFor();
+  await page.getByLabel('Competition period').selectOption('s2');
+  assert.equal(await legacySection.getByRole('row').nth(1).getByRole('cell').nth(3).textContent(), '—');
+  assert.equal(await legacySection.getByText('Best round:', { exact: false }).count(), 0);
+  await page.getByLabel('Competition period').selectOption('s3');
+  await legacySection.getByRole('row').filter({ hasText: 'Mayo_' }).getByText('Best round: Final', { exact: true }).waitFor();
   const artistTab = page.getByRole('tab', { name: 'Artists' });
   await artistTab.focus();
   await page.keyboard.press('ArrowRight');
   assert.equal(await page.getByRole('tab', { name: 'Producers' }).getAttribute('aria-selected'), 'true');
   await legacySection.getByText('No verified producer competition results in this period.').waitFor();
   assert.equal(await legacySection.getByRole('link', { name: 'Vantiva / Tiva' }).getAttribute('href'), 'vantiva.html');
+  assert.equal(await legacySection.getByRole('link', { name: 'Browse the EXM roster' }).getAttribute('href'), 'artists.html');
   await page.goto(origin + '/legacy.html#legacy-bracket');
   await page.getByText('Judge Score 46–39.5 / 50', { exact: true }).waitFor();
   assert.equal(await page.locator('.events-bracket li').count(), 13);
@@ -136,6 +139,7 @@ try {
   await linkedPanel.locator('a[href="member.html?username=verified-rehearsal"]').waitFor();
   assert.equal(await linkedPanel.getByRole('link', { name: 'Mayo_', exact: true }).getAttribute('href'), 'mayo.html');
   assert.equal(await linkedPanel.getByRole('link', { name: 'LR', exact: true }).getAttribute('href'), '1ilriskk.html');
+  assert.equal(await linkedPanel.getByRole('link', { name: 'Wasi', exact: true }).getAttribute('href'), 'legacy.html?artist=wasi');
   await linkedStandings.goto(origin + '/legacy.html?artist=mayo_');
   await linkedStandings.getByRole('heading', { name: 'Mayo_', exact: true }).waitFor();
   await linkedStandings.getByText('Pilot · Winner', { exact: true }).waitFor();
@@ -143,7 +147,7 @@ try {
   assert.equal(await linkedStandings.locator('.legacy-player-stats strong').first().textContent(), '80');
   await linkedStandings.goto(origin + '/events.html');
   await linkedPanel.locator('a[href="member.html?username=verified-rehearsal"]').waitFor();
-  await linkedStandings.getByLabel('Legacy period').selectOption('s2');
+  await linkedStandings.getByLabel('Competition period').selectOption('s2');
   assert.equal(await linkedPanel.getByRole('link', { name: 'BitchYouNotAYop', exact: true }).getAttribute('href'), 'member.html?username=verified-rehearsal');
   await linkedStandings.close();
 

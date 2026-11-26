@@ -6,6 +6,7 @@
       "credits": [
         "BitchYouNotAYop"
       ],
+      "creditedArtist": "bitchyounotayop",
       "status": "archive"
     },
     {
@@ -14,6 +15,7 @@
       "credits": [
         "Mayo_"
       ],
+      "creditedArtist": "mayo_",
       "status": "archive"
     },
     {
@@ -22,6 +24,7 @@
       "credits": [
         "Mayo_"
       ],
+      "creditedArtist": "mayo_",
       "status": "pending"
     },
     {
@@ -31,6 +34,7 @@
       "credits": [
         "BitchYouNotAYop"
       ],
+      "creditedArtist": "bitchyounotayop",
       "status": "verified",
       "source": "EXM Hall of Fame"
     },
@@ -43,8 +47,17 @@
         "LR"
       ],
       "status": "verified",
-      "source": "EXM official results"
+      "source": "EXM official results",
+      "rounds": [
+        { "stage": "Opening", "order": 10, "label": "Opening" },
+        { "stage": "Quarterfinal", "order": 20, "label": "Quarterfinal" },
+        { "stage": "Semifinal", "order": 30, "label": "Semifinal" },
+        { "stage": "Final", "order": 40, "label": "Final" }
+      ]
     }
+  ],
+  "producerDiscovery": [
+    { "id": "vantiva", "name": "Vantiva / Tiva", "link": "vantiva.html" }
   ],
   "teams": [
     {
