@@ -47,6 +47,11 @@ try {
   await artist.reload();
   await artist.locator('#profile-photo-preview').waitFor();
   assert.equal(await artist.locator('#profile-avatar').inputValue(), 'custom');
+  await photoInput.setInputFiles({ name: 'invalid.png', mimeType: 'image/png', buffer: Buffer.from('Invalid image') });
+  await artist.locator('#profile-photo-status').getByText('This browser could not open the photo.', { exact: false }).waitFor();
+  await artist.locator('#profile-photo-preview').waitFor();
+  assert.equal(await artist.locator('#profile-avatar').inputValue(), 'custom');
+  assert.equal(await artist.getByRole('button', { name: 'Save profile' }).isEnabled(), true);
   await artist.goto(base + '/account?next=rewards');
   await artist.waitForURL(/member-hub(?:\.html)?#rewards$/);
   await artist.getByRole('heading', { name: 'EXM Rewards Shop' }).waitFor();

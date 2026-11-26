@@ -60,7 +60,13 @@
     pendingPhoto = null;
     photoPreview.hidden = true;
     const file = photo.files[0];
-    if (!file) return;
+    if (!file) {
+      preparingPhoto = false;
+      saveButton.disabled = false;
+      photoStatus.textContent = '';
+      restoreAvatarPreview();
+      return;
+    }
     preparingPhoto = true;
     saveButton.disabled = true;
     saveStatus.textContent = '';
@@ -215,15 +221,19 @@
     form.addEventListener('submit', async event => {
       event.preventDefault();
       const button = form.querySelector('button[type="submit"]');
+      const isProfile = form === profile;
+      if (button.disabled) return;
       button.disabled = true;
-      const feedback = form === profile ? saveStatus : status;
-      feedback.textContent = form === profile ? 'Saving profile…' : 'Working…';
+      if (isProfile) photo.disabled = true;
+      const feedback = isProfile ? saveStatus : status;
+      feedback.textContent = isProfile ? 'Saving profile…' : 'Working…';
       try {
         await handle(Object.fromEntries(new FormData(form)), form);
       } catch {
         feedback.textContent = 'Member accounts are temporarily unavailable. Please try again.';
       } finally {
-        button.disabled = form === profile && preparingPhoto;
+        if (isProfile) photo.disabled = false;
+        button.disabled = isProfile && preparingPhoto;
       }
     });
   }

@@ -24,3 +24,9 @@ Branch: `codex/exm-rewards-access-review`. Production was not deployed by this r
 6. Verify existing authorization, merge and deploy through the established pipeline, then smoke-test the exact live release. Do not reopen signup/applications or configure new providers as a side effect. Report remaining blockers honestly.
 
 The latest visual pass changes CSS only; it does not correct incomplete historical rankings or prove live profile persistence. Do not label the entire site finished until the live member workflows pass.
+
+## PR continuation
+
+- The isolated Worker, Auth and PostgreSQL tests covered avatar upload and persistence, event permissions, concurrent redemption, and verified roster links. The preview permits image-only blob URLs so it exercises the same photo preparation as production.
+- Standings use the verified roster claim and the member’s visibility setting to select a public profile link. Private and unclaimed records retain their Legacy destinations. The migration replaces two existing service-only read functions. It does not edit roster, profile, award or wallet rows.
+- Signed-in production verification still needs an authorized founder session and a separate non-founder session. Safari and iPhone photo behavior need device verification.
