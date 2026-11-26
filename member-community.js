@@ -137,7 +137,14 @@
           link.href = url.href;
           link.target = '_blank';
           link.rel = 'noopener noreferrer';
-          link.textContent = url.hostname.replace(/^www\./, '') + ' ↗';
+          const host = url.hostname.replace(/^www\./, '');
+          const platforms = [
+            ['spotify.com', 'Spotify'], ['soundcloud.com', 'SoundCloud'], ['bandcamp.com', 'Bandcamp'],
+            ['youtube.com', 'YouTube'], ['youtu.be', 'YouTube'], ['instagram.com', 'Instagram'],
+            ['tiktok.com', 'TikTok'], ['twitch.tv', 'Twitch'], ['vimeo.com', 'Vimeo'],
+            ['behance.net', 'Behance'], ['github.com', 'GitHub'],
+          ];
+          link.textContent = platforms.find(([domain]) => host === domain || host.endsWith('.' + domain))?.[1] || host;
           item.append(link);
         }
         return item;

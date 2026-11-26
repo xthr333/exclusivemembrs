@@ -1,0 +1,27 @@
+.artist-profile-shell{max-width:58rem;margin-inline:auto}
+.artist-profile-card{background:#100d12;border:1px solid #39313b;box-shadow:0 20px 65px #0008;margin-block:1.2rem;overflow:hidden}
+.artist-profile-hero{position:relative;isolation:isolate;display:grid;justify-items:center;text-align:center;gap:.55rem;padding:clamp(1.75rem,5vw,3.3rem) 1rem 1.65rem;background:repeating-linear-gradient(0deg,#ffffff06 0 1px,transparent 1px 4px),radial-gradient(ellipse at 50% 0%,#64334166,transparent 65%),linear-gradient(145deg,#201c27,#100d12 60%);border-bottom:1px solid #39313b}
+.artist-profile-hero #public-profile-banner{position:absolute;inset:0 0 auto;height:7rem;z-index:-1;opacity:.48;mask-image:linear-gradient(#000,transparent);border-radius:0}
+.artist-profile-kicker{font-size:.8rem;font-weight:800;letter-spacing:.18em;color:#e5b7bb}
+.artist-profile-hero #public-avatar{width:clamp(5rem,16vw,7rem);border-color:var(--cosmetic,#d4cbd9)}
+.artist-profile-hero #member-name{font-size:clamp(2rem,8.5vw,4.1rem);line-height:1.04;margin:0;color:#f7f1f7;letter-spacing:.02em;text-shadow:0 2px 0 #534c58}
+.artist-profile-hero p{margin:0}
+.artist-profile-hero #public-profile-handle{color:#d2c4d2}
+.artist-profile-hero #public-profile-roles{color:#dcd0db}
+.artist-profile-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:.35rem}
+.artist-profile-badges:has(> :not([hidden])){margin-top:.3rem}
+.artist-profile-hero #public-progress{width:min(100%,24rem);padding:.65rem .85rem;border:1px solid #584452;background:#201822ee;margin-top:.35rem}
+.artist-profile-rank{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.4rem;color:#f8e9f8;align-items:center}
+.artist-profile-rank span{font-size:.78rem;letter-spacing:.12em;color:#ffafb2;font-weight:800}
+#public-progress progress{width:100%;height:.55rem;accent-color:#f4737c;margin-block:.35rem}
+#public-progress p:not(.artist-profile-rank){font-size:.88rem;color:#ddd0dd;text-align:left}
+#public-progress .cosmetic-sample{margin-top:.55rem}
+.artist-profile-body{width:min(100%,42rem);margin-inline:auto;padding:clamp(1rem,4vw,2rem)}
+.artist-profile-body p:empty{display:none}
+.artist-profile-body #public-profile-bio{white-space:pre-wrap}
+.artist-profile-body #public-profile-links{display:grid;gap:.6rem;margin-block:1rem}
+.artist-profile-body #public-profile-links:empty{display:none}
+.artist-profile-body #public-profile-links a{display:flex;align-items:center;justify-content:center;min-height:3.2rem;text-align:center;padding:.55rem 1rem;text-decoration:none;overflow-wrap:anywhere;background:linear-gradient(112deg,#211a23,#30202b);border:1px solid #6c4b58;border-inline-start:3px solid #e96d79;color:#fff4f7;font-weight:800}
+.artist-profile-body #public-profile-links a:hover,.artist-profile-body #public-profile-links a:focus-visible{background:#492c3a}
+.artist-profile-body .events-history{margin-block:1.25rem;border-top:1px solid #514054;padding-top:1rem}
+@media(min-width:48rem){.artist-profile-body #public-profile-links{grid-template-columns:repeat(2,minmax(0,1fr))}.artist-profile-body #public-profile-links li:only-child{grid-column:1/-1}}

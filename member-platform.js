@@ -58,8 +58,19 @@
           banner.classList.add('cosmetic-' + data.equipped.banner.appearance);
           banner.hidden = false;
         }
-        publicProgress.replaceChildren(el('p', data.rank + ' · Level ' + data.level + ' · ' + fmt(data.xp) + ' XP'));
-        cosmetics(publicProgress, data.equipped);
+        const rank = el('p', null, 'artist-profile-rank');
+        rank.append(el('strong', data.rank), el('span', 'LEVEL ' + data.level));
+        publicProgress.replaceChildren(rank);
+        if (Number.isFinite(data.nextLevelXp) && data.nextLevelXp > data.levelFloor) {
+          const next = el('progress');
+          next.max = data.nextLevelXp - data.levelFloor;
+          next.value = Math.max(0, data.xp - data.levelFloor);
+          next.setAttribute('aria-label', 'Progress to level ' + (data.level + 1));
+          publicProgress.append(next, el('p', fmt(data.xp) + ' lifetime XP · ' +
+            fmt(Math.max(0, data.nextLevelXp - data.xp)) + ' XP to next level'));
+        } else publicProgress.append(el('p', fmt(data.xp) + ' lifetime XP'));
+        if (data.equipped?.badge) publicProgress.append(sample(data.equipped.badge, 'badge'));
+        publicProgress.hidden = false;
       }).catch(() => {});
     });
     return;
