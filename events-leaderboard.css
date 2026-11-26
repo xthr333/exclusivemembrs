@@ -72,3 +72,35 @@
 #event-board summary { min-height: 44px; display: list-item; padding: 9px 0; cursor: pointer; }
 
 .events-shell [hidden] { display: none; }
+
+/* EXM arena: decoration stays behind content and never intercepts controls. */
+.events-shell { position: relative; isolation: isolate; }
+.events-shell::before { content: ""; position: absolute; z-index: -1; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 85% 0%, #811c2524, transparent 52%); }
+.events-titlebar h1 { color: #f2f2f4; text-shadow: 2px 2px 0 #621e28; }
+.events-eyebrow { color: #d2c8cb; font-size: .8rem; }
+.events-tabs { border-color: #454248; background: #101013; }
+.events-tabs button[aria-selected="true"] { background: linear-gradient(125deg,#bc2335,#801a29); box-shadow: inset 0 1px #ffb9be50; }
+.events-rank { background: #101013; border-color: #454248; }
+.events-rank th { padding-block: 15px; font-size: .8rem; letter-spacing: .04em; }
+.events-rank td { padding-block: 15px; }
+.events-rank td:first-child, .events-rank td:last-child { font-family: var(--mono,monospace); font-size: clamp(1rem,2.7vw,1.45rem); }
+.events-rank tr[data-rank="1"] { background: linear-gradient(110deg,#39393e,#18181d 65%); }
+.events-rank tr[data-rank="2"] { background: linear-gradient(110deg,#292b31,#15151a 65%); }
+.events-rank tr[data-rank="3"] { background: linear-gradient(110deg,#322923,#151417 65%); }
+.events-rank tbody tr:hover, .events-rank tbody tr:focus-within { background-color: #242027; outline: 1px solid #786771; outline-offset: -1px; }
+.events-avatar { width: 40px; height: 40px; flex-basis: 40px; border-width: 2px; background: repeating-linear-gradient(0deg,#ffffff05 0 1px,transparent 1px 4px),#131316; font-size: .8rem; }
+.events-rank tr[data-rank="1"] .events-avatar { box-shadow: 0 0 16px #e0dce428; }
+.events-artist small { font-size: .8rem; margin-top: 3px; color: #dbb9bd; }
+.events-artist-name { text-decoration: none; }
+.events-artist-name:hover, .events-artist-name:focus-visible { text-decoration: underline; }
+.events-explainer { background: #111114; }
+.events-explainer summary { font-size: .875rem; }
+@media (max-width: 580px) {
+  .events-rank th { font-size: .75rem; letter-spacing: 0; }
+  .events-avatar { width: 30px; height: 30px; flex-basis: 30px; font-size: .75rem; }
+  .events-artist small { font-size: .75rem; }
+  .events-rank td { padding-block: 12px; }
+}
+@media (prefers-contrast: more) {
+  .events-rank, .events-rank td, .events-rank th, .events-tabs { border-color: #aaa; }
+}

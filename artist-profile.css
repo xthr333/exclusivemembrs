@@ -1,5 +1,5 @@
 .artist-profile-shell{max-width:58rem;margin-inline:auto}
-.artist-profile-card{background:#100d12;border:1px solid #39313b;box-shadow:0 20px 65px #0008;margin-block:1.2rem;overflow:hidden}
+.artist-profile-card{background:#101013;border:1px solid #454248;box-shadow:0 20px 65px #0008;margin-block:1.2rem;overflow:hidden}
 .artist-profile-hero{position:relative;isolation:isolate;display:grid;justify-items:center;text-align:center;gap:.55rem;padding:clamp(1.75rem,5vw,3.3rem) 1rem 1.65rem;background:repeating-linear-gradient(0deg,#ffffff06 0 1px,transparent 1px 4px),radial-gradient(ellipse at 50% 0%,#64334166,transparent 65%),linear-gradient(145deg,#201c27,#100d12 60%);border-bottom:1px solid #39313b}
 .artist-profile-hero #public-profile-banner{position:absolute;inset:0 0 auto;height:7rem;z-index:-1;opacity:.48;mask-image:linear-gradient(#000,transparent);border-radius:0}
 .artist-profile-kicker{font-size:.8rem;font-weight:800;letter-spacing:.18em;color:#e5b7bb}
