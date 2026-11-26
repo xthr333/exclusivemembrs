@@ -26,12 +26,24 @@ function card(page, heading) {
 }
 
 try {
+  const guest = await pageFor();
+  await guest.goto(base + '/member-hub#rewards');
+  const shopSignIn = guest.getByRole('link', { name: 'Sign in to Rewards Shop' });
+  await shopSignIn.waitFor();
+  assert.equal(await shopSignIn.getAttribute('href'), 'account.html?next=rewards');
+  await guest.context().close();
+
   const artist = await pageFor('artist');
+  await artist.goto(base + '/account?next=rewards');
+  await artist.waitForURL(/member-hub(?:\.html)?#rewards$/);
+  await artist.getByRole('heading', { name: 'EXM Rewards Shop' }).waitFor();
+  await go(artist, 'Dashboard');
+  await artist.getByRole('heading', { name: 'Welcome, @preview-artist' }).waitFor();
   const check = artist.getByRole('button', { name: 'Check in today' });
   if (await check.isVisible()) await check.click();
   await artist.getByRole('button', { name: 'Checked in today' }).waitFor();
   const rank = await artist.locator('#member-rank').textContent();
-  await go(artist, 'Digital rewards');
+  await go(artist, 'Rewards Shop');
   const reward = card(artist, 'Opening Night');
   await reward.waitFor();
   const redeem = reward.getByRole('button', { name: 'Redeem for 10 points' });

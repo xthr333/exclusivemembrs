@@ -9,6 +9,10 @@
   const recoveryReference = byId('member-recovery-reference');
   const rosterBadges = byId('account-roster-badges');
   const hosted = Boolean(window.EXMHostedMode);
+  const rewardsDestination = 'member-hub.html#rewards';
+  const returnToRewards = window.EXMHostedMode !== 'events' &&
+    new URLSearchParams(location.search).get('next') === 'rewards';
+  const continueRewards = byId('account-continue-rewards');
   const photo = byId('profile-photo');
   const photoPreview = byId('profile-photo-preview');
   const photoStatus = byId('profile-photo-status');
@@ -78,6 +82,7 @@
     dashboard.hidden = true;
     codesList.replaceChildren();
     codes.hidden = true;
+    continueRewards.hidden = true;
     ++photoVersion;
     pendingPhoto = null;
     photo.value = '';
@@ -193,7 +198,10 @@
       return item;
     });
     codesList.replaceChildren(...items);
-    await showSession();
+    if (await showSession() && returnToRewards) {
+      if (items.length) continueRewards.hidden = false;
+      else location.replace(rewardsDestination);
+    }
   });
 
   if (window.EXMHostedMode === 'events') {
@@ -284,5 +292,7 @@
     byId('fixture-signup').hidden = false;
   }
   /* /exm:fixture */
-  showSession().catch(() => { status.textContent = 'Member accounts are temporarily unavailable.'; });
+  showSession().then(signedIn => {
+    if (signedIn && returnToRewards && codes.hidden) location.replace(rewardsDestination);
+  }).catch(() => { status.textContent = 'Member accounts are temporarily unavailable.'; });
 })();

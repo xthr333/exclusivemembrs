@@ -425,6 +425,9 @@
     const view = eventsOnly ? 'staff' :
       panels.some(panel => panel.dataset.panel === requested) ? requested : 'dashboard';
     const request = ++requestNumber;
+    const signInLink = byId('hub-sign-in');
+    signInLink.href = view === 'rewards' ? 'account.html?next=rewards' : 'account.html';
+    signInLink.textContent = view === 'rewards' ? 'Sign in to Rewards Shop' : 'Sign in';
     signedOut.hidden = true;
     panels.forEach(panel => { panel.hidden = panel.dataset.panel !== view; });
     viewLinks.forEach(link => {
