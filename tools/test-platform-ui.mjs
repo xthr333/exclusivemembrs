@@ -205,7 +205,9 @@ try {
     await page.getByLabel('Photographer', { exact: true }).check();
     await page.getByRole('button', { name: 'Save profile' }).click();
     await page.getByText('Profile saved.', { exact: true }).waitFor();
-    await page.reload();
+    await continueToRewards.click();
+    await page.waitForURL(origin + '/member-hub.html#rewards');
+    await page.goto(origin + '/account.html?test-fixture=1');
     await page.getByText('@' + username, { exact: true }).waitFor();
     assert.equal(await page.getByLabel('Display name', { exact: true }).inputValue(), 'Local browser profile');
     assert.equal(await page.locator('#member-codes').isVisible(), false);
