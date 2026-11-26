@@ -21,7 +21,7 @@
     {
       "id": "s1",
       "label": "Season I",
-      "winner": "Mayo_"
+      "listedArtist": "Mayo_"
     },
     {
       "id": "pilot",
@@ -156,7 +156,9 @@
       "name": "Mayo_",
       "link": "mayo.html",
       "archiveCredits": [
-        "pilot",
+        "pilot"
+      ],
+      "archiveListings": [
         "s1"
       ],
       "seasons": [
@@ -195,6 +197,7 @@
       "name": "LR",
       "link": "1ilriskk.html",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -233,6 +236,7 @@
       "archiveCredits": [
         "pre-production"
       ],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -272,6 +276,7 @@
       "id": "wasi",
       "name": "Wasi",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -306,6 +311,7 @@
       "id": "oso-ylb",
       "name": "Oso YLB",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -336,6 +342,7 @@
       "id": "lil-vet",
       "name": "Lil Vet",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -366,6 +373,7 @@
       "id": "fukitdrako",
       "name": "fukitdrako!",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -396,6 +404,7 @@
       "id": "konrax",
       "name": "konrax!",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -426,6 +435,7 @@
       "id": "1twogg",
       "name": "1twogg",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -452,6 +462,7 @@
       "id": "mxhara",
       "name": "Mxhara",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -478,6 +489,7 @@
       "id": "jaykurtt",
       "name": "Jaykurtt",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -504,6 +516,7 @@
       "id": "bbyhero6",
       "name": "Bbyhero6",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -530,6 +543,7 @@
       "id": "pg23",
       "name": "PG23",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -556,6 +570,7 @@
       "id": "jai",
       "name": "Jai",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -582,6 +597,7 @@
       "id": "bootupkee",
       "name": "bootupkee",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -605,6 +621,7 @@
       "name": "1chrxllo",
       "link": "1chrxllo.html",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -627,6 +644,7 @@
       "id": "callmeld",
       "name": "callmeLD",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -649,6 +667,7 @@
       "id": "yung-asy",
       "name": "yung asy",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -671,6 +690,7 @@
       "id": "vbii",
       "name": "$$vbii",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",
@@ -693,6 +713,7 @@
       "id": "ayco",
       "name": "Ayco",
       "archiveCredits": [],
+      "archiveListings": [],
       "seasons": [
         {
           "id": "s3",

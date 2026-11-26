@@ -37,14 +37,13 @@ assert.deepEqual(Object.keys(publicData), ['results', 'brackets', 'artists', 'pr
 assert.equal(publicData.brackets.length, 13);
 assert.equal(publicData.artists.length, 20);
 assert.deepEqual(publicData.results.find(result => result.id === 's3').finalScore, [46, 39.5]);
-assert.deepEqual(Object.keys(publicData.results.find(result => result.id === 's1')), ['id', 'label', 'winner']);
 assert.deepEqual(Object.keys(publicData.brackets.find(result => result.id === 'opening-4')), ['id', 'stage', 'winner', 'opponent']);
 assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'songwars-public.json'),'utf8')), { results: publicData.results });
 assert.deepEqual(publicData.producers, []);
 assert.deepEqual(publicData.producerDiscovery.map(({ id, link }) => [id, link]), [['vantiva', 'vantiva.html']]);
 const competitive = rankCompetition(publicData.artists, 'all');
 assert.deepEqual(competitive.slice(0, 3).map(({ id, rank, titles, wins }) => [id, rank, titles, wins]), [
-  ['mayo_', 1, 3, 4], ['bitchyounotayop', 2, 2, 3], ['1ilriskk', 3, 1, 4],
+  ['mayo_', 1, 2, 4], ['bitchyounotayop', 2, 2, 3], ['1ilriskk', 3, 1, 4],
 ]);
 const quarterfinalist = competitive.findIndex(entry => entry.id === 'pg23');
 const opening = competitive.findIndex(entry => entry.id === 'ayco');
@@ -56,7 +55,13 @@ assert.equal(seasonTwo.length, 1);
 assert.equal(seasonTwo[0].wins, null);
 assert.equal(seasonTwo[0].round, null);
 assert.equal(seasonTwo[0].titles, 1);
-assert.deepEqual(publicData.artists.find(artist => artist.id === 'mayo_').archiveCredits, ['pilot', 's1']);
+const mayo = publicData.artists.find(artist => artist.id === 'mayo_');
+assert.deepEqual(mayo.archiveCredits, ['pilot']);
+assert.deepEqual(mayo.archiveListings, ['s1']);
+assert.deepEqual(rankCompetition(publicData.artists, 's1'), []);
+assert.deepEqual(publicData.results.find(result => result.id === 's1'), {
+  id: 's1', label: 'Season I', listedArtist: 'Mayo_',
+});
 const fixtures = Array.from({ length: 51 }, (_, index) => ({
   id: String(index), name: 'Rehearsal ' + String(index).padStart(2, '0'),
   seasons: [{ id: 'rehearsal', wins: 2, points: index }],

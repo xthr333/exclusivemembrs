@@ -73,7 +73,7 @@ assert.match(ybdd, /champion-mark">Founder<.*champion-mark">EXM Artist</);
 assert.doesNotMatch(o3, />Founder</);
 assert.match(hall, /href="1ilriskk.html">LR<\/a> and <a href="mayo.html">Mayo_<\/a>/);
 assert.match(readFileSync(resolve(out, '1ilriskk.html'), 'utf8'), /SongWars champion · Season III · Double Impact/);
-assert.match(hall, /id="season-i"[\s\S]*?Mayo_<\/a>[\s\S]*?<p>Winner<\/p>/);
+assert.match(hall, /id="season-i"[\s\S]*?Mayo_<\/a>[\s\S]*?<p>Archive listing<\/p>/);
 assert.doesNotMatch(hall, /pending verification/i);
 assert.match(readFileSync(resolve(out, 'artists.html'), 'utf8'), /href="mayo\.html"/);
 assert.match(readFileSync(resolve(out, 'admin.html'), 'utf8'), /supabase/i);

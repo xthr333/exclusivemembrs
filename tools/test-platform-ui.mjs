@@ -120,7 +120,8 @@ try {
   await page.getByText('Judge Score 46–39.5 / 50', { exact: true }).waitFor();
   assert.equal(await page.locator('.events-bracket li').count(), 13);
   assert.equal(await page.getByText('BallHogs • Mayo_ + LR • 46–39.5').count(), 1);
-  assert.equal(await page.getByText('Winner — Mayo_', { exact: true }).count(), 2);
+  assert.equal(await page.getByText('Winner — Mayo_', { exact: true }).count(), 1);
+  assert.equal(await page.getByText('Archive listing — Mayo_', { exact: true }).count(), 1);
   await page.getByRole('link', { name: 'Standings', exact: true }).click();
   await page.getByRole('heading', { name: 'Leaderboard' }).waitFor();
   await page.goBack();
@@ -147,7 +148,7 @@ try {
   await rankLink.waitFor();
   assert.equal(await rankLink.getAttribute('href'), 'events.html#leaderboard');
   await linkedStandings.getByText('Pilot · Winner', { exact: true }).waitFor();
-  await linkedStandings.getByText('Season I · Winner', { exact: true }).waitFor();
+  await linkedStandings.getByText('Season I · Archive listing', { exact: true }).waitFor();
   assert.equal(await linkedStandings.locator('.legacy-player-stats strong').first().textContent(), '80');
   await linkedStandings.goto(origin + '/bitchyounotayop.html');
   await linkedStandings.locator('h1 + [data-songwars-rank]').getByRole('link', { name: 'All-time SongWars rank #2' }).waitFor();

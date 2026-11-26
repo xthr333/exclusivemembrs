@@ -160,6 +160,8 @@ function renderResults(target, data) {
         bracket.append(round);
       }
       row.append(bracket);
+    } else if (result.listedArtist) {
+      row.append(el('p', 'Archive listing — ' + result.listedArtist));
     } else {
       row.append(el('p', 'Winner — ' + result.winner));
     }
@@ -239,6 +241,11 @@ function profile(target, data, artist) {
   for (const result of winnerOnly) {
     const credit = el('p', null, 'legacy-winner-credit');
     credit.append(el('strong', result.label), document.createTextNode(' · Winner'));
+    section.append(credit);
+  }
+  for (const result of data.results.filter(entry => artist.archiveListings?.includes(entry.id))) {
+    const credit = el('p', null, 'legacy-winner-credit');
+    credit.append(el('strong', result.label), document.createTextNode(' · Archive listing'));
     section.append(credit);
   }
   for (const record of artist.seasons) {
