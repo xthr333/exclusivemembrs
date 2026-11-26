@@ -5,7 +5,7 @@ Continue from latest `origin/main`, not an old worktree or checkpoint. This file
 ## Completed in the latest follow-up work
 
 - Events is the canonical competitive leaderboard; retired standings links now lead there.
-- Earlier winner-only credits contribute to title totals: Mayo 3, BitchYouNotAYop 2, LR 1. These do not invent earlier battle wins or additional wallet awards. Source evidence statuses remain distinct.
+- Supported winner-only credits contribute to title totals without adding inferred wins or wallet awards. The pending Season I listing stays visible on Mayo_’s record and does not count as a championship without original-result confirmation.
 - Removed misleading recorded-event counts from public leaderboard rows.
 - Updated Discord destination to https://discord.gg/8dZNXNr62r and removed the requirement for a named voice channel. Members must be able to join an accessible EXM VC and use mic/camera; staff verification remains separate from self-attestation.
 - Account editor has separate library/camera inputs, a 144px preview, bounded image decoding and actionable timeout feedback. This is not proof of real-device Safari/HEIC support.

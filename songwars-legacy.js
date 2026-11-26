@@ -160,6 +160,8 @@ function renderResults(target, data) {
         bracket.append(round);
       }
       row.append(bracket);
+    } else if (result.listedArtist) {
+      row.append(el('p', 'Archive listing — ' + result.listedArtist));
     } else {
       row.append(el('p', 'Winner — ' + result.winner));
     }
@@ -201,6 +203,15 @@ function profile(target, data, artist) {
   const section = el('section', null, 'events-history');
   const total = artist.seasons.reduce((sum, record) => sum + record.points, 0);
   const isArchive = target.dataset.legacyView === 'archive';
+  const placement = rankCompetition(data.artists, 'all').find(row => row.id === artist.id);
+  const identity = target.closest('#public-profile')?.querySelector('#public-profile-handle') ??
+    target.closest('main')?.querySelector('h1');
+  if (placement && identity) {
+    const caption = el('p', null, 'kicker');
+    caption.dataset.songwarsRank = String(placement.rank);
+    caption.append(link('All-time SongWars rank #' + placement.rank, 'events.html#leaderboard', 'text-link'));
+    identity.after(caption);
+  }
   if (isArchive) {
     target.querySelector('.events-titlebar h1').textContent = artist.name;
     const hero = el('header', null, 'legacy-player-hero');
@@ -230,6 +241,11 @@ function profile(target, data, artist) {
   for (const result of winnerOnly) {
     const credit = el('p', null, 'legacy-winner-credit');
     credit.append(el('strong', result.label), document.createTextNode(' · Winner'));
+    section.append(credit);
+  }
+  for (const result of data.results.filter(entry => artist.archiveListings?.includes(entry.id))) {
+    const credit = el('p', null, 'legacy-winner-credit');
+    credit.append(el('strong', result.label), document.createTextNode(' · Archive listing'));
     section.append(credit);
   }
   for (const record of artist.seasons) {

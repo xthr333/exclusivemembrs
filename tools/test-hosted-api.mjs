@@ -95,9 +95,7 @@ assert.equal((await platform('check_in', { cookie: ordinary, data: {} })).status
 const mode = 'members';
 const artistEvent = {
   ...event, id: randomUUID(), name: 'Rehearsal artist intake', kind: 'other', applicationMode: 'artist',
-  discordVoiceChannel: 'Isolated test voice channel',
 };
-assert.equal((await platform('event_save', { mode, cookie: owner, data: { ...artistEvent, discordVoiceChannel: '' } })).status, 400);
 assert.equal((await platform('event_save', { mode, cookie: owner, data: {
   ...artistEvent, applicationMode: 'external', registration: artistEvent.interest,
 } })).status, 400);
@@ -110,12 +108,14 @@ const artistApplication = {
   music: 'https://example.com/private-music-link',
   joinedDiscord: true,
   voiceReady: true,
+  devicesReady: true,
 };
 assert.equal((await platform('apply', { mode, data: artistApplication })).status, 409);
 assert.equal((await platform('event_publish', { mode, cookie: owner, data: { id: artistEvent.id } })).status, 200);
 assert.equal((await platform('apply', { mode, data: { ...application, event: artistEvent.id } })).status, 400);
 assert.equal((await platform('apply', { mode, data: { ...artistApplication, instagram: '' } })).status, 400);
 assert.equal((await platform('apply', { mode, data: { ...artistApplication, voiceReady: false } })).status, 400);
+assert.equal((await platform('apply', { mode, data: { ...artistApplication, devicesReady: false } })).status, 400);
 assert.equal((await platform('apply', { mode, data: { ...artistApplication, music: 'http://example.com/artist' } })).status, 400);
 assert.equal((await platform('apply', { mode, cookie: ordinary, data: artistApplication })).status, 200);
 assert.equal((await platform('apply', { mode, data: artistApplication })).status, 200);
@@ -128,15 +128,19 @@ assert.equal(reviewedArtist.discord_username, artistApplication.discord);
 assert.equal(reviewedArtist.instagram_handle, 'rehearsal.artist');
 assert.equal(reviewedArtist.music_url, artistApplication.music);
 assert.equal(reviewedArtist.discord_readiness_attested, true);
+assert.equal(reviewedArtist.devices_readiness_attested, true);
 assert.equal(reviewedArtist.discord_verified_at, null);
+assert.equal(reviewedArtist.devices_verified_at, null);
 const decision = { event: artistEvent.id, id: reviewedArtist.id, status: 'approved' };
 assert.equal((await platform('application_review', { mode, cookie: ordinary, data: { ...decision, discordVerified: true } })).status, 403);
 assert.equal((await platform('application_review', { mode, cookie: owner, data: decision })).status, 409);
 assert.equal((await platform('application_review', { mode, cookie: owner, data: { ...decision, status: 'waitlisted' } })).status, 200);
-assert.equal((await platform('application_review', { mode, cookie: owner, data: { ...decision, discordVerified: true } })).status, 200);
+assert.equal((await platform('application_review', { mode, cookie: owner, data: { ...decision, discordVerified: true } })).status, 409);
+assert.equal((await platform('application_review', { mode, cookie: owner, data: { ...decision, discordVerified: true, devicesVerified: true } })).status, 200);
 const [verified] = (await (await platform(artistReview, { mode, cookie: owner })).json()).items;
 assert.equal(verified.status, 'approved');
 assert.ok(verified.discord_verified_at);
+assert.ok(verified.devices_verified_at);
 const publicCards = await (await platform('events', { mode })).text();
 for (const privateData of [artistApplication.contact, artistApplication.music, artistApplication.discord]) {
   assert.ok(!publicCards.includes(privateData));

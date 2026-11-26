@@ -277,7 +277,9 @@
   });
   /* /exm:fixture */
 
-  if (window.EXMPublicSignup === true) {
+  const signupRehearsal = window.EXMSignupRehearsal === true &&
+    new URLSearchParams(location.search).get('signup') === 'rehearsal';
+  if (window.EXMPublicSignup === true || signupRehearsal) {
     const signupPanel = byId('public-signup');
     const start = byId('public-signup-start');
     const verify = byId('public-signup-verify');

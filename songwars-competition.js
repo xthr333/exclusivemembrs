@@ -14,7 +14,6 @@ export function rankCompetition(artists, season) {
     return [{
       ...artist,
       titles: new Set([...records.filter(record => record.champion).map(record => record.id), ...archiveTitles]).size,
-      appearances: new Set([...records.map(record => record.id), ...archiveTitles]).size,
       wins: scored.length ? scored.reduce((sum, record) => sum + record.wins, 0) : null,
       round,
     }];

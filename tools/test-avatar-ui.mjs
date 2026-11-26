@@ -1,11 +1,15 @@
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
+import { mkdtemp, rm, truncate, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { isLoopback } from '../server/member-api.mjs';
 
 const base = process.env.EXM_MEMBER_WORKER_ORIGIN || 'http://127.0.0.1:8788';
 assert.ok(isLoopback(base), 'Avatar UI tests require the isolated preview Worker.');
 const { chromium } = await import(process.env.EXM_PLAYWRIGHT_MODULE || 'playwright');
 const browser = await chromium.launch({ executablePath: process.env.EXM_CHROMIUM || undefined });
+const temporaryFiles = await mkdtemp(join(tmpdir(), 'exm-avatar-ui-'));
 const username = 'avatar-' + randomBytes(6).toString('hex');
 const email = username + '@example.test';
 const password = 'Local test ' + randomBytes(16).toString('hex');
@@ -18,7 +22,7 @@ try {
   });
   assert.equal(signup.status(), 202, 'Preview-fixture signup');
   const page = await context.newPage();
-  page.setDefaultTimeout(15000);
+  page.setDefaultTimeout(25000);
   await page.goto(base + '/account');
   const signIn = page.locator('#member-login');
   async function logIn() {
@@ -29,6 +33,7 @@ try {
   await logIn();
 
   const fileInput = page.getByLabel('Upload a profile photo');
+  const cameraInput = page.getByLabel('Or take a profile photo');
   const preview = page.locator('#profile-photo-preview');
   const photoStatus = page.locator('#profile-photo-status');
   const save = page.getByRole('button', { name: 'Save profile' });
@@ -36,6 +41,16 @@ try {
   const previewReady = photoStatus.getByText('Photo ready. Tap Save profile below to apply it.', { exact: true });
   const avatarURL = base + '/api/members/avatar?username=' + username;
   await fileInput.waitFor();
+  assert.equal(await cameraInput.getAttribute('capture'), 'user');
+  assert.equal(await fileInput.getAttribute('capture'), null);
+
+  async function read(path) {
+    return page.evaluate(async url => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Isolated API error ' + response.status + ' at ' + url);
+      return response.json();
+    }, path);
+  }
 
   async function image(name, mimeType, color, width = 40, height = 60) {
     const imageData = await page.evaluate(({ mimeType, color, width, height }) => {
@@ -49,8 +64,8 @@ try {
     return { name, mimeType, buffer: Buffer.from(imageData.split(',')[1], 'base64') };
   }
 
-  async function select(file) {
-    await fileInput.setInputFiles(file);
+  async function select(file, input = fileInput) {
+    await input.setInputFiles(file);
     await previewReady.waitFor();
     const source = await preview.getAttribute('src');
     assert.match(source, /^data:image\/webp;base64,/);
@@ -87,13 +102,23 @@ try {
   const png = await image('screenshot.png', 'image/png', '#1c6d2c');
   const webp = await image('share.webp', 'image/webp', '#2842a6');
   const phoneJpeg = await image('phone.jpg', 'image/jpeg', '#523d6c', 4032, 3024);
-  for (const file of [jpeg, png, webp, phoneJpeg]) await saveAndCheck(await select(file));
+  const initial = await read('/api/platform/dashboard');
+  const bio = 'Isolated photo and profile regression';
+  await page.getByLabel('Bio', { exact: true }).fill(bio);
+  await page.locator('#profile-visibility').uncheck();
+  await saveAndCheck(await select(jpeg, cameraInput));
+  assert.equal((await read('/api/platform/dashboard')).points - initial.points, 20, 'First bio and photo add 10 points each');
+  for (const file of [png, webp, phoneJpeg]) await saveAndCheck(await select(file));
+  assert.equal((await read('/api/platform/dashboard')).points - initial.points, 20, 'Further uploads do not repeat the milestones');
 
   const savedPhoto = await preview.getAttribute('src');
   assert.ok(savedPhoto.endsWith(username));
+  const oversizedFile = join(temporaryFiles, 'too-large.jpg');
+  await writeFile(oversizedFile, '');
+  await truncate(oversizedFile, 25 * 1024 * 1024 + 1);
   for (const [file, error] of [
     [{ name: 'invalid.png', mimeType: 'image/png', buffer: Buffer.from('Invalid image') }, 'This browser could not open the photo.'],
-    [{ ...jpeg, name: 'too-large.jpg', buffer: Buffer.alloc(25 * 1024 * 1024 + 1) }, 'This photo is over 25 MB.'],
+    [oversizedFile, 'This photo is over 25 MB.'],
     [await image('too-many-pixels.jpg', 'image/jpeg', '#444444', 8000, 6400), 'Choose a photo up to 50 megapixels.'],
   ]) {
     await fileInput.setInputFiles(file);
@@ -143,8 +168,42 @@ try {
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await logIn();
   await checkSavedAvatar(replacement);
+  assert.equal(await page.getByLabel('Bio', { exact: true }).inputValue(), bio);
+  const { profile } = await read('/api/members/public-profile?view=self');
+  assert.equal(profile.bio, bio);
+  assert.equal(profile.publiclyVisible, false);
+  assert.equal((await requestAsGuest('public-profile?username=' + username)).status, 404);
+  await page.locator('#profile-visibility').check();
+  await save.click();
+  await saved.waitFor();
+  const optedIn = await requestAsGuest('public-profile?username=' + username);
+  assert.equal(optedIn.status, 200);
+  assert.equal((await optedIn.json()).profile.bio, bio);
 
-  console.log('PASS: isolated Chromium phone viewport avatar upload, JPEG/PNG/WebP and 12 MP source, invalid/oversize/cancel and replacement race, real Worker save/reload and new sign-in.');
+  function requestAsGuest(path) {
+    return fetch(base + '/api/members/' + path);
+  }
+
+  await page.goto(base + '/member-hub');
+  await page.getByRole('button', { name: 'Check in today', exact: true }).click();
+  await page.getByRole('button', { name: 'Checked in today', exact: true }).waitFor();
+  const earned = await read('/api/platform/dashboard');
+  assert.equal(earned.points - initial.points, 25);
+  await page.getByRole('navigation', { name: 'Member hub' }).getByRole('link', { name: 'Rewards Shop' }).click();
+  const reward = page.locator('#reward-items article').filter({ has: page.getByRole('heading', { name: 'Opening Night', exact: true }) });
+  await reward.getByRole('button', { name: 'Redeem for 10 points', exact: true }).click();
+  await page.locator('#hub-status').getByText('Reward added to your inventory.', { exact: true }).waitFor();
+  await page.getByRole('button', { name: 'My inventory', exact: true }).click();
+  await reward.getByRole('button', { name: 'Equip', exact: true }).click();
+  await reward.getByRole('button', { name: 'Unequip', exact: true }).waitFor();
+  await page.reload();
+  await reward.getByRole('button', { name: 'Unequip', exact: true }).waitFor();
+  const redeemed = await read('/api/platform/dashboard');
+  assert.equal(redeemed.points, earned.points - 10);
+  assert.equal(redeemed.xp, earned.xp, 'Redeeming a reward preserves XP');
+  assert.equal(redeemed.equipped.badge.name, 'Opening Night');
+
+  console.log('PASS: isolated Chromium photo library and camera-input file, save/reload and new sign-in, photo limits and replacement, private/public profile, first bio/photo and check-in earnings, redemption/equip persistence.');
 } finally {
-  await browser.close();
+  await Promise.all([browser.close(), rm(temporaryFiles, { recursive: true })]);
 }

@@ -7,7 +7,7 @@ const out = resolve(import.meta.dirname, '../dist');
 const root = resolve(out, '..');
 const pages = readdirSync(out).filter(file => file.endsWith('.html'));
 const privatePages = ['account.html', 'member.html', 'member-hub.html'];
-const unavailable = [...privatePages, 'CONNECTED-FIX-HANDOFF.md', 'RECOVERY-HANDOFF.md', 'server', 'supabase', 'tools', '.dev.vars',
+const unavailable = [...privatePages, 'CODEX-FINISH-HANDOFF.md', 'CONNECTED-FIX-HANDOFF.md', 'RECOVERY-HANDOFF.md', 'server', 'supabase', 'tools', '.dev.vars',
   'member-account.js', 'member-community.js', 'member-platform.js', 'member-operations.js', 'editorial-preview.js'];
 for (const name of unavailable) assert.ok(!existsSync(resolve(out, name)), name + ' must stay out of public assets');
 const legacyExclusions = readFileSync(resolve(root, '_config.yml'), 'utf8').split('\n')
@@ -73,7 +73,7 @@ assert.match(ybdd, /champion-mark">Founder<.*champion-mark">EXM Artist</);
 assert.doesNotMatch(o3, />Founder</);
 assert.match(hall, /href="1ilriskk.html">LR<\/a> and <a href="mayo.html">Mayo_<\/a>/);
 assert.match(readFileSync(resolve(out, '1ilriskk.html'), 'utf8'), /SongWars champion · Season III · Double Impact/);
-assert.match(hall, /id="season-i"[\s\S]*?Mayo_<\/a>[\s\S]*?<p>Winner<\/p>/);
+assert.match(hall, /id="season-i"[\s\S]*?Mayo_<\/a>[\s\S]*?<p>Archive listing<\/p>/);
 assert.doesNotMatch(hall, /pending verification/i);
 assert.match(readFileSync(resolve(out, 'artists.html'), 'utf8'), /href="mayo\.html"/);
 assert.match(readFileSync(resolve(out, 'admin.html'), 'utf8'), /supabase/i);

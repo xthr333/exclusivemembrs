@@ -17,9 +17,9 @@ for (const season of source.seasons.filter(season => season.creditedArtist)) {
 
 const final = archive.matches.find(match => match.stage === 'Final');
 const seasonTwo = source.seasons.find(season => season.id === 's2');
-const results = [...source.seasons].reverse().map(({ id, label, credits }) => ({
+const results = [...source.seasons].reverse().map(({ id, label, status, credits }) => ({
   id, label,
-  winner: id === 's3' ? final.winner.name : credits[0],
+  ...(status === 'pending' ? { listedArtist: credits[0] } : { winner: id === 's3' ? final.winner.name : credits[0] }),
   ...(id === 's3' ? { artists: credits, finalScore: [final.score, final.opponentScore] } : {}),
 }));
 const brackets = archive.matches.map(({ id, stage, winner, opponent, score, opponentScore, outOf }) => ({
@@ -28,7 +28,9 @@ const brackets = archive.matches.map(({ id, stage, winner, opponent, score, oppo
 }));
 const artists = [...archive.people.values()].map(({ id, name, link, team }) => ({
   id, name, ...(link ? { link } : {}),
-  archiveCredits: source.seasons.filter(season => season.status !== 'verified' && season.creditedArtist === id)
+  archiveCredits: source.seasons.filter(season => season.status === 'archive' && season.creditedArtist === id)
+    .map(season => season.id),
+  archiveListings: source.seasons.filter(season => season.status === 'pending' && season.creditedArtist === id)
     .map(season => season.id),
   seasons: ['s3', 's2'].flatMap(season => {
     const played = season === 's3' && team.bouts.length > 0;
