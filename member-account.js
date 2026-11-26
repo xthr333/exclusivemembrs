@@ -14,6 +14,7 @@
     new URLSearchParams(location.search).get('next') === 'rewards';
   const continueRewards = byId('account-continue-rewards');
   const photo = byId('profile-photo');
+  const camera = byId('profile-camera');
   const photoPreview = byId('profile-photo-preview');
   const photoStatus = byId('profile-photo-status');
   const saveStatus = byId('profile-save-status');
@@ -55,11 +56,11 @@
     return prefix + btoa(binary);
   }
 
-  photo.addEventListener('change', async () => {
+  async function preparePhoto(input) {
     const version = ++photoVersion;
     pendingPhoto = null;
     photoPreview.hidden = true;
-    const file = photo.files[0];
+    const file = input.files[0];
     if (!file) {
       preparingPhoto = false;
       saveButton.disabled = false;
@@ -78,8 +79,16 @@
       }
       const image = new Image();
       await new Promise((resolve, reject) => {
-        image.onload = resolve;
-        image.onerror = () => reject(new Error('This browser could not open the photo. On iPhone, try a screenshot or export it as JPEG.'));
+        const timer = setTimeout(() => {
+          image.onload = image.onerror = null;
+          image.src = '';
+          reject(new Error('This photo took too long to open. Choose it again, or try a smaller JPEG or screenshot.'));
+        }, 20000);
+        image.onload = () => { clearTimeout(timer); resolve(); };
+        image.onerror = () => {
+          clearTimeout(timer);
+          reject(new Error('This browser could not open the photo. On iPhone, try a screenshot or export it as JPEG.'));
+        };
         image.src = url;
       });
       if (!image.naturalWidth || !image.naturalHeight || image.naturalWidth * image.naturalHeight > 50_000_000) {
@@ -110,7 +119,7 @@
     } catch (error) {
       if (version === photoVersion) {
         photoStatus.textContent = error.message;
-        photo.value = '';
+        input.value = '';
         restoreAvatarPreview();
       }
     } finally {
@@ -120,7 +129,10 @@
         saveButton.disabled = false;
       }
     }
-  });
+  }
+  for (const input of [photo, camera]) {
+    input.addEventListener('change', () => preparePhoto(input));
+  }
 
   let savedAvatar = 'initials';
   let savedAvatarURL = '';
@@ -153,6 +165,7 @@
     saveStatus.textContent = '';
     pendingPhoto = null;
     photo.value = '';
+    camera.value = '';
     photoPreview.removeAttribute('src');
     photoPreview.hidden = true;
     photoStatus.textContent = '';
@@ -224,7 +237,7 @@
       const isProfile = form === profile;
       if (button.disabled) return;
       button.disabled = true;
-      if (isProfile) photo.disabled = true;
+      if (isProfile) photo.disabled = camera.disabled = true;
       const feedback = isProfile ? saveStatus : status;
       feedback.textContent = isProfile ? 'Saving profile…' : 'Working…';
       try {
@@ -232,7 +245,7 @@
       } catch {
         feedback.textContent = 'Member accounts are temporarily unavailable. Please try again.';
       } finally {
-        if (isProfile) photo.disabled = false;
+        if (isProfile) photo.disabled = camera.disabled = false;
         button.disabled = isProfile && preparingPhoto;
       }
     });
@@ -363,6 +376,7 @@
       savedAvatar = formData.avatar;
       pendingPhoto = null;
       photo.value = '';
+      camera.value = '';
       photoStatus.textContent = '';
       restoreAvatarPreview();
       const awards = (data.awards || []).map(award => award === 'first_bio' ? 'First bio earned.' : 'First custom avatar earned.').join(' ');
