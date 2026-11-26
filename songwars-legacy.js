@@ -74,7 +74,7 @@ function leaderboard(target, data) {
       avatar.setAttribute('aria-hidden', 'true');
       const identity = el('span');
       identity.append(artistLink(artist.id, artist.name));
-      if (artist.round) identity.append(el('small', 'Best round: ' + artist.round.label));
+      identity.append(el('small', artist.appearances + ' recorded event' + (artist.appearances === 1 ? '' : 's')));
       const artistCell = row.insertCell();
       const artistLayout = el('div', null, 'events-artist');
       artistLayout.append(avatar, identity);
@@ -219,8 +219,8 @@ function profile(target, data, artist) {
     return card;
   };
   stats.append(stat(total, 'Legacy Points'));
-  const titles = artist.seasons.filter(record => record.champion).length;
-  if (titles) stats.append(stat(titles, 'Verified championships'));
+  const titles = new Set([...artist.seasons.filter(record => record.champion).map(record => record.id), ...(artist.archiveCredits ?? [])]).size;
+  if (titles) stats.append(stat(titles, 'Championships'));
   if (knownWins.length) stats.append(stat(knownWins.reduce((sum, record) => sum + record.wins, 0), 'Recorded wins'));
   section.append(stats);
   const recordLink = artist.link && !location.pathname.endsWith('/' + artist.link) &&

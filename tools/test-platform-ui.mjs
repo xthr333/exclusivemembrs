@@ -107,7 +107,7 @@ try {
   assert.equal(await legacySection.getByRole('row').nth(1).getByRole('cell').nth(3).textContent(), '—');
   assert.equal(await legacySection.getByText('Best round:', { exact: false }).count(), 0);
   await page.getByLabel('Competition period').selectOption('s3');
-  await legacySection.getByRole('row').filter({ hasText: 'Mayo_' }).getByText('Best round: Final', { exact: true }).waitFor();
+  await legacySection.getByRole('row').filter({ hasText: 'Mayo_' }).getByText('1 recorded event', { exact: true }).waitFor();
   const artistTab = page.getByRole('tab', { name: 'Artists' });
   await artistTab.focus();
   await page.keyboard.press('ArrowRight');

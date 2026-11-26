@@ -6,13 +6,15 @@ export function rankCompetition(artists, season) {
 
   const standings = artists.flatMap(artist => {
     const records = artist.seasons.filter(record => season === 'all' || record.id === season);
-    if (!records.length) return [];
+    const archiveTitles = (artist.archiveCredits ?? []).filter(id => season === 'all' || id === season);
+    if (!records.length && !archiveTitles.length) return [];
     const scored = records.filter(record => Number.isInteger(record.wins));
     const round = records.reduce((best, record) =>
       record.round && (!best || record.round.order > best.order) ? record.round : best, null);
     return [{
       ...artist,
-      titles: records.filter(record => record.champion).length,
+      titles: new Set([...records.filter(record => record.champion).map(record => record.id), ...archiveTitles]).size,
+      appearances: new Set([...records.map(record => record.id), ...archiveTitles]).size,
       wins: scored.length ? scored.reduce((sum, record) => sum + record.wins, 0) : null,
       round,
     }];
