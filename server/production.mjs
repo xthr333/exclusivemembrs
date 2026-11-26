@@ -1,4 +1,4 @@
-import { handleMemberRequest, respond } from './member-api.mjs';
+import { handleMemberRequest, respond, signupRehearsalEmail } from './member-api.mjs';
 import { handlePlatformRequest } from './platform-api.mjs';
 
 const canonical = 'exclusivemembrs.com';
@@ -31,10 +31,12 @@ export default {
     }
     const enabled = mode && url.hostname === canonical && url.protocol === 'https:';
     const signup = mode === 'members' && env.EXM_PUBLIC_SIGNUP === 'verified-email';
+    const rehearsal = !signup && Boolean(signupRehearsalEmail(env, mode));
     if (url.pathname.startsWith('/api/')) {
       if (url.pathname.startsWith('/api/preview/')) return respond({ error: 'Page not found.' }, 404);
       if (request.method === 'GET' && url.pathname === '/api/exm-mode.js' && enabled) {
-        return new Response('window.EXMHostedMode = ' + JSON.stringify(mode) + '; window.EXMPublicSignup = ' + signup + ';', {
+        return new Response('window.EXMHostedMode = ' + JSON.stringify(mode) + '; window.EXMPublicSignup = ' + signup +
+          '; window.EXMSignupRehearsal = ' + rehearsal + ';', {
           headers: { 'Content-Type': 'application/javascript; charset=utf-8', 'Cache-Control': 'no-store',
             'X-Content-Type-Options': 'nosniff' },
         });
@@ -42,6 +44,7 @@ export default {
       if (!enabled) return respond({ error: 'Page not found.' }, 404);
       const hosted = {
         EXM_HOSTED: true, EXM_MEMBER_MODE: mode, EXM_PUBLIC_SIGNUP: env.EXM_PUBLIC_SIGNUP,
+        EXM_SIGNUP_REHEARSAL_EMAIL: env.EXM_SIGNUP_REHEARSAL_EMAIL,
         EXM_MEMBER_AUTH_URL: env.EXM_MEMBER_AUTH_URL, EXM_MEMBER_DATA_URL: env.EXM_MEMBER_DATA_URL,
         EXM_MEMBER_SERVICE_ROLE_KEY: env.EXM_MEMBER_SERVICE_ROLE_KEY,
         EXM_MEMBER_ANON_KEY: env.EXM_MEMBER_ANON_KEY, EXM_MEMBER_PEPPER: env.EXM_MEMBER_PEPPER,

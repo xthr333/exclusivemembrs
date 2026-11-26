@@ -91,8 +91,9 @@ try {
   await legacySection.getByRole('row').filter({ hasText: 'BitchYouNotAYop' }).waitFor();
   assert.equal(await legacySection.getByRole('link', { name: 'BitchYouNotAYop', exact: true }).getAttribute('href'), 'bitchyounotayop.html');
   assert.equal(await legacySection.getByRole('row').count(), 21);
-  assert.equal(await legacySection.locator('tr[data-rank="1"]').count(), 2);
-  assert.match(await legacySection.locator('tr[data-rank="3"]').innerText(), /BitchYouNotAYop/);
+  assert.match(await legacySection.locator('tr[data-rank="1"]').innerText(), /Mayo_/);
+  assert.match(await legacySection.locator('tr[data-rank="2"]').innerText(), /BitchYouNotAYop/);
+  assert.match(await legacySection.locator('tr[data-rank="3"]').innerText(), /LR/);
   assert.equal(await legacySection.getByRole('columnheader', { name: 'Judge Score' }).count(), 0);
   assert.equal(await page.locator('#results').isVisible(), false);
   for (const width of [320, 390, 1280]) {
@@ -142,14 +143,56 @@ try {
   assert.equal(await linkedPanel.getByRole('link', { name: 'Wasi', exact: true }).getAttribute('href'), 'legacy.html?artist=wasi');
   await linkedStandings.goto(origin + '/legacy.html?artist=mayo_');
   await linkedStandings.getByRole('heading', { name: 'Mayo_', exact: true }).waitFor();
+  const rankLink = linkedStandings.locator('h1 + [data-songwars-rank]').getByRole('link', { name: 'All-time SongWars rank #1' });
+  await rankLink.waitFor();
+  assert.equal(await rankLink.getAttribute('href'), 'events.html#leaderboard');
   await linkedStandings.getByText('Pilot · Winner', { exact: true }).waitFor();
   await linkedStandings.getByText('Season I · Winner', { exact: true }).waitFor();
   assert.equal(await linkedStandings.locator('.legacy-player-stats strong').first().textContent(), '80');
+  await linkedStandings.goto(origin + '/bitchyounotayop.html');
+  await linkedStandings.locator('h1 + [data-songwars-rank]').getByRole('link', { name: 'All-time SongWars rank #2' }).waitFor();
   await linkedStandings.goto(origin + '/events.html');
   await linkedPanel.locator('a[href="member.html?username=verified-rehearsal"]').waitFor();
   await linkedStandings.getByLabel('Competition period').selectOption('s2');
   assert.equal(await linkedPanel.getByRole('link', { name: 'BitchYouNotAYop', exact: true }).getAttribute('href'), 'member.html?username=verified-rehearsal');
   await linkedStandings.close();
+
+  if (pages.includes('member.html')) {
+    const profile = await context.newPage();
+    await profile.setViewportSize({ width: 320, height: 640 });
+    const longName = 'LocalArtist'.repeat(5);
+    await profile.route('**/api/members/public-profile?**', route => route.fulfill({ json: { profile: {
+      username: 'local-artist', displayName: longName, bio: 'Local profile', creativeRoles: [],
+      verifiedActivity: [], links: [], staffRoles: [], followers: 0, following: 0,
+    } } }));
+    const progress = { level: 2, rank: 'New Member', xp: 125, nextLevelXp: 200, levelFloor: 100 };
+    let request = 0;
+    await profile.route('**/api/platform/public_progress?**', route => {
+      request += 1;
+      if (request === 1) return route.fulfill({ status: 503, json: { error: 'Preview temporarily unavailable' } });
+      return route.fulfill({ json: { ...progress, equipped: request === 2 ? {
+        frame: { appearance: 'chrome', name: 'Chrome Frame' },
+        banner: { appearance: 'ember', name: 'Ember Banner' },
+      } : {} } });
+    });
+    await profile.goto(origin + '/member.html?username=local-artist');
+    const name = profile.getByRole('heading', { name: longName, exact: true });
+    const retryProgress = profile.getByRole('button', { name: 'Retry profile progress' });
+    await name.waitFor();
+    await retryProgress.focus();
+    await profile.keyboard.press('Enter');
+    await profile.getByRole('progressbar', { name: 'Progress to level 3' }).waitFor();
+    await profile.locator('#public-avatar.cosmetic-chrome').waitFor();
+    await profile.locator('#public-profile-banner.cosmetic-ember').waitFor();
+    assert.ok(await name.evaluate(element => element.scrollWidth <= element.clientWidth));
+    assert.ok(await profile.evaluate(() => document.documentElement.scrollWidth === innerWidth));
+    await profile.evaluate(() => document.dispatchEvent(new CustomEvent('exm:profile', {
+      detail: { username: 'local-artist' },
+    })));
+    await profile.locator('#public-profile-banner').waitFor({ state: 'hidden' });
+    assert.equal(await profile.locator('#public-avatar.cosmetic-chrome').count(), 0);
+    await profile.close();
+  }
 
   const noScript = await browser.newContext({
     javaScriptEnabled: false, reducedMotion: 'reduce', viewport: { width: 320, height: 640 },

@@ -66,16 +66,25 @@
   window.EXMMemberUI = { api, el, actionButton, field, formFor, pretty, date };
   const publicProgress = byId('public-progress');
   if (publicProgress) {
-    document.addEventListener('exm:profile', ({ detail }) => {
+    const avatar = byId('public-avatar');
+    const banner = byId('public-profile-banner');
+    let latestProgressRequest = 0;
+    let frameClass;
+    let bannerClass;
+
+    async function showProfileProgress(detail) {
+      const request = ++latestProgressRequest;
       const path = detail.isSelf ? 'dashboard' : 'public_progress?username=' + encodeURIComponent(detail.username);
-      api(path).then(data => {
-        const avatar = byId('public-avatar');
-        if (data.equipped?.frame) avatar.classList.add('cosmetic-' + data.equipped.frame.appearance);
-        const banner = byId('public-profile-banner');
-        if (banner && data.equipped?.banner) {
-          banner.classList.add('cosmetic-' + data.equipped.banner.appearance);
-          banner.hidden = false;
-        }
+      try {
+        const data = await api(path);
+        if (request !== latestProgressRequest) return;
+        if (frameClass) avatar.classList.remove(frameClass);
+        frameClass = data.equipped?.frame && 'cosmetic-' + data.equipped.frame.appearance;
+        if (frameClass) avatar.classList.add(frameClass);
+        if (bannerClass) banner.classList.remove(bannerClass);
+        bannerClass = data.equipped?.banner && 'cosmetic-' + data.equipped.banner.appearance;
+        if (bannerClass) banner.classList.add(bannerClass);
+        banner.hidden = !bannerClass;
         const rank = el('p', null, 'artist-profile-rank');
         rank.append(el('strong', data.rank), el('span', 'LEVEL ' + data.level));
         publicProgress.replaceChildren(rank);
@@ -89,8 +98,19 @@
         } else publicProgress.append(el('p', fmt(data.xp) + ' lifetime XP'));
         if (data.equipped?.badge) publicProgress.append(sample(data.equipped.badge, 'badge'));
         publicProgress.hidden = false;
-      }).catch(() => {});
-    });
+      } catch (error) {
+        if (request !== latestProgressRequest || error.status === 404) return;
+        const message = el('p', 'Profile progress is temporarily unavailable.');
+        message.setAttribute('role', 'status');
+        const retry = actionButton('Retry profile progress', async button => {
+          button.disabled = true;
+          await showProfileProgress(detail);
+        });
+        publicProgress.replaceChildren(message, retry);
+        publicProgress.hidden = false;
+      }
+    }
+    document.addEventListener('exm:profile', ({ detail }) => showProfileProgress(detail));
     return;
   }
 
@@ -115,6 +135,7 @@
   let inventory = false;
   let rewardData = null;
   let previewProfile = null;
+  const pendingRewards = new Set();
   const rewardKind = byId('reward-kind');
   let before = null;
   let blockedAfter = '';
@@ -143,7 +164,7 @@
       status.textContent = error.message;
       return false;
     } finally {
-      if (button.isConnected && button.id !== 'daily-check-in') button.disabled = false;
+      if (button.isConnected && button.id !== 'daily-check-in' && !button.dataset.rewardAction) button.disabled = false;
       if (button.id === 'daily-check-in' && button.textContent === 'Check in today') button.disabled = false;
     }
   }
@@ -196,14 +217,13 @@
     }), 'No verified scores in this category and period yet.');
   }
 
-  function cosmeticProfilePreview(item) {
-    const preview = el('div', null, 'cosmetic-profile-preview');
-    preview.setAttribute('aria-label', item.name + ' profile preview');
+  function paintCosmeticPreview(preview, item) {
+    const children = [];
+    preview.classList.toggle('cosmetic-preview-banner', item.kind === 'banner');
     if (item.kind === 'banner') {
       const banner = el('div', null, 'cosmetic-profile-banner cosmetic-' + item.appearance);
       banner.setAttribute('aria-hidden', 'true');
-      preview.classList.add('cosmetic-preview-banner');
-      preview.append(banner);
+      children.push(banner);
     }
     const name = previewProfile?.displayName || 'EXM profile';
     const avatar = el('span', previewProfile ? name.slice(0, 2).toUpperCase() : 'EX', 'member-avatar');
@@ -215,9 +235,50 @@
       avatar.replaceChildren(image);
     }
     if (item.kind === 'frame') avatar.classList.add('cosmetic-' + item.appearance);
-    preview.append(avatar, el('strong', name));
-    if (item.kind === 'badge') preview.append(sample(item, 'badge'));
+    children.push(avatar, el('strong', name));
+    if (item.kind === 'badge') children.push(sample(item, 'badge'));
+    preview.replaceChildren(...children);
+  }
+
+  function cosmeticProfilePreview(item) {
+    const preview = el('div', null, 'cosmetic-profile-preview');
+    preview.dataset.rewardPreview = item.slug;
+    preview.setAttribute('aria-label', item.name + ' profile preview');
+    paintCosmeticPreview(preview, item);
     return preview;
+  }
+
+  function personalizeRewards(request) {
+    requestJSON('/api/members/session').then(({ profile }) => {
+      if (request !== requestNumber || !profile) return;
+      previewProfile = profile;
+      const items = new Map(rewardData.items.map(item => [item.slug, item]));
+      for (const preview of byId('rewards').querySelectorAll('[data-reward-preview]')) {
+        const item = items.get(preview.dataset.rewardPreview);
+        if (item) paintCosmeticPreview(preview, item);
+      }
+    }).catch(() => {});
+  }
+
+  function rewardButton(item, label, action, message, insufficient = false) {
+    const button = actionButton(label, async button => {
+      if (button.disabled || pendingRewards.has(item.slug)) return;
+      pendingRewards.add(item.slug);
+      try {
+        await mutate(button, action, { reward: item.slug }, message);
+      } finally {
+        pendingRewards.delete(item.slug);
+        for (const visible of byId('rewards').querySelectorAll('[data-reward-action]')) {
+          if (visible.dataset.rewardAction === item.slug) {
+            visible.disabled = visible.dataset.insufficientBalance === 'true';
+          }
+        }
+      }
+    });
+    button.dataset.rewardAction = item.slug;
+    button.dataset.insufficientBalance = String(insufficient);
+    button.disabled = insufficient || pendingRewards.has(item.slug);
+    return button;
   }
 
   function showRewards(data) {
@@ -235,13 +296,13 @@
       if (item.owned) {
         card.append(el('p', item.equipped ? 'Owned · equipped' : 'Owned'));
         const action = item.equipped ? 'unequip' : 'equip';
-        card.append(actionButton(item.equipped ? 'Unequip' : 'Equip', button =>
-          mutate(button, action, { reward: item.slug }, item.equipped ? 'Item unequipped.' : 'Cosmetic equipped.')));
+        card.append(rewardButton(item, item.equipped ? 'Unequip' : 'Equip', action,
+          item.equipped ? 'Item unequipped.' : 'Cosmetic equipped.'));
       } else if (item.cost != null) {
-        const button = actionButton('Redeem for ' + item.cost + ' points', button =>
-          mutate(button, 'redeem', { reward: item.slug }, 'Reward added to your inventory.'));
-        button.disabled = item.cost > data.points;
-        card.append(el('p', button.disabled ? 'Earn ' + (item.cost - data.points) + ' more points' : 'Available'), button);
+        const insufficient = item.cost > data.points;
+        const button = rewardButton(item, 'Redeem for ' + item.cost + ' points', 'redeem',
+          'Reward added to your inventory.', insufficient);
+        card.append(el('p', insufficient ? 'Earn ' + (item.cost - data.points) + ' more points' : 'Available'), button);
       }
       return card;
     }
@@ -513,10 +574,11 @@
         if (request !== requestNumber) return;
         showFeed(data);
       } else if (view === 'rewards') {
-        const [data, session] = await Promise.all([api('rewards'), requestJSON('/api/members/session').catch(() => null)]);
+        const data = await api('rewards');
         if (request !== requestNumber) return;
-        previewProfile = session?.profile || null;
+        previewProfile = null;
         showRewards(data);
+        personalizeRewards(request);
       } else if (view === 'access') {
         await window.EXMMemberOperations.access();
       } else if (view === 'privacy') {

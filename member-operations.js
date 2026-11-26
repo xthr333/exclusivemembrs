@@ -99,7 +99,8 @@
       const artistApplication = event.applicationMode === 'artist';
       const { form, finish } = task(card, hosted ? 'Submit application' : 'Submit test application', async values => {
         const readiness = artistApplication
-          ? { joinedDiscord: values.joinedDiscord === 'on', voiceReady: values.voiceReady === 'on' }
+          ? { joinedDiscord: values.joinedDiscord === 'on', voiceReady: values.voiceReady === 'on',
+            devicesReady: values.devicesReady === 'on' }
           : {};
         await api('apply', { event: event.id, ...values, ...readiness });
         form.reset();
@@ -118,7 +119,8 @@
         field(form, 'Instagram handle or profile link', 'instagram').maxLength = 500;
         field(form, 'Public music link', 'music', null, 'url').maxLength = 500;
         field(form, 'I joined the EXM Discord server', 'joinedDiscord', null, 'checkbox');
-        field(form, 'I can join a voice channel and have checked my microphone and camera', 'voiceReady', null, 'checkbox');
+        field(form, 'I can join an EXM voice channel', 'voiceReady', null, 'checkbox');
+        field(form, 'I have checked my microphone and camera', 'devicesReady', null, 'checkbox');
       }
       if (event.question) field(form, event.question, 'answer').maxLength = 600;
       finish();
@@ -252,8 +254,6 @@
       useValue(form, 'Event status', 'status', old.status || 'draft', choices(states));
       useValue(form, 'Application intake', 'applicationMode',
         old.applicationMode || (old.registration ? 'external' : 'standard'), applicationModes);
-      useValue(form, 'Discord voice channel (required to open artist applications)',
-        'discordVoiceChannel', old.discordVoiceChannel, null, 'text', false).maxLength = 80;
       const capacity = useValue(form, 'Capacity (optional)', 'capacity', old.capacity, null, 'number', false);
       capacity.min = 1;
       capacity.max = 500;
@@ -299,20 +299,27 @@
       card.append(el('h4', record.display_name), el('p', record.contact), el('p', record.answer));
       if (record.discord_readiness_attested) {
         card.append(el('p', 'Discord: ' + record.discord_username), el('p', 'Instagram: @' + record.instagram_handle),
-          el('p', 'Applicant confirmed EXM server membership and access to the event voice channel.'));
+          el('p', 'Applicant confirmed EXM server membership and voice access.'),
+          el('p', record.devices_readiness_attested ? 'Applicant confirmed microphone and camera readiness.' :
+            'This application predates the microphone and camera prompt.'));
         appendLink(card, record.music_url, 'Open music link');
       }
       const { form, finish } = task(card, 'Save review', async values => {
-        const readiness = record.discord_readiness_attested ? { discordVerified: values.discordVerified === 'on' } : {};
+        const readiness = record.discord_readiness_attested ? { discordVerified: values.discordVerified === 'on',
+          devicesVerified: values.devicesVerified === 'on' } : {};
         await api('application_review', { event: id, id: record.id, status: values.status, ...readiness });
         return 'Review saved.';
       });
       useValue(form, 'Application status', 'status', record.status, choices(['pending', 'approved', 'waitlisted', 'declined']));
       if (record.discord_readiness_attested) {
-        const verified = field(form, 'I verified EXM Discord membership and access to the event voice channel',
+        const verified = field(form, 'I verified EXM Discord membership and voice access',
           'discordVerified', null, 'checkbox');
         verified.required = false;
         verified.checked = Boolean(record.discord_verified_at);
+        const devices = field(form, 'I verified that the microphone and camera work in EXM voice',
+          'devicesVerified', null, 'checkbox');
+        devices.required = false;
+        devices.checked = Boolean(record.devices_verified_at);
       }
       finish();
       return card;
@@ -411,6 +418,12 @@
     const rebuild = () => studio(owner, canReview, canScore);
     const group = el('div', null, 'platform-grid hub-grid');
     const children = [el('h3', 'Events and applications')];
+    if (owner && hosted) {
+      const authoritative = el('div');
+      appendLink(authoritative, 'https://songwars-s3-registration.b26xkz4v97.chatgpt.site/admin/season-4/applications',
+        'Review official SongWars IV applications');
+      children.push(authoritative);
+    }
     if (owner) group.append(editorCard(null, 'event', rebuild));
     for (const event of data.events) {
       const card = owner ? editorCard(event, 'event', rebuild) : el('article', null, 'platform-card');

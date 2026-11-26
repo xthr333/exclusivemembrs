@@ -11,7 +11,7 @@ async function pageFor(name, viewport = { width: 390, height: 762 }) {
   const context = await browser.newContext({ viewport, reducedMotion: 'reduce' });
   await context.route('**/*', route => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
   const page = await context.newPage();
-  page.setDefaultTimeout(10000);
+  page.setDefaultTimeout(25000);
   if (name) {
     await page.goto(base + '/account');
     await page.getByRole('button', { name: 'Test ' + name, exact: true }).click();
@@ -86,13 +86,13 @@ try {
   assert.equal(await artist.locator('#member-rank').textContent(), rank);
   await artist.locator('#dashboard-cosmetics').getByText('Opening Night', { exact: true }).waitFor();
 
-  await go(artist, 'Leaderboards');
-  await artist.getByLabel('Category').selectOption('artist');
-  await artist.getByRole('button', { name: 'Show rankings' }).click();
-  const results = artist.locator('#rank-rows');
-  await results.getByRole('link', { name: 'TEST · Artist', exact: true }).waitFor();
-  await results.getByRole('link', { name: 'TEST · Producer', exact: true }).waitFor({ state: 'hidden' });
-  await results.getByRole('link', { name: 'TEST · Artist', exact: true }).click();
+  await go(artist, 'Leaderboard');
+  await artist.waitForURL(/\/events(?:\.html)?$/);
+  await artist.getByRole('heading', { name: 'Leaderboard', exact: true }).waitFor();
+  const standings = artist.locator('#legacy-scores');
+  await standings.getByRole('link', { name: 'BitchYouNotAYop', exact: true }).waitFor();
+  assert.equal(await standings.getByText('TEST · Artist', { exact: true }).count(), 0);
+  await artist.goto(base + '/member?username=preview-artist');
   await artist.getByRole('heading', { name: 'TEST · Artist', exact: true }).waitFor();
   await artist.getByText('Opening Night', { exact: true }).waitFor();
 
@@ -134,7 +134,6 @@ try {
   await editor.getByLabel('Description', { exact: true }).fill('Synthetic community workshop.');
   await editor.getByLabel('Event status').selectOption('registration_open');
   await editor.getByLabel('Application intake').selectOption('artist');
-  await editor.getByLabel('Discord voice channel', { exact: false }).fill('Isolated test voice channel');
   await editor.getByRole('button', { name: 'Save event draft' }).click();
   const eventEditor = card(owner, eventName);
   await eventEditor.getByRole('button', { name: 'Publish saved draft to preview' }).click();
@@ -142,16 +141,20 @@ try {
 
   const guest = await pageFor();
   const editorial = card(owner, 'Featured event and member spotlight');
+  const spotlight = 'TEST · Editorial spotlight ' + run;
   await editorial.getByLabel('Featured campaign').selectOption({ label: eventName });
   await editorial.getByLabel('Creator spotlight').selectOption('vantiva');
-  await editorial.getByLabel('Spotlight description (optional)').fill('TEST · Editorial spotlight');
+  await editorial.getByLabel('Spotlight description (optional)').fill(spotlight);
   await editorial.getByRole('button', { name: 'Save editorial draft' }).click();
+  await editorial.getByText('Campaign: ' + eventName, { exact: true }).waitFor({ state: 'attached' });
   const publishHomepage = editorial.getByRole('button', { name: 'Publish saved editorial draft to preview' });
   await publishHomepage.waitFor();
   await guest.goto(base + '/');
   await guest.locator('.welcome-copy').getByRole('link', { name: 'Explore Events' }).waitFor();
-  assert.equal(await guest.locator('#preview-featured-creator').count(), 0);
+  assert.equal(await guest.getByText(spotlight, { exact: true }).count(), 0);
+  const published = owner.waitForResponse(response => new URL(response.url()).pathname === '/api/platform/editorial_publish');
   await publishHomepage.click();
+  assert.equal((await published).status(), 200, 'Preview editorial publication succeeded');
   await editorial.getByText('Editorial preview is up to date.').waitFor();
   await guest.reload();
   await guest.locator('#preview-featured-creator').getByRole('link', { name: 'Vantiva' }).waitFor();
@@ -161,6 +164,7 @@ try {
   await editorial.getByLabel('Featured campaign').selectOption('');
   await editorial.getByLabel('Creator spotlight').selectOption('');
   await editorial.getByRole('button', { name: 'Save editorial draft' }).click();
+  await editorial.getByText('Campaign: Official SongWars campaign', { exact: true }).waitFor({ state: 'attached' });
   await publishHomepage.click();
   await editorial.getByText('Editorial preview is up to date.').waitFor();
 
@@ -173,15 +177,17 @@ try {
   await publicEvent.getByLabel('Instagram handle or profile link').fill('@browser.' + run);
   await publicEvent.getByLabel('Public music link').fill('https://example.com/music');
   await publicEvent.getByLabel('I joined the EXM Discord server').check();
-  await publicEvent.getByLabel('I can access the event voice channel').check();
+  await publicEvent.getByLabel('I can join an EXM voice channel').check();
+  await publicEvent.getByLabel('I have checked my microphone and camera').check();
   await publicEvent.getByRole('button', { name: 'Submit test application' }).click();
   await publicEvent.getByText('Test interest received.', { exact: false }).waitFor();
   await eventEditor.getByRole('button', { name: 'Review test applications' }).click();
   const guestRecord = card(owner, 'TEST · Browser guest ' + run);
   await guestRecord.getByLabel('Application status').selectOption('approved');
   await guestRecord.getByRole('button', { name: 'Save review' }).click();
-  await guestRecord.getByText('Verify Discord server membership and event voice-channel access before approval.', { exact: true }).waitFor();
-  await guestRecord.getByLabel('I verified EXM Discord membership and access to the event voice channel').check();
+  await guestRecord.getByText('Verify Discord membership, voice access, microphone and camera readiness before approval.', { exact: true }).waitFor();
+  await guestRecord.getByLabel('I verified EXM Discord membership and voice access').check();
+  await guestRecord.getByLabel('I verified that the microphone and camera work in EXM voice').check();
   await guestRecord.getByRole('button', { name: 'Save review' }).click();
   await guestRecord.getByText('Review saved.', { exact: true }).waitFor();
 

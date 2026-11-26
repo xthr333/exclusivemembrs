@@ -201,6 +201,15 @@ function profile(target, data, artist) {
   const section = el('section', null, 'events-history');
   const total = artist.seasons.reduce((sum, record) => sum + record.points, 0);
   const isArchive = target.dataset.legacyView === 'archive';
+  const placement = rankCompetition(data.artists, 'all').find(row => row.id === artist.id);
+  const identity = target.closest('#public-profile')?.querySelector('#public-profile-handle') ??
+    target.closest('main')?.querySelector('h1');
+  if (placement && identity) {
+    const caption = el('p', null, 'kicker');
+    caption.dataset.songwarsRank = String(placement.rank);
+    caption.append(link('All-time SongWars rank #' + placement.rank, 'events.html#leaderboard', 'text-link'));
+    identity.after(caption);
+  }
   if (isArchive) {
     target.querySelector('.events-titlebar h1').textContent = artist.name;
     const hero = el('header', null, 'legacy-player-hero');

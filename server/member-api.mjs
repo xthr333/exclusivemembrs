@@ -4,6 +4,7 @@ const cookieName = '__Host-exm_session';
 const signupCookie = '__Host-exm_signup';
 const signupCookieSeconds = 600;
 const signupPaths = new Set(['/api/members/signup', '/api/members/signup-verify', '/api/members/signup-complete']);
+const emailPattern = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
 const usernamePattern = /^[a-z0-9][a-z0-9_-]{2,23}$/;
 const creativeRoles = new Set([
   'artist', 'producer', 'songwriter', 'photographer', 'filmmaker', 'animator',
@@ -73,10 +74,22 @@ async function readBody(request, maxBytes = 4096) {
 
 function validEmail(value) {
   const email = normalizeEmail(value);
-  if (email.length > 254 || !/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(email)) {
+  if (email.length > 254 || !emailPattern.test(email)) {
     throw new RequestError(400, 'Enter an email address.');
   }
   return email;
+}
+
+export function signupRehearsalEmail(env, mode = env.EXM_MEMBER_MODE) {
+  const email = normalizeEmail(env.EXM_SIGNUP_REHEARSAL_EMAIL);
+  return mode === 'members' && email.length <= 254 && emailPattern.test(email) ? email : '';
+}
+
+function enrollmentEmail(value, enrollment) {
+  if (!enrollment.public && normalizeEmail(value) !== enrollment.rehearsalEmail) {
+    throw new RequestError(403, 'Public signup is closed.');
+  }
+  return validEmail(value);
 }
 
 function credentials(body, signup) {
@@ -141,7 +154,7 @@ function provider(env) {
     const result = await fetch(base.replace(/\/$/, '') + path, {
       method, redirect: 'manual', signal: AbortSignal.timeout(8000),
       headers,
-      body: JSON.stringify(payload),
+      ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
     });
     if (!result.ok) throw new ProviderError(result.status);
     const raw = await result.text();
@@ -153,6 +166,7 @@ function provider(env) {
     alias: async email => (await digest('login', email)) + '@members.exclusivemembrs.com',
     digest,
     createAccount: payload => request(authURL, '/admin/users', service, payload),
+    readSignupAccount: id => request(authURL, '/admin/users/' + id, service, undefined, 'GET'),
     updateSignupAccount: (id, payload) => request(authURL, '/admin/users/' + id, service, payload, 'PUT'),
     sendSignupCode: (email, confirmed) => confirmed
       ? request(authURL, '/otp', anon, { email, create_user: false })
@@ -206,10 +220,10 @@ function checkSignupAge(birthDate) {
   if (minimumBirthday > today) throw new RequestError(403, 'You must be at least 13 to create an EXM account.');
 }
 
-async function beginPublicSignup(db, request, body) {
+async function beginPublicSignup(db, request, body, enrollment) {
+  const email = enrollmentEmail(body.email, enrollment);
   checkSignupAge(body.birthDate);
   if (body.privacyAccepted !== true) throw new RequestError(400, 'Acknowledge the account privacy information to continue.');
-  const email = validEmail(body.email);
   await throttle(db, request, 'public_signup', email, [8, 4]);
   const state = () => db.rpc('public_signup_state', { p_email: email });
   let existing = await state();
@@ -230,8 +244,8 @@ async function beginPublicSignup(db, request, body) {
   return respond({ message: 'Check your inbox for the EXM signup code if your address can be registered. If you already have an account, sign in or use account recovery.' }, 202);
 }
 
-async function verifyPublicSignup(db, request, body) {
-  const email = validEmail(body.email);
+async function verifyPublicSignup(db, request, body, enrollment) {
+  const email = enrollmentEmail(body.email, enrollment);
   const code = typeof body.code === 'string' ? body.code.trim() : '';
   if (!/^\d{6,10}$/.test(code)) throw new RequestError(400, 'Enter the code from your email.');
   await throttle(db, request, 'public_signup_verify', email, [24, 6]);
@@ -252,24 +266,28 @@ async function verifyPublicSignup(db, request, body) {
       result.user.email !== email || !result.user.email_confirmed_at) {
     throw new RequestError(401, 'This signup code is invalid or expired.');
   }
-  const key = id + '.' + (Math.floor(Date.now() / 1000) + signupCookieSeconds);
-  const token = key + '.' + await db.digest('public_signup_verified', key);
+  const scope = enrollment.public ? 'p' : 'r';
+  const key = scope + '.' + id + '.' + (Math.floor(Date.now() / 1000) + signupCookieSeconds);
+  const token = key + '.' + await db.digest('public_signup_verified', key + ':' + (scope === 'r' ? email : ''));
   return respond({ verified: true }, 200, {
     'Set-Cookie': signupCookie + '=' + token + '; ' + cookieAttributes + '; Max-Age=' + signupCookieSeconds,
   });
 }
 
-async function finishPublicSignup(db, request, body) {
+async function finishPublicSignup(db, request, body, enrollment) {
   const token = readCookie(request, signupCookie);
-  const parts = token.match(/^([a-f0-9-]{36})\.(\d{10})\.([a-f0-9]{64})$/);
-  if (!parts || Number(parts[2]) < Math.floor(Date.now() / 1000)) {
-    throw new RequestError(401, 'Verify your email again to finish signup.');
-  }
-  const [, id, expires, signature] = parts;
-  const expected = await db.digest('public_signup_verified', id + '.' + expires);
+  const parts = token.match(/^([pr])\.([a-f0-9-]{36})\.(\d{10})\.([a-f0-9]{64})$/);
+  const invalidProof = () => new RequestError(401, 'Verify your email again to finish signup.');
+  if (!parts || Number(parts[3]) <= Math.floor(Date.now() / 1000)) throw invalidProof();
+  const [, scope, id, expires, signature] = parts;
+  const rehearsal = scope === 'r';
+  if (rehearsal ? !enrollment.rehearsalEmail : !enrollment.public) throw invalidProof();
+  const email = rehearsal ? enrollment.rehearsalEmail : '';
+  if (rehearsal && body.email !== undefined && normalizeEmail(body.email) !== email) throw invalidProof();
+  const expected = await db.digest('public_signup_verified', scope + '.' + id + '.' + expires + ':' + email);
   let mismatch = 0;
   for (let i = 0; i < expected.length; i++) mismatch |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
-  if (mismatch) throw new RequestError(401, 'Verify your email again to finish signup.');
+  if (mismatch) throw invalidProof();
   await throttle(db, request, 'public_signup_finish', id, [24, 8]);
   const { username, password } = accountCredentials(body, true);
   const displayName = typeof body.displayName === 'string' ? body.displayName.trim() : '';
@@ -277,10 +295,16 @@ async function finishPublicSignup(db, request, body) {
     throw new RequestError(400, 'Enter a display name up to 60 characters.');
   }
   try {
+    if (rehearsal) {
+      const account = await db.readSignupAccount(id);
+      if (account?.id !== id || normalizeEmail(account.email) !== email || !account.email_confirmed_at ||
+          account.app_metadata?.exm_registration_pending !== true) throw invalidProof();
+    }
     await db.updateSignupAccount(id, {
       password, app_metadata: { exm_registration_pending: false, exm_signup_handle: username, exm_signup_name: displayName },
     });
   } catch (error) {
+    if (rehearsal && error instanceof ProviderError && error.status === 404) throw invalidProof();
     if (error instanceof ProviderError && [400, 409, 422, 500].includes(error.status)) {
       throw new RequestError(409, 'The account could not be set up with that username. Try another username, or verify your email again if your session expired.');
     }
@@ -355,8 +379,12 @@ export async function handleMemberRequest(request, env) {
   const hosted = env.EXM_HOSTED === true;
   const backupCodes = !hosted || env.EXM_MEMBER_MODE === 'members';
   const fixtureSignup = !hosted && env.EXM_MEMBER_PREVIEW_SIGNUP === 'fixture' && isLoopback(request.url);
-  const publicSignup = hosted && env.EXM_MEMBER_MODE === 'members' && env.EXM_PUBLIC_SIGNUP === 'verified-email';
-  if (signupPaths.has(url.pathname) && !publicSignup && !(fixtureSignup && url.pathname === '/api/members/signup')) {
+  const enrollment = {
+    public: hosted && env.EXM_MEMBER_MODE === 'members' && env.EXM_PUBLIC_SIGNUP === 'verified-email',
+    rehearsalEmail: hosted ? signupRehearsalEmail(env) : '',
+  };
+  if (signupPaths.has(url.pathname) && !enrollment.public && !enrollment.rehearsalEmail &&
+      !(fixtureSignup && url.pathname === '/api/members/signup')) {
     return respond({ error: 'Public signup is closed.' }, 403);
   }
   if (hosted && !backupCodes && url.pathname === '/api/members/recover') {
@@ -372,10 +400,10 @@ export async function handleMemberRequest(request, env) {
     }
     if (path === '/api/members/signup') {
       const body = await readBody(request);
-      return await (fixtureSignup ? signup(db, request, body) : beginPublicSignup(db, request, body));
+      return await (fixtureSignup ? signup(db, request, body) : beginPublicSignup(db, request, body, enrollment));
     }
-    if (path === '/api/members/signup-verify') return await verifyPublicSignup(db, request, await readBody(request));
-    if (path === '/api/members/signup-complete') return await finishPublicSignup(db, request, await readBody(request));
+    if (path === '/api/members/signup-verify') return await verifyPublicSignup(db, request, await readBody(request), enrollment);
+    if (path === '/api/members/signup-complete') return await finishPublicSignup(db, request, await readBody(request), enrollment);
     if (path === '/api/members/login') return await login(db, request, await readBody(request), hosted, backupCodes);
     if (path === '/api/members/recover') return await recover(db, request, await readBody(request));
 

@@ -42,8 +42,8 @@ const errors = {
   duplicate: [409, 'This verified activity has already been recorded.'],
   stale: [409, 'Another edit was saved. Reopen the campaign studio before changing the draft.'],
   answer: [400, 'Answer the event’s application question before submitting.'],
-  artist_requirements: [400, 'Enter Discord, Instagram and a music link, then confirm Discord server and voice-channel access.'],
-  readiness: [409, 'Verify Discord server membership and event voice-channel access before approval.'],
+  artist_requirements: [400, 'Enter Discord, Instagram and a music link, then confirm voice access, microphone and camera readiness.'],
+  readiness: [409, 'Verify Discord membership, voice access, microphone and camera readiness before approval.'],
   intake_changed: [409, 'Create a new event to change application requirements after submissions arrive.'],
   capacity: [409, 'This event is at capacity. Keep the applicant on the waitlist.'],
   closed: [409, 'This event or registration is closed. Save an approved status before publishing a draft.'],
@@ -222,15 +222,12 @@ function operationPayload(action, body, hosted) {
       valid(!opensAt || !closesAt || opensAt < closesAt, 'Registration close must come after opening.');
       const registration = secureLink(body.registration);
       const applicationMode = body.applicationMode ?? (registration ? 'external' : 'standard');
-      const discordVoiceChannel = applicationMode === 'artist' ? optionalText(body.discordVoiceChannel, 80) : null;
       valid(['standard', 'artist', 'external'].includes(applicationMode) &&
         (applicationMode === 'external') === Boolean(registration), 'Use external registration only when an official registration URL is provided.');
       valid(!registration || registration !== secureLink(body.interest), 'Interest and official registration must use different links.');
-      valid(applicationMode !== 'artist' || status !== 'registration_open' || discordVoiceChannel,
-        'Name the required Discord voice channel before opening artist applications.');
       return {
         id, kind, format, status, name: text(name, 80), description: text(body.description, 600), capacity: capacity ?? null,
-        startsAt: timestamp(body.startsAt), opensAt, closesAt, link: secureLink(body.link), applicationMode, discordVoiceChannel,
+        startsAt: timestamp(body.startsAt), opensAt, closesAt, link: secureLink(body.link), applicationMode,
         stream: secureLink(body.stream), recap: secureLink(body.recap),
         interest: secureLink(body.interest), registration,
         rsvp: secureLink(body.rsvp), tickets: secureLink(body.tickets), replay: secureLink(body.replay),
@@ -244,21 +241,24 @@ function operationPayload(action, body, hosted) {
         'Enter a valid contact email.');
       else valid(/^[^\s@]+@[^\s@]+\.test$/.test(contact), 'Use a synthetic email ending in .test for this preview.');
       const base = { event, name: text(name, 80), contact, answer: optionalText(body.answer, 600) || '' };
-      const fields = ['discord', 'instagram', 'music', 'joinedDiscord', 'voiceReady'];
+      const fields = ['discord', 'instagram', 'music', 'joinedDiscord', 'voiceReady', 'devicesReady'];
       if (!fields.some(key => Object.hasOwn(body, key))) return base;
       const discord = text(body.discord, 37);
       valid(discordPattern.test(discord), 'Enter your Discord username.');
       const instagram = instagramHandle(body.instagram);
       const music = secureLink(body.music);
-      valid(music && body.joinedDiscord === true && body.voiceReady === true,
-        'Enter your music link, then confirm Discord server and voice-channel access.');
-      return { ...base, discord, instagram, music, discordReadiness: true };
+      valid(music && body.joinedDiscord === true && body.voiceReady === true && body.devicesReady === true,
+        'Enter your music link, then confirm Discord membership, voice access, microphone and camera readiness.');
+      return { ...base, discord, instagram, music, discordReadiness: true, devicesReady: true };
     }
     case 'application_review':
       valid(matches(event, uuidPattern) && matches(id, uuidPattern) &&
         ['pending', 'approved', 'waitlisted', 'declined'].includes(status) &&
-        (!Object.hasOwn(body, 'discordVerified') || typeof body.discordVerified === 'boolean'));
-      return { event, id, status, ...(typeof body.discordVerified === 'boolean' ? { discordVerified: body.discordVerified } : {}) };
+        (!Object.hasOwn(body, 'discordVerified') || typeof body.discordVerified === 'boolean') &&
+        (!Object.hasOwn(body, 'devicesVerified') || typeof body.devicesVerified === 'boolean'));
+      return { event, id, status,
+        ...(typeof body.discordVerified === 'boolean' ? { discordVerified: body.discordVerified } : {}),
+        ...(typeof body.devicesVerified === 'boolean' ? { devicesVerified: body.devicesVerified } : {}) };
     case 'event_assign':
       valid(matches(event, uuidPattern) && matches(username, usernamePattern) && ['event_staff', 'judge'].includes(role));
       return { event, username, role };
