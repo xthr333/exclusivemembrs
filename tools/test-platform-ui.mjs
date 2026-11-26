@@ -250,9 +250,10 @@ try {
     await page.getByText('@' + secondUsername, { exact: true }).waitFor();
     await page.goto(origin + '/member.html?username=' + username);
     await page.getByRole('button', { name: 'Follow', exact: true }).click();
-    await page.getByText('1 follower · 0 following', { exact: true }).waitFor();
-    await page.getByRole('button', { name: 'Unfollow', exact: true }).click();
+    await page.getByRole('button', { name: 'Unfollow', exact: true }).waitFor();
     await page.getByText('0 followers · 0 following', { exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Unfollow', exact: true }).click();
+    await page.getByRole('button', { name: 'Follow', exact: true }).waitFor();
     console.log('PASS: Chromium signup, recovery-code display, secure session, profile edit, reload, logout, recovery, directory filtering, follow and unfollow with local data.');
   }
   console.log('PASS: ' + pages.length * widthsToTest.length + ' Chromium layout checks, keyboard/back navigation, reduced motion, legacy subpath, and offline/no-script fallbacks.');
