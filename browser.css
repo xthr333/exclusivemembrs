@@ -261,7 +261,28 @@ body::after{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;ba
 #profile-photo-preview{width:6rem;height:6rem;object-fit:cover;border-radius:50%}
 .cosmetic-profile-preview{display:grid;gap:.55rem;padding:.85rem;background:#141724;color:#fff;border-radius:4px;margin-block:.65rem}
 .cosmetic-profile-banner{min-height:2.5rem;background:linear-gradient(115deg,#171922,var(--cosmetic));border-radius:3px}
-.cosmetic-profile-preview .member-avatar{margin-block:.3rem;width:3rem}
+.cosmetic-profile-preview .member-avatar{margin-block:.3rem;width:3.5rem}
 .cosmetic-preview-banner{position:relative;isolation:isolate;overflow:hidden}
 .cosmetic-preview-banner .cosmetic-profile-banner{position:absolute;inset:0;height:100%;border:0;border-radius:0;opacity:.42;z-index:-1}
+
+/* Compact EXM inventory: real equipped styles, not oversized placeholder panels. */
+#rewards .platform-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+#rewards .platform-card{padding:16px;min-width:0;border:1px solid #3c3942;border-top:2px solid #ababb8;background:linear-gradient(145deg,#232127,#111116 65%);border-radius:6px}
+#rewards .platform-card h3{font-size:1.4rem;margin:0;line-height:1.15}
+#rewards .platform-card p{font-size:.875rem;line-height:1.4;margin:.65rem 0}
+#rewards .platform-card .btn{padding:10px 12px;min-height:44px;font-size:.875rem;border-radius:4px}
+#rewards .cosmetic-profile-preview{min-height:150px;align-content:center;background:repeating-linear-gradient(0deg,#ffffff04 0 1px,transparent 1px 4px),radial-gradient(ellipse at top right,#68233040,transparent 75%),#101116}
+#rewards .cosmetic-profile-preview strong{font-size:.875rem;letter-spacing:.06em;text-transform:uppercase}
+#rewards .hub-filters{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+#rewards .hub-filters .btn{width:auto;flex:1;max-width:240px;border-radius:4px}
+#rewards-balance{display:inline-block;padding:10px 16px;border:1px solid #77717e;border-radius:4px;background:linear-gradient(120deg,#34343e,#15151c);font-weight:700}
+.hub-links{gap:6px!important}
+.hub-links a{padding:10px 12px!important;font-size:.875rem;text-decoration:none;border-radius:4px}
+.member-avatar.cosmetic-chrome{border-style:double;border-width:5px;box-shadow:0 0 0 2px #525965,0 0 18px #dce4f02b}
+.member-avatar.cosmetic-signal{border-style:dashed;box-shadow:0 0 0 3px #a1f0be18}
+.member-avatar.cosmetic-ember{border-radius:35%;border-width:3px;box-shadow:4px 4px 0 #822e3a,0 0 18px #ff727b30}
+.cosmetic-profile-banner.cosmetic-chrome{background:linear-gradient(125deg,#16171b 8%,#9ba1ae 38%,#343641 42%,#cbcfd7 46%,#262830 50%,#131419 85%)}
+.cosmetic-profile-banner.cosmetic-signal{background:repeating-linear-gradient(90deg,#788579 0 12%,#525c5e 12% 24%,#854553 24% 36%,#313540 36% 48%),#15151b}
+.cosmetic-sample[data-kind=badge]{border-radius:3px;border-width:1px 1px 3px;padding:.45rem .7rem;font-size:.875rem;font-weight:700;letter-spacing:.03em;background:linear-gradient(135deg,#3b3a43,#121319)}
+@media(min-width:390px) and (max-width:580px){#rewards .platform-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#rewards .platform-card{padding:12px}#rewards .platform-card h3{font-size:1.2rem}}
 #public-profile-banner{margin-bottom:1rem}

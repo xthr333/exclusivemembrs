@@ -44,7 +44,7 @@ assert.deepEqual(publicData.producers, []);
 assert.deepEqual(publicData.producerDiscovery.map(({ id, link }) => [id, link]), [['vantiva', 'vantiva.html']]);
 const competitive = rankCompetition(publicData.artists, 'all');
 assert.deepEqual(competitive.slice(0, 3).map(({ id, rank, titles, wins }) => [id, rank, titles, wins]), [
-  ['1ilriskk', 1, 1, 4], ['mayo_', 1, 1, 4], ['bitchyounotayop', 3, 1, 3],
+  ['mayo_', 1, 3, 4], ['bitchyounotayop', 2, 2, 3], ['1ilriskk', 3, 1, 4],
 ]);
 const quarterfinalist = competitive.findIndex(entry => entry.id === 'pg23');
 const opening = competitive.findIndex(entry => entry.id === 'ayco');

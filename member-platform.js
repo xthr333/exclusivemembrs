@@ -443,6 +443,7 @@
 
   async function load(message = '') {
     const requested = location.hash.slice(1);
+    if (requested === 'rankings') { location.replace('events.html'); return; }
     const view = eventsOnly ? 'staff' :
       panels.some(panel => panel.dataset.panel === requested) ? requested : 'dashboard';
     const request = ++requestNumber;
