@@ -16,8 +16,11 @@
   const photo = byId('profile-photo');
   const photoPreview = byId('profile-photo-preview');
   const photoStatus = byId('profile-photo-status');
+  const saveStatus = byId('profile-save-status');
+  const saveButton = profile.querySelector('button[type="submit"]');
   let pendingPhoto = null;
   let photoVersion = 0;
+  let preparingPhoto = false;
 
   photo.addEventListener('change', async () => {
     const version = ++photoVersion;
@@ -25,15 +28,21 @@
     photoPreview.hidden = true;
     const file = photo.files[0];
     if (!file) return;
+    preparingPhoto = true;
+    saveButton.disabled = true;
+    saveStatus.textContent = '';
     photoStatus.textContent = 'Preparing your preview…';
     const url = URL.createObjectURL(file);
     try {
-      if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 4194304) {
-        throw new Error('Choose a JPEG, PNG or WebP file up to 4 MiB.');
+      if (file.size > 4194304) {
+        throw new Error('This photo is over 4 MiB. Choose a smaller photo or screenshot.');
       }
       const image = new Image();
-      image.src = url;
-      await image.decode();
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error('This browser could not open the photo. On iPhone, try a screenshot or export it as JPEG.'));
+        image.src = url;
+      });
       if (!image.naturalWidth || !image.naturalHeight || Math.max(image.naturalWidth, image.naturalHeight) > 4096) {
         throw new Error('Choose an image up to 4096 pixels wide or tall.');
       }
@@ -58,13 +67,29 @@
       photoPreview.src = optimized;
       photoPreview.hidden = false;
       profile.elements.avatar.value = 'custom';
-      photoStatus.textContent = 'Preview ready. Save your profile to apply the photo.';
+      photoStatus.textContent = 'Photo ready. Tap Save profile below to apply it.';
     } catch (error) {
-      if (version === photoVersion) photoStatus.textContent = error.message;
+      if (version === photoVersion) {
+        photoStatus.textContent = error.message;
+        photo.value = '';
+        restoreAvatarPreview();
+      }
     } finally {
       URL.revokeObjectURL(url);
+      if (version === photoVersion) {
+        preparingPhoto = false;
+        saveButton.disabled = false;
+      }
     }
   });
+
+  let savedAvatar = 'initials';
+  let savedAvatarURL = '';
+  function restoreAvatarPreview() {
+    profile.elements.avatar.value = savedAvatar;
+    photoPreview.hidden = savedAvatar !== 'custom' || !savedAvatarURL;
+    if (!photoPreview.hidden) photoPreview.src = savedAvatarURL;
+  }
 
   async function request(action, payload) {
     const response = await fetch('/api/members/' + action, payload === undefined ? {} : {
@@ -84,6 +109,9 @@
     codes.hidden = true;
     continueRewards.hidden = true;
     ++photoVersion;
+    preparingPhoto = false;
+    saveButton.disabled = false;
+    saveStatus.textContent = '';
     pendingPhoto = null;
     photo.value = '';
     photoPreview.removeAttribute('src');
@@ -125,11 +153,10 @@
     const account = data.profile;
     profile.elements.displayName.value = account.displayName;
     profile.elements.bio.value = account.bio;
-    profile.elements.avatar.value = account.avatar;
+    savedAvatar = account.avatar;
+    savedAvatarURL = '/api/members/avatar?username=' + encodeURIComponent(account.username);
     if (!pendingPhoto) {
-      photoPreview.hidden = account.avatar !== 'custom';
-      if (!photoPreview.hidden) photoPreview.src = '/api/members/avatar?username=' + encodeURIComponent(account.username);
-      else photoPreview.removeAttribute('src');
+      restoreAvatarPreview();
     }
     profile.querySelectorAll('[name="links"]').forEach((input, position) => {
       input.value = account.links[position] || '';
@@ -156,13 +183,14 @@
       event.preventDefault();
       const button = form.querySelector('button[type="submit"]');
       button.disabled = true;
-      status.textContent = 'Working…';
+      const feedback = form === profile ? saveStatus : status;
+      feedback.textContent = form === profile ? 'Saving profile…' : 'Working…';
       try {
         await handle(Object.fromEntries(new FormData(form)), form);
       } catch {
-        status.textContent = 'Member accounts are temporarily unavailable. Please try again.';
+        feedback.textContent = 'Member accounts are temporarily unavailable. Please try again.';
       } finally {
-        button.disabled = false;
+        button.disabled = form === profile && preparingPhoto;
       }
     });
   }
@@ -231,11 +259,13 @@
       discoverable: profile.elements.discoverable.checked,
       avatarData: formData.avatar === 'custom' ? pendingPhoto : null,
     });
-    status.textContent = code === 200 ? 'Profile saved.' : data.error || 'Could not save your profile.';
+    saveStatus.textContent = code === 200 ? 'Profile saved.' : data.error || 'Could not save your profile.';
     if (code === 200) {
+      savedAvatar = formData.avatar;
       pendingPhoto = null;
       photo.value = '';
       photoStatus.textContent = '';
+      restoreAvatarPreview();
       const awards = (data.awards || []).map(award => award === 'first_bio' ? 'First bio earned.' : 'First custom avatar earned.').join(' ');
       const wallet = data.progress;
       if (wallet) progress.textContent = [awards, wallet.points + ' spendable points.',

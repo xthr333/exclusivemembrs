@@ -26,14 +26,27 @@ function card(page, heading) {
 }
 
 try {
-  const guest = await pageFor();
-  await guest.goto(base + '/member-hub#rewards');
-  const shopSignIn = guest.getByRole('link', { name: 'Sign in to Rewards Shop' });
+  const shopGuest = await pageFor();
+  await shopGuest.goto(base + '/member-hub#rewards');
+  const shopSignIn = shopGuest.getByRole('link', { name: 'Sign in to Rewards Shop' });
   await shopSignIn.waitFor();
   assert.equal(await shopSignIn.getAttribute('href'), 'account.html?next=rewards');
-  await guest.context().close();
+  await shopGuest.context().close();
 
   const artist = await pageFor('artist');
+  await artist.goto(base + '/account');
+  const photoInput = artist.getByLabel('Upload a profile photo');
+  await photoInput.waitFor();
+  await photoInput.setInputFiles({
+    name: 'avatar.webp', mimeType: 'image/webp',
+    buffer: Buffer.from('UklGRi4AAABXRUJQVlA4ICIAAABQAQCdASoQABAAAUAmJQBOgCgAAP74I2+pW/XRVki3AAAA', 'base64'),
+  });
+  await artist.getByText('Photo ready. Tap Save profile below to apply it.', { exact: true }).waitFor();
+  await artist.getByRole('button', { name: 'Save profile' }).click();
+  await artist.locator('#profile-save-status').getByText('Profile saved.', { exact: true }).waitFor();
+  await artist.reload();
+  await artist.locator('#profile-photo-preview').waitFor();
+  assert.equal(await artist.locator('#profile-avatar').inputValue(), 'custom');
   await artist.goto(base + '/account?next=rewards');
   await artist.waitForURL(/member-hub(?:\.html)?#rewards$/);
   await artist.getByRole('heading', { name: 'EXM Rewards Shop' }).waitFor();
