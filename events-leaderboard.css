@@ -1,5 +1,5 @@
 .events-shell { width: min(100% - 32px, 1020px); margin: 0 auto; padding: 14px 0 52px; }
-.events-nav { display: flex; flex-wrap: wrap; gap: 4px 18px; border-bottom: 1px solid #32323a; }
+.events-nav { display: flex; flex-wrap: wrap; gap: 8px 24px; border-bottom: 1px solid #32323a; }
 .events-nav a, .events-minor { display: inline-flex; align-items: center; min-height: 44px; font-size: .83rem; font-weight: 700; }
 .events-nav a { text-decoration: none; color: #bfbfc8; }
 .events-nav a[aria-current] { color: #fff; box-shadow: inset 0 -2px #f04d59; }
